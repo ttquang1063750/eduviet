@@ -1,0 +1,306 @@
+.page {
+  padding: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+// ─── States ───────────────────────────────────────────────────────────────────
+
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
+  color: #6b7280;
+}
+
+.spinner-large {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #4a90e2;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-icon {
+  font-size: 4rem;
+}
+
+.back-link {
+  color: #4a90e2;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+// ─── Breadcrumb ───────────────────────────────────────────────────────────────
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin-bottom: 1.5rem;
+
+  a {
+    color: #4a90e2;
+    text-decoration: none;
+  }
+}
+
+// ─── Lesson header ────────────────────────────────────────────────────────────
+
+.lesson-header {
+  margin-bottom: 2rem;
+}
+
+.lesson-badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.badge {
+  padding: 0.3rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  &-grade { background: #f3f4f6; color: #374151; }
+}
+
+.difficulty-easy     { background: #dcfce7; color: #15803d; }
+.difficulty-medium   { background: #fef9c3; color: #a16207; }
+.difficulty-hard     { background: #fee2e2; color: #dc2626; }
+.difficulty-advanced { background: #f3e8ff; color: #7c3aed; }
+
+.lesson-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 0.75rem;
+}
+
+.lesson-meta {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  flex-wrap: wrap;
+}
+
+// ─── Content grid ─────────────────────────────────────────────────────────────
+
+.lesson-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ─── Panels ───────────────────────────────────────────────────────────────────
+
+.theory-panel,
+.exercises-panel {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f3f4f6;
+
+  h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+  }
+}
+
+.theory-content {
+  padding: 1.25rem;
+}
+
+.theory-text {
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #374151;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+}
+
+// ─── Exercise card ────────────────────────────────────────────────────────────
+
+.exercise-card {
+  padding: 1.25rem;
+  border-bottom: 1px solid #f9fafb;
+}
+
+.exercise-number {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #4a90e2;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.exercise-question {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #111827;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+// ─── Options ─────────────────────────────────────────────────────────────────
+
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+
+  &:hover     { border-color: #4a90e2; background: #f0f6ff; }
+  &.selected  { border-color: #4a90e2; background: #e0f0ff; }
+
+  input { display: none; }
+
+  &.selected .option-label {
+    background: #4a90e2;
+    color: white;
+  }
+}
+
+.option-label {
+  width: 24px;
+  height: 24px;
+  background: #f3f4f6;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #374151;
+  flex-shrink: 0;
+}
+
+.option-text {
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+// ─── Fill in blank ────────────────────────────────────────────────────────────
+
+.fill-blank {
+  margin-top: 0.5rem;
+}
+
+.fill-input {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+
+  &:focus {
+    border-color: #4a90e2;
+  }
+}
+
+// ─── Exercise footer ─────────────────────────────────────────────────────────
+
+.exercise-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.875rem;
+}
+
+.points-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #4a90e2;
+  background: #e0f0ff;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+}
+
+.hint-btn {
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+  color: #6b7280;
+  transition: border-color 0.15s;
+
+  &:hover {
+    border-color: #ffd700;
+    color: #a16207;
+  }
+}
+
+.hint-box {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: #fef9c3;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #92400e;
+  border-left: 3px solid #ffd700;
+}
+
+// ─── Submit ───────────────────────────────────────────────────────────────────
+
+.submit-btn {
+  width: calc(100% - 2.5rem);
+  margin: 1rem 1.25rem;
+  padding: 0.875rem;
+  background: linear-gradient(135deg, #4a90e2, #1a237e);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}

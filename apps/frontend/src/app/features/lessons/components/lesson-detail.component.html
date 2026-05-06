@@ -1,0 +1,113 @@
+<div class="page">
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner-large"></div>
+      <p>Đang tải bài học...</p>
+    </div>
+  } @else if (lesson()) {
+    <div class="lesson-layout">
+      <nav class="breadcrumb">
+        <a routerLink="/lessons">Bài học</a>
+        <span>›</span>
+        <span [style.color]="lesson()!.subject.color ?? '#4A90E2'">{{ lesson()!.subject.name }}</span>
+        <span>›</span>
+        <span>{{ lesson()!.title }}</span>
+      </nav>
+
+      <div class="lesson-header">
+        <div class="lesson-badges">
+          <span
+            class="badge badge-subject"
+            [style.background]="lesson()!.subject.color + '22'"
+            [style.color]="lesson()!.subject.color ?? '#4A90E2'"
+          >
+            {{ lesson()!.subject.name }}
+          </span>
+          <span class="badge difficulty-{{ lesson()!.difficulty.toLowerCase() }}">
+            {{ difficultyLabel(lesson()!.difficulty) }}
+          </span>
+          <span class="badge badge-grade">Lớp {{ lesson()!.grade }}</span>
+        </div>
+        <h1 class="lesson-title">{{ lesson()!.title }}</h1>
+        <div class="lesson-meta">
+          <span>📁 {{ lesson()!.topic }}</span>
+          <span>⏱ {{ lesson()!.estimatedMinutes }} phút học</span>
+          <span>📝 {{ lesson()!.exercises.length }} bài tập</span>
+        </div>
+      </div>
+
+      <div class="lesson-content-grid">
+        <!-- Theory panel -->
+        <div class="theory-panel">
+          <div class="panel-header">
+            <h2>📖 Lý thuyết</h2>
+          </div>
+          <div class="theory-content">
+            <pre class="theory-text">{{ lesson()!.theory }}</pre>
+          </div>
+        </div>
+
+        <!-- Exercises panel -->
+        <div class="exercises-panel">
+          <div class="panel-header">
+            <h2>✏️ Bài tập ({{ lesson()!.exercises.length }})</h2>
+          </div>
+
+          @for (exercise of lesson()!.exercises; track exercise.id; let i = $index) {
+            <div class="exercise-card">
+              <div class="exercise-number">Câu {{ i + 1 }}</div>
+              <div class="exercise-question">{{ exercise.question }}</div>
+
+              @if (exercise.type === 'MULTIPLE_CHOICE' && exercise.options) {
+                <div class="options-list">
+                  @for (opt of exercise.options; track opt; let j = $index) {
+                    <label class="option-item" [class.selected]="selectedAnswers()[exercise.id] === opt">
+                      <input
+                        type="radio"
+                        [name]="'q-' + exercise.id"
+                        [value]="opt"
+                        (change)="selectAnswer(exercise.id, opt)"
+                      />
+                      <span class="option-label">{{ 'ABCD'[j] }}</span>
+                      <span class="option-text">{{ opt }}</span>
+                    </label>
+                  }
+                </div>
+              }
+
+              @if (exercise.type === 'FILL_IN_BLANK') {
+                <div class="fill-blank">
+                  <input
+                    type="text"
+                    class="fill-input"
+                    placeholder="Nhập đáp án của bạn..."
+                    (input)="selectAnswer(exercise.id, $any($event.target).value)"
+                  />
+                </div>
+              }
+
+              <div class="exercise-footer">
+                <span class="points-badge">{{ exercise.points }} điểm</span>
+                @if (exercise.hints.length > 0) {
+                  <button class="hint-btn" (click)="toggleHint(exercise.id)">💡 Gợi ý</button>
+                }
+              </div>
+
+              @if (showHints()[exercise.id] && exercise.hints.length > 0) {
+                <div class="hint-box">{{ exercise.hints[0] }}</div>
+              }
+            </div>
+          }
+
+          <button class="submit-btn" (click)="submitAnswers()">Nộp bài</button>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="error-state">
+      <div class="error-icon">😕</div>
+      <h2>Bài học không tồn tại</h2>
+      <a routerLink="/lessons" class="back-link">← Quay lại danh sách</a>
+    </div>
+  }
+</div>

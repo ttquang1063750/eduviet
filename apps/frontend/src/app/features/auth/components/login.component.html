@@ -1,0 +1,136 @@
+<div class="login-page">
+  <!-- Flat illustration background -->
+  <div class="illustration-panel">
+    <div class="illustration-content">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="60" height="60" rx="16" fill="#4A90E2" />
+            <path d="M15 20h30M15 30h20M15 40h25" stroke="white" stroke-width="3" stroke-linecap="round" />
+            <circle cx="44" cy="38" r="10" fill="#FFD700" stroke="white" stroke-width="2" />
+            <path d="M40 38l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-name">EduViet</h1>
+          <p class="brand-tagline">Nền tảng học tập thông minh</p>
+        </div>
+      </div>
+
+      <div class="illustration-svg">
+        <svg viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="60" y="180" width="120" height="16" rx="4" fill="#FF7043" />
+          <rect x="64" y="164" width="112" height="16" rx="4" fill="#42A5F5" />
+          <rect x="68" y="148" width="104" height="16" rx="4" fill="#66BB6A" />
+          <rect x="40" y="196" width="160" height="8" rx="4" fill="#795548" />
+          <circle cx="280" cy="100" r="30" fill="#FFB74D" />
+          <rect x="255" y="130" width="50" height="60" rx="10" fill="#42A5F5" />
+          <rect x="245" y="145" width="20" height="40" rx="8" fill="#42A5F5" />
+          <rect x="295" y="145" width="20" height="40" rx="8" fill="#42A5F5" />
+          <text x="130" y="80" font-size="18" fill="white" font-family="monospace" opacity="0.8">x² + 2x + 1</text>
+          <text x="150" y="108" font-size="14" fill="white" font-family="monospace" opacity="0.6">= (x+1)²</text>
+          <circle cx="50" cy="60" r="5" fill="#FFD700" opacity="0.8" />
+          <circle cx="340" cy="200" r="6" fill="#FFD700" opacity="0.8" />
+          <circle cx="30" cy="140" r="4" fill="#FF7043" opacity="0.7" />
+          <circle cx="370" cy="80" r="5" fill="#66BB6A" opacity="0.7" />
+        </svg>
+      </div>
+
+      <div class="features-list">
+        <div class="feature-item">
+          <span class="feature-icon">📚</span>
+          <span>Hàng nghìn bài học từ lớp 1-12</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">✏️</span>
+          <span>Bài tập tương tác, vẽ hình</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">💬</span>
+          <span>Chat trực tiếp với giáo viên</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login form panel -->
+  <div class="form-panel">
+    <div class="form-container">
+      <div class="form-header">
+        <h2>Chào mừng trở lại!</h2>
+        <p>Đăng nhập để tiếp tục học tập</p>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="alert alert-error" role="alert">
+          <span class="alert-icon">⚠️</span>
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="login-form" novalidate>
+        <div class="form-group">
+          <label for="email" class="form-label">Email</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            class="form-input"
+            [class.error]="isFieldInvalid('email')"
+            placeholder="example@eduviet.vn"
+            autocomplete="email"
+          />
+          @if (isFieldInvalid('email')) {
+            <span class="field-error">Email không hợp lệ</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label">Mật khẩu</label>
+          <div class="input-wrapper">
+            <input
+              id="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              class="form-input"
+              [class.error]="isFieldInvalid('password')"
+              placeholder="••••••••"
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              (click)="showPassword.update(v => !v)"
+              [attr.aria-label]="showPassword() ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
+            >
+              {{ showPassword() ? '🙈' : '👁️' }}
+            </button>
+          </div>
+          @if (isFieldInvalid('password')) {
+            <span class="field-error">Mật khẩu phải có ít nhất 6 ký tự</span>
+          }
+        </div>
+
+        <button type="submit" class="btn-primary" [disabled]="form.invalid || isLoading()">
+          @if (isLoading()) {
+            <span class="spinner"></span>
+            Đang đăng nhập...
+          } @else {
+            Đăng nhập
+          }
+        </button>
+      </form>
+
+      <div class="demo-accounts">
+        <p class="demo-title">Tài khoản demo:</p>
+        <div class="demo-grid">
+          @for (account of demoAccounts; track account.role) {
+            <button class="demo-btn" (click)="fillDemo(account)">
+              <span class="demo-role">{{ account.label }}</span>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

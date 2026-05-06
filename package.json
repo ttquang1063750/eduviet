@@ -1,0 +1,39 @@
+{
+  "name": "eduviet",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"pnpm dev:be\" \"pnpm dev:fe\"",
+    "dev:be": "pnpm --filter @eduviet/backend dev",
+    "dev:fe": "pnpm --filter @eduviet/frontend dev",
+    "build": "pnpm --filter @eduviet/shared-types build && pnpm --filter @eduviet/backend build && pnpm --filter @eduviet/frontend build",
+    "test": "pnpm --recursive test",
+    "test:be": "pnpm --filter @eduviet/backend test",
+    "test:fe": "pnpm --filter @eduviet/frontend test",
+    "lint": "pnpm --recursive lint",
+    "format": "prettier --write \"**/*.{ts,html,json,css,scss,md}\" --ignore-path .prettierignore",
+    "typecheck": "pnpm --recursive typecheck",
+    "db:migrate": "pnpm --filter @eduviet/prisma migrate:dev",
+    "db:migrate:create": "pnpm --filter @eduviet/prisma migrate:create",
+    "db:migrate:deploy": "pnpm --filter @eduviet/prisma migrate:deploy",
+    "db:seed": "pnpm --filter @eduviet/prisma seed",
+    "db:reset": "pnpm --filter @eduviet/prisma reset",
+    "db:studio": "pnpm --filter @eduviet/prisma studio",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "docker:reset": "docker compose down -v"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "prettier": "^3.4.2",
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.3.0"
+  },
+  "lint-staged": {
+    "**/*.{ts,html}": ["eslint --fix"],
+    "**/*.{ts,html,json,css,scss,md}": ["prettier --write"]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "extends": ["@commitlint/config-conventional"],
+  "rules": {
+    "scope-enum": [
+      2,
+      "always",
+      [
+        "auth", "users", "schools", "classes", "lessons", "content",
+        "chat", "blog", "news", "notifications", "email", "sms",
+        "storage", "rbac", "reports", "deps", "docker", "ci", "db"
+      ]
+    ]
+  }
+}

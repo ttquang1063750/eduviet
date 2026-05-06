@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "EduViet PostgreSQL",
+      "Group": "EduViet",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "eduviet_dev",
+      "Username": "eduviet",
+      "SSLMode": "prefer",
+      "PassFile": "/tmp/pgpassfile"
+    }
+  }
+}

@@ -1,0 +1,446 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+// ===========================
+// ENUMS
+// ===========================
+
+enum Role {
+  SUPER_ADMIN
+  PROVINCE_ADMIN
+  DISTRICT_ADMIN
+  SCHOOL_ADMIN
+  CONTENT_CREATOR
+  CONTENT_REVIEWER
+  CONTENT_APPROVER
+  GRADER
+  HOMEROOM_TEACHER
+  SUBJECT_TEACHER
+  STUDENT
+  PARENT
+}
+
+enum ContentStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  PUBLISHED
+  REJECTED
+  ARCHIVED
+}
+
+enum SubjectCode {
+  MATH
+  PHYSICS
+  CHEMISTRY
+  BIOLOGY
+  LITERATURE
+  ENGLISH
+  HISTORY
+  GEOGRAPHY
+  CIVIC_EDUCATION
+  INFORMATICS
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+  ADVANCED
+}
+
+enum ExerciseType {
+  MULTIPLE_CHOICE
+  FILL_IN_BLANK
+  SHORT_ANSWER
+  DRAWING
+  ESSAY
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+}
+
+enum ChatRoomType {
+  CLASS
+  TEACHER_PARENT
+  ONE_ON_ONE
+  STAFF
+}
+
+// ===========================
+// GEO HIERARCHY
+// ===========================
+
+model Nation {
+  id         String     @id @default(uuid())
+  name       String
+  code       String     @unique
+  provinces  Province[]
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @updatedAt @map("updated_at")
+
+  @@map("nations")
+}
+
+model Province {
+  id        String     @id @default(uuid())
+  name      String
+  code      String     @unique
+  nationId  String     @map("nation_id")
+  nation    Nation     @relation(fields: [nationId], references: [id])
+  districts District[]
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+
+  @@index([nationId])
+  @@map("provinces")
+}
+
+model District {
+  id         String   @id @default(uuid())
+  name       String
+  code       String   @unique
+  provinceId String   @map("province_id")
+  province   Province @relation(fields: [provinceId], references: [id])
+  schools    School[]
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@index([provinceId])
+  @@map("districts")
+}
+
+// ===========================
+// SCHOOL & CLASS
+// ===========================
+
+model School {
+  id         String   @id @default(uuid())
+  name       String
+  code       String   @unique
+  address    String?
+  phone      String?
+  email      String?
+  districtId String   @map("district_id")
+  district   District @relation(fields: [districtId], references: [id])
+  classes    Class[]
+  users      User[]
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+
+  @@index([districtId])
+  @@map("schools")
+}
+
+model Class {
+  id               String            @id @default(uuid())
+  name             String
+  grade            Int
+  academicYear     String            @map("academic_year")
+  schoolId         String            @map("school_id")
+  school           School            @relation(fields: [schoolId], references: [id])
+  homeroomTeacherId String?          @map("homeroom_teacher_id")
+  homeroomTeacher  User?             @relation("HomeroomTeacher", fields: [homeroomTeacherId], references: [id])
+  enrollments      ClassEnrollment[]
+  chatRooms        ChatRoom[]
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+  deletedAt        DateTime?         @map("deleted_at")
+
+  @@index([schoolId])
+  @@map("classes")
+}
+
+model ClassEnrollment {
+  id        String   @id @default(uuid())
+  classId   String   @map("class_id")
+  class     Class    @relation(fields: [classId], references: [id])
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([classId, userId])
+  @@index([classId])
+  @@index([userId])
+  @@map("class_enrollments")
+}
+
+// ===========================
+// USERS & AUTH
+// ===========================
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  phone        String?   @unique
+  passwordHash String    @map("password_hash")
+  fullName     String    @map("full_name")
+  avatarUrl    String?   @map("avatar_url")
+  role         Role
+  isActive     Boolean   @default(true) @map("is_active")
+  isVerified   Boolean   @default(false) @map("is_verified")
+  schoolId     String?   @map("school_id")
+  school       School?   @relation(fields: [schoolId], references: [id])
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  // Relations
+  refreshTokens      RefreshToken[]
+  enrollments        ClassEnrollment[]
+  homeroomClasses    Class[]              @relation("HomeroomTeacher")
+  sentMessages       ChatMessage[]        @relation("MessageSender")
+  chatRoomMembers    ChatRoomMember[]
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+  createdLessons     Lesson[]             @relation("LessonCreator")
+  reviewedLessons    Lesson[]             @relation("LessonReviewer")
+  blogPosts          BlogPost[]
+  comments           Comment[]
+  studentParents     ParentStudent[]      @relation("ParentRelation")
+  parentOf           ParentStudent[]      @relation("StudentRelation")
+
+  @@index([email])
+  @@index([role])
+  @@index([schoolId])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  revokedAt DateTime? @map("revoked_at")
+  userAgent String?  @map("user_agent")
+  ipAddress String?  @map("ip_address")
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+model ParentStudent {
+  id        String @id @default(uuid())
+  parentId  String @map("parent_id")
+  parent    User   @relation("ParentRelation", fields: [parentId], references: [id])
+  studentId String @map("student_id")
+  student   User   @relation("StudentRelation", fields: [studentId], references: [id])
+
+  @@unique([parentId, studentId])
+  @@map("parent_students")
+}
+
+// ===========================
+// CONTENT / LESSONS
+// ===========================
+
+model Subject {
+  id      String      @id @default(uuid())
+  code    SubjectCode @unique
+  name    String
+  nameEn  String      @map("name_en")
+  iconUrl String?     @map("icon_url")
+  color   String?
+  lessons Lesson[]
+
+  @@map("subjects")
+}
+
+model Lesson {
+  id               String        @id @default(uuid())
+  title            String
+  slug             String        @unique
+  subjectId        String        @map("subject_id")
+  subject          Subject       @relation(fields: [subjectId], references: [id])
+  grade            Int
+  topic            String
+  difficulty       Difficulty
+  theory           String        @db.Text
+  estimatedMinutes Int           @default(30) @map("estimated_minutes")
+  status           ContentStatus @default(DRAFT)
+  creatorId        String        @map("creator_id")
+  creator          User          @relation("LessonCreator", fields: [creatorId], references: [id])
+  reviewerId       String?       @map("reviewer_id")
+  reviewer         User?         @relation("LessonReviewer", fields: [reviewerId], references: [id])
+  reviewNote       String?       @map("review_note") @db.Text
+  publishedAt      DateTime?     @map("published_at")
+  scheduledAt      DateTime?     @map("scheduled_at")
+  exercises        Exercise[]
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+  deletedAt        DateTime?     @map("deleted_at")
+
+  @@index([subjectId, grade])
+  @@index([status])
+  @@index([creatorId])
+  @@map("lessons")
+}
+
+model Exercise {
+  id            String       @id @default(uuid())
+  lessonId      String       @map("lesson_id")
+  lesson        Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  type          ExerciseType
+  question      String       @db.Text
+  options       Json?
+  correctAnswer Json         @map("correct_answer")
+  explanation   String       @db.Text
+  hints         Json         @default("[]")
+  points        Int          @default(10)
+  orderIndex    Int          @default(0) @map("order_index")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  @@index([lessonId])
+  @@map("exercises")
+}
+
+// ===========================
+// BLOG & NEWS
+// ===========================
+
+model BlogPost {
+  id          String        @id @default(uuid())
+  title       String
+  slug        String        @unique
+  content     String        @db.Text
+  coverImage  String?       @map("cover_image")
+  status      ContentStatus @default(DRAFT)
+  authorId    String        @map("author_id")
+  author      User          @relation(fields: [authorId], references: [id])
+  publishedAt DateTime?     @map("published_at")
+  comments    Comment[]
+  tags        String[]
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  deletedAt   DateTime?     @map("deleted_at")
+
+  @@index([authorId])
+  @@index([status])
+  @@map("blog_posts")
+}
+
+model Comment {
+  id         String    @id @default(uuid())
+  content    String    @db.Text
+  authorId   String    @map("author_id")
+  author     User      @relation(fields: [authorId], references: [id])
+  postId     String    @map("post_id")
+  post       BlogPost  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parentId   String?   @map("parent_id")
+  parent     Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies    Comment[] @relation("CommentReplies")
+  isHidden   Boolean   @default(false) @map("is_hidden")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+
+  @@index([postId])
+  @@index([parentId])
+  @@map("comments")
+}
+
+// ===========================
+// LIVE CHAT
+// ===========================
+
+model ChatRoom {
+  id        String           @id @default(uuid())
+  name      String?
+  type      ChatRoomType
+  classId   String?          @map("class_id")
+  class     Class?           @relation(fields: [classId], references: [id])
+  members   ChatRoomMember[]
+  messages  ChatMessage[]
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  @@index([classId])
+  @@map("chat_rooms")
+}
+
+model ChatRoomMember {
+  id         String   @id @default(uuid())
+  roomId     String   @map("room_id")
+  room       ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id])
+  joinedAt   DateTime @default(now()) @map("joined_at")
+  lastReadAt DateTime? @map("last_read_at")
+
+  @@unique([roomId, userId])
+  @@index([roomId])
+  @@index([userId])
+  @@map("chat_room_members")
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  roomId    String   @map("room_id")
+  room      ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  senderId  String   @map("sender_id")
+  sender    User     @relation("MessageSender", fields: [senderId], references: [id])
+  content   String   @db.Text
+  mediaUrl  String?  @map("media_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  editedAt  DateTime? @map("edited_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@index([roomId, createdAt])
+  @@map("chat_messages")
+}
+
+// ===========================
+// NOTIFICATIONS
+// ===========================
+
+model Notification {
+  id        String              @id @default(uuid())
+  userId    String              @map("user_id")
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  channel   NotificationChannel
+  isRead    Boolean             @default(false) @map("is_read")
+  data      Json?
+  createdAt DateTime            @default(now()) @map("created_at")
+  readAt    DateTime?           @map("read_at")
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
+
+// ===========================
+// AUDIT LOG
+// ===========================
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  user         User     @relation(fields: [userId], references: [id])
+  action       String
+  resourceType String   @map("resource_type")
+  resourceId   String?  @map("resource_id")
+  details      Json?
+  ipAddress    String?  @map("ip_address")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([resourceType, resourceId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

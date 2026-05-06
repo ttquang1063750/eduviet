@@ -1,0 +1,50 @@
+<div class="page">
+  <div class="page-header">
+    <h1>👥 Quản lý người dùng</h1>
+    <button class="btn-primary">+ Thêm người dùng</button>
+  </div>
+
+  <div class="table-card">
+    @if (loading()) {
+      <div class="loading">Đang tải...</div>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Họ tên</th>
+            <th>Email</th>
+            <th>Vai trò</th>
+            <th>Trạng thái</th>
+            <th>Ngày tạo</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.id) {
+            <tr>
+              <td>
+                <div class="user-cell">
+                  <div class="user-avatar">{{ user.fullName.split(' ').at(-1)?.[0] }}</div>
+                  <span>{{ user.fullName }}</span>
+                </div>
+              </td>
+              <td class="text-muted">{{ user.email }}</td>
+              <td><span class="role-badge">{{ roleLabel(user.role) }}</span></td>
+              <td>
+                <span class="status-badge" [class.active]="user.isActive">
+                  {{ user.isActive ? 'Hoạt động' : 'Bị khóa' }}
+                </span>
+              </td>
+              <td class="text-muted">{{ user.createdAt | date: 'dd/MM/yyyy' }}</td>
+              <td><button class="action-btn">Sửa</button></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <div class="table-footer">
+        <span class="total-count">Tổng: {{ total() }} người dùng</span>
+      </div>
+    }
+  </div>
+</div>
