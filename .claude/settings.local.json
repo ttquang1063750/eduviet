@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p /Users/qtang/Desktop/landing/.claude/agents /Users/qtang/Desktop/landing/.claude/workflows /Users/qtang/Desktop/landing/.claude/commands)",
+      "Bash(npm --version)",
+      "Bash(pnpm --version)",
+      "Bash(ng version *)",
+      "Bash(docker --version)",
+      "Bash(ng new *)",
+      "Bash(npm install *)",
+      "Bash(npx --yes prisma generate --schema=./schema.prisma)",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"admin@eduviet.vn\",\"password\":\"Admin@123\"}')",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s http://localhost:3000/api/lessons)",
+      "Bash(curl -s -I http://localhost:4200)",
+      "Bash(curl -s http://localhost:4200/api/auth/login -X POST -H 'Content-Type: application/json' -d '{\"email\":\"student@eduviet.vn\",\"password\":\"Admin@123\"}')",
+      "Bash(open http://localhost:4200)",
+      "Bash(curl -s \"http://localhost:3000/api/subjects\")",
+      "Bash(curl -s \"http://localhost:3000/api/lessons/phuong-trinh-bac-hai-mot-an\")",
+      "Bash(awk '{print $9}')",
+      "Bash(chmod +x /Users/qtang/Desktop/landing/eduviet/start-dev.sh)",
+      "Bash(npx ng *)",
+      "Bash(curl -s http://localhost:4200/)"
+    ],
+    "additionalDirectories": [
+      "/Users/qtang/Desktop/landing/.claude"
+    ]
+  }
+}
