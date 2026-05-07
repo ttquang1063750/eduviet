@@ -1,0 +1,53 @@
+<div class="chat-widget-container" [class.is-open]="isOpen()">
+  <!-- Popup Window -->
+  @if (isOpen()) {
+    <div class="chat-popup">
+      <div class="chat-header">
+        <div class="header-info">
+          <h3>Trò chuyện</h3>
+          @if (chatService.isConnected()) {
+            <span class="status-online" title="Đã kết nối"></span>
+          } @else {
+            <span class="status-offline" title="Mất kết nối"></span>
+          }
+        </div>
+        <button class="btn-close" (click)="closeChat()">
+          <i class="icon-close">×</i>
+        </button>
+      </div>
+
+      <div class="chat-body">
+        <!-- Placeholder cho RoomList và MessageThread -->
+        @if (!chatService.activeRoomId()) {
+          <div class="placeholder-content">
+            <!-- <app-room-list></app-room-list> -->
+            <p>Danh sách phòng chat (Đang phát triển...)</p>
+          </div>
+        } @else {
+          <div class="placeholder-content">
+            <button class="btn-back" (click)="chatService.setActiveRoom(null)">← Quay lại</button>
+            <!-- <app-message-thread></app-message-thread> -->
+            <p>Nội dung tin nhắn (Đang phát triển...)</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Floating Action Button (FAB) -->
+  <button class="chat-fab" (click)="toggleChat()" [class.has-unread]="chatService.totalUnread() > 0">
+    <div class="fab-icon">
+      @if (isOpen()) {
+        <span class="icon-close">×</span>
+      } @else {
+        <span class="icon-chat">💬</span>
+      }
+    </div>
+    
+    @if (chatService.totalUnread() > 0 && !isOpen()) {
+      <span class="unread-badge">
+        {{ chatService.totalUnread() > 99 ? '99+' : chatService.totalUnread() }}
+      </span>
+    }
+  </button>
+</div>
