@@ -2,16 +2,23 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { AppError } from '../errors/app-error.js';
 import { UserRole } from '@eduviet/shared-types';
 
-// JWT payload shape
-interface JwtPayload {
+// Access token payload
+export interface AccessTokenPayload {
   sub: string;
   email: string;
   role: UserRole;
 }
 
-declare module 'fastify' {
-  interface FastifyRequest {
-    // Normalised user object populated after jwtVerify()
+// Refresh token payload (dùng secret riêng, payload tối giản)
+export interface RefreshTokenPayload {
+  sub: string;
+  type: 'refresh';
+}
+
+// Augment @fastify/jwt để request.user có type rõ ràng
+declare module '@fastify/jwt' {
+  interface FastifyJWT {
+    payload: AccessTokenPayload | RefreshTokenPayload;
     user: {
       id: string;
       email: string;
@@ -23,16 +30,18 @@ declare module 'fastify' {
 export async function authenticate(request: FastifyRequest, reply: FastifyReply) {
   try {
     await request.jwtVerify();
-    // Map JWT `sub` claim → `id` so all route handlers use request.user.id
-    const payload = request.user as unknown as JwtPayload;
-    (request.user as FastifyRequest['user']) = {
-      id: payload.sub,
-      email: payload.email,
-      role: payload.role,
+    // Map JWT `sub` claim → `id` cho tất cả route handlers dùng request.user.id
+    const raw = request.user as unknown as AccessTokenPayload;
+    (request as unknown as { user: { id: string; email: string; role: UserRole } }).user = {
+      id: raw.sub,
+      email: raw.email,
+      role: raw.role,
     };
   } catch {
     const err = AppError.unauthorized();
-    reply.status(err.statusCode).send({ error: { code: err.code, message: err.message } });
+    return reply
+      .status(err.statusCode)
+      .send({ error: { code: err.code, message: err.message } });
   }
 }
 
@@ -41,10 +50,12 @@ export function authorize(...roles: UserRole[]) {
     await authenticate(request, reply);
     if (reply.sent) return;
 
-    const userRole = (request.user as { role: UserRole }).role;
-    if (!roles.includes(userRole)) {
+    const user = request.user as unknown as { role: UserRole };
+    if (!roles.includes(user.role)) {
       const err = AppError.forbidden();
-      reply.status(err.statusCode).send({ error: { code: err.code, message: err.message } });
+      return reply
+        .status(err.statusCode)
+        .send({ error: { code: err.code, message: err.message } });
     }
   };
 }

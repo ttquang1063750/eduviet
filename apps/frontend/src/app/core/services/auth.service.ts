@@ -1,7 +1,8 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { tap, catchError, EMPTY } from 'rxjs';
+import { tap, catchError, EMPTY, of, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import type { AuthUser, LoginRequest, LoginResponse } from '@eduviet/shared-types';
 
 interface ApiResponse<T> {
@@ -23,18 +24,24 @@ export class AuthService {
   readonly isAuthenticated = computed(() => this._user() !== null);
   readonly currentRole = computed(() => this._user()?.role ?? null);
 
-  constructor() {
-    this.loadCurrentUser();
+  constructor() {}
+
+  init(): Observable<AuthUser | null> {
+    const token = this.getAccessToken();
+    if (!token) return of(null);
+
+    return this.http.get<ApiResponse<AuthUser>>(`${this.API}/me`).pipe(
+      tap((res) => this._user.set(res.data)),
+      map(res => res.data),
+      catchError(() => {
+        this.clearAuth();
+        return of(null);
+      })
+    );
   }
 
   private loadCurrentUser() {
-    const token = this.getAccessToken();
-    if (!token) return;
-
-    this.http.get<ApiResponse<AuthUser>>(`${this.API}/me`).subscribe({
-      next: (res) => this._user.set(res.data),
-      error: () => this.clearAuth(),
-    });
+    this.init().subscribe();
   }
 
   login(credentials: LoginRequest) {

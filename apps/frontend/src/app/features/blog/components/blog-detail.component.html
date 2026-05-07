@@ -1,0 +1,106 @@
+@if (loading()) {
+  <div class="loading-state"><div class="spinner"></div><p>Đang tải bài viết...</p></div>
+} @else if (error()) {
+  <div class="error-state"><p>{{ error() }}</p><a routerLink="/blog" class="btn btn--outline">← Quay lại Blog</a></div>
+} @else if (post(); as p) {
+  <article class="blog-article">
+    <!-- Cover image -->
+    @if (p.coverImage) {
+      <img [src]="p.coverImage" [alt]="p.title" class="article-cover" />
+    }
+
+    <div class="article-content">
+      <!-- Header -->
+      <header class="article-header">
+        @if (p.tags.length > 0) {
+          <div class="tags">
+            @for (tag of p.tags; track tag) { <span class="tag">{{ tag }}</span> }
+          </div>
+        }
+        <h1 class="article-title">{{ p.title }}</h1>
+        <div class="article-meta">
+          <span class="meta-author">{{ p.author.fullName }}</span>
+          <span class="meta-sep">·</span>
+          <span class="meta-date">{{ p.publishedAt | date:'dd/MM/yyyy' }}</span>
+          <span class="meta-sep">·</span>
+          <span>{{ totalComments() }} bình luận</span>
+        </div>
+      </header>
+
+      <!-- Body -->
+      <div class="article-body" [innerHTML]="p.content"></div>
+
+      <!-- Comments section -->
+      <section class="comments-section">
+        <h2 class="comments-title">Bình luận ({{ totalComments() }})</h2>
+
+        <!-- New comment form -->
+        @if (isLoggedIn()) {
+          <form class="comment-form" [formGroup]="commentForm" (ngSubmit)="submitComment()">
+            <textarea
+              formControlName="content"
+              class="comment-textarea"
+              placeholder="Viết bình luận của bạn..."
+              rows="3"
+            ></textarea>
+            <button type="submit" class="btn btn--primary" [disabled]="commentForm.invalid || submitting()">
+              {{ submitting() ? 'Đang gửi...' : 'Gửi bình luận' }}
+            </button>
+          </form>
+        } @else {
+          <p class="login-prompt"><a routerLink="/auth/login">Đăng nhập</a> để bình luận.</p>
+        }
+
+        <!-- Comments list -->
+        @if (p.comments.length === 0) {
+          <p class="no-comments">Chưa có bình luận nào. Hãy là người đầu tiên!</p>
+        } @else {
+          <div class="comments-list">
+            @for (comment of p.comments; track comment.id) {
+              <div class="comment">
+                <div class="comment__header">
+                  <span class="comment__author">{{ comment.author.fullName }}</span>
+                  <span class="comment__date">{{ comment.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+                <p class="comment__content">{{ comment.content }}</p>
+
+                @if (isLoggedIn()) {
+                  <button class="reply-btn" (click)="startReply(comment.id)">Trả lời</button>
+                }
+
+                <!-- Reply form -->
+                @if (replyingTo() === comment.id) {
+                  <form class="reply-form" [formGroup]="replyForm" (ngSubmit)="submitReply(comment.id)">
+                    <textarea formControlName="content" class="comment-textarea comment-textarea--sm"
+                      placeholder="Viết trả lời..." rows="2"></textarea>
+                    <div class="reply-actions">
+                      <button type="submit" class="btn btn--primary btn--sm" [disabled]="replyForm.invalid || submitting()">
+                        {{ submitting() ? 'Đang gửi...' : 'Trả lời' }}
+                      </button>
+                      <button type="button" class="btn btn--outline btn--sm" (click)="cancelReply()">Hủy</button>
+                    </div>
+                  </form>
+                }
+
+                <!-- Nested replies -->
+                @if (comment.replies.length > 0) {
+                  <div class="replies">
+                    @for (reply of comment.replies; track reply.id) {
+                      <div class="comment comment--reply">
+                        <div class="comment__header">
+                          <span class="comment__author">{{ reply.author.fullName }}</span>
+                          <span class="comment__date">{{ reply.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                        </div>
+                        <p class="comment__content">{{ reply.content }}</p>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </section>
+    </div>
+  </article>
+}

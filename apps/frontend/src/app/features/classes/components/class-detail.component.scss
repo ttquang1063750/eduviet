@@ -1,0 +1,247 @@
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  color: #9ca3af;
+  gap: 1rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.class-detail-page {
+  padding: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.breadcrumb-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.breadcrumb-link {
+  color: #6366f1;
+  text-decoration: none;
+  &:hover { text-decoration: underline; }
+}
+
+.breadcrumb-sep { color: #d1d5db; }
+
+.class-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 1.75rem;
+  margin-bottom: 2rem;
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  &__name {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0.25rem 0 0;
+  }
+
+  &__school {
+    color: #6b7280;
+    margin: 0;
+    font-size: 0.95rem;
+  }
+}
+
+.class-grade-badge {
+  display: inline-flex;
+  background: #ede9fe;
+  color: #6366f1;
+  border-radius: 999px;
+  padding: 0.2rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.class-year-tag {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin-top: 0.25rem;
+}
+
+.class-stats {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-shrink: 0;
+}
+
+.stat-card {
+  background: #f5f3ff;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #6366f1;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.teacher-card {
+  background: #f0fdf4;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.teacher-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.teacher-name {
+  font-weight: 600;
+  color: #1a1a2e;
+  font-size: 0.95rem;
+}
+
+.teacher-email {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.section-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0 0 1rem;
+}
+
+.empty-text {
+  color: #9ca3af;
+  text-align: center;
+  padding: 2rem;
+}
+
+.students-table-wrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1.5px solid #e5e7eb;
+}
+
+.students-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+
+  th {
+    background: #f9fafb;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1.5px solid #e5e7eb;
+  }
+
+  td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.9rem;
+    color: #374151;
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+}
+
+.idx-cell { color: #9ca3af; font-size: 0.85rem; }
+
+.student-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 500;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ede9fe;
+  color: #6366f1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.email-cell { color: #6b7280; }
+.date-cell { color: #9ca3af; font-size: 0.85rem; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+
+  &--outline {
+    border: 1.5px solid #e5e7eb;
+    color: #374151;
+    background: transparent;
+    &:hover { border-color: #6366f1; color: #6366f1; }
+  }
+}

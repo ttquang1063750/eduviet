@@ -19,6 +19,8 @@ export interface Exercise {
   hints: string[];
   points: number;
   orderIndex: number;
+  /** URL ảnh nền cho bài tập vẽ hình (type = DRAWING). Học sinh vẽ đè lên ảnh này. */
+  backgroundImageUrl?: string | null;
 }
 
 export interface Lesson {

@@ -137,16 +137,65 @@
 
 .theory-content {
   padding: 1.25rem;
-}
-
-.theory-text {
-  font-family: inherit;
   font-size: 0.95rem;
   line-height: 1.7;
   color: #374151;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  margin: 0;
+
+  ::ng-deep {
+    markdown {
+      display: block;
+      min-height: 50px;
+      // border: 1px dashed #4a90e2; // Temporary for verification
+      
+      p { margin-bottom: 1rem; }
+      h3 { font-size: 1.2rem; margin: 1.5rem 0 0.75rem; color: #111827; }
+      ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+      li { margin-bottom: 0.5rem; }
+      
+      code {
+        background: #f1f5f9;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        font-family: 'Fira Code', monospace;
+        font-size: 0.875rem;
+      }
+
+      pre {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1rem;
+        margin: 1rem 0;
+        overflow-x: auto;
+        
+        code {
+          background: transparent;
+          padding: 0;
+          font-size: 0.9rem;
+        }
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1rem;
+        th, td {
+          border: 1px solid #e2e8f0;
+          padding: 0.75rem;
+          text-align: left;
+        }
+        th { background: #f8fafc; font-weight: 700; }
+      }
+
+      blockquote {
+        border-left: 4px solid #4a90e2;
+        padding-left: 1rem;
+        margin-left: 0;
+        color: #6b7280;
+        font-style: italic;
+      }
+    }
+  }
 }
 
 // ─── Exercise card ────────────────────────────────────────────────────────────
@@ -170,6 +219,8 @@
   color: #111827;
   line-height: 1.5;
   margin-bottom: 1rem;
+
+  ::ng-deep markdown p { margin: 0; }
 }
 
 // ─── Options ─────────────────────────────────────────────────────────────────
@@ -218,6 +269,8 @@
 .option-text {
   font-size: 0.875rem;
   color: #374151;
+  
+  ::ng-deep markdown p { margin: 0; }
 }
 
 // ─── Fill in blank ────────────────────────────────────────────────────────────
@@ -283,6 +336,65 @@
   font-size: 0.85rem;
   color: #92400e;
   border-left: 3px solid #ffd700;
+
+  ::ng-deep markdown p { margin: 0; }
+}
+
+// ─── Drawing exercise ─────────────────────────────────────────────────────────
+
+.drawing-exercise {
+  margin-top: 1rem;
+
+  app-drawing-canvas {
+    display: block;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+}
+
+.drawing-saved-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  width: fit-content;
+
+  svg {
+    color: #16a34a;
+  }
+}
+
+// ─── Fill-in textarea ─────────────────────────────────────────────────────────
+
+.fill-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: #1f2937;
+  background: #fafafa;
+  resize: vertical;
+  min-height: 100px;
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+
+  &:focus {
+    border-color: #4a90e2;
+    background: #fff;
+  }
+
+  &::placeholder {
+    color: #9ca3af;
+  }
 }
 
 // ─── Submit ───────────────────────────────────────────────────────────────────

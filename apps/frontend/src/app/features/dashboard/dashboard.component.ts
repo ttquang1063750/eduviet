@@ -16,12 +16,6 @@ export class DashboardComponent implements OnInit {
   private lessonsService = inject(LessonsService);
 
   readonly user = this.authService.user;
-  readonly isAdmin = computed(() =>
-    this.authService.hasRole('SUPER_ADMIN', 'SCHOOL_ADMIN', 'PROVINCE_ADMIN', 'DISTRICT_ADMIN')
-  );
-  readonly isContentCreator = computed(() =>
-    this.authService.hasRole('CONTENT_CREATOR', 'SUBJECT_TEACHER', 'HOMEROOM_TEACHER')
-  );
 
   readonly lessonsLoading = signal(true);
   readonly recentLessons = signal<
@@ -37,33 +31,9 @@ export class DashboardComponent implements OnInit {
   >([]);
   readonly totalLessons = signal(0);
 
-  readonly userInitial = computed(() => {
-    const parts = (this.user()?.fullName ?? '').split(' ');
-    const last = parts[parts.length - 1];
-    return last ? last[0].toUpperCase() : '?';
-  });
-
   readonly lastName = computed(() => {
     const parts = (this.user()?.fullName ?? '').split(' ');
     return parts[parts.length - 1] ?? '';
-  });
-
-  readonly roleLabel = computed(() => {
-    const labels: Record<string, string> = {
-      SUPER_ADMIN: 'Super Admin',
-      PROVINCE_ADMIN: 'Quản trị tỉnh',
-      DISTRICT_ADMIN: 'Quản trị huyện',
-      SCHOOL_ADMIN: 'Quản trị trường',
-      CONTENT_CREATOR: 'Soạn thảo viên',
-      CONTENT_REVIEWER: 'Reviewer',
-      CONTENT_APPROVER: 'Phê duyệt viên',
-      GRADER: 'Chấm điểm',
-      HOMEROOM_TEACHER: 'Giáo viên chủ nhiệm',
-      SUBJECT_TEACHER: 'Giáo viên bộ môn',
-      STUDENT: 'Học sinh',
-      PARENT: 'Phụ huynh',
-    };
-    return labels[this.user()?.role ?? ''] ?? '';
   });
 
   ngOnInit() {
@@ -85,9 +55,5 @@ export class DashboardComponent implements OnInit {
       ADVANCED: 'Nâng cao',
     };
     return labels[d] ?? d;
-  }
-
-  logout() {
-    this.authService.logout().subscribe();
   }
 }

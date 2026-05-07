@@ -1,0 +1,63 @@
+<section class="blog-list-page">
+  <header class="page-header">
+    <h1 class="page-title">Blog</h1>
+    <span class="page-subtitle">{{ total() }} bài viết</span>
+  </header>
+
+  <div class="filter-bar" [formGroup]="filterForm">
+    <input formControlName="search" class="filter-input" placeholder="Tìm kiếm bài viết..." />
+    <input formControlName="tag" class="filter-input" placeholder="Lọc theo tag..." />
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Đang tải bài viết...</p>
+    </div>
+  } @else if (posts().length === 0) {
+    <div class="empty-state">
+      <p>Không tìm thấy bài viết nào.</p>
+    </div>
+  } @else {
+    <div class="post-grid">
+      @for (post of posts(); track post.id) {
+        <a [routerLink]="['/blog', post.slug]" class="post-card">
+          @if (post.coverImage) {
+            <img [src]="post.coverImage" [alt]="post.title" class="post-card__cover" loading="lazy" />
+          } @else {
+            <div class="post-card__cover-placeholder">📝</div>
+          }
+
+          <div class="post-card__body">
+            @if (post.tags.length > 0) {
+              <div class="post-tags">
+                @for (tag of post.tags.slice(0, 3); track tag) {
+                  <span class="tag">{{ tag }}</span>
+                }
+              </div>
+            }
+            <h2 class="post-card__title">{{ post.title }}</h2>
+
+            <div class="post-card__meta">
+              <span class="meta-author">{{ post.author.fullName }}</span>
+              <span class="meta-sep">·</span>
+              <span class="meta-date">{{ post.publishedAt | date:'dd/MM/yyyy' }}</span>
+              <span class="meta-sep">·</span>
+              <span class="meta-comments">{{ post._count.comments }} bình luận</span>
+            </div>
+          </div>
+        </a>
+      }
+    </div>
+
+    @if (totalPages() > 1) {
+      <nav class="pagination">
+        <button class="pagination__btn" [disabled]="page() === 1" (click)="changePage(page() - 1)">‹</button>
+        @for (p of pageRange; track p) {
+          <button class="pagination__btn" [class.pagination__btn--active]="p === page()" (click)="changePage(p)">{{ p }}</button>
+        }
+        <button class="pagination__btn" [disabled]="page() === totalPages()" (click)="changePage(page() + 1)">›</button>
+      </nav>
+    }
+  }
+</section>

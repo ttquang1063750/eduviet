@@ -1,0 +1,83 @@
+<section class="class-list-page">
+  <header class="page-header">
+    <h1 class="page-title">Danh sách lớp học</h1>
+    <span class="page-subtitle">{{ total() }} lớp học</span>
+  </header>
+
+  <div class="filter-bar" [formGroup]="filterForm">
+    <select formControlName="grade" class="filter-select">
+      <option value="">Tất cả khối</option>
+      @for (g of grades; track g) {
+        <option [value]="g">Khối {{ g }}</option>
+      }
+    </select>
+
+    <input
+      formControlName="academicYear"
+      class="filter-input"
+      placeholder="Năm học (vd: 2024-2025)"
+    />
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Đang tải danh sách lớp...</p>
+    </div>
+  } @else if (classes().length === 0) {
+    <div class="empty-state">
+      <p>Không có lớp học nào.</p>
+    </div>
+  } @else {
+    <div class="class-grid">
+      @for (cls of classes(); track cls.id) {
+        <a [routerLink]="['/classes', cls.id]" class="class-card">
+          <div class="class-card__header">
+            <span class="class-grade-badge">Khối {{ cls.grade }}</span>
+            <span class="class-year">{{ cls.academicYear }}</span>
+          </div>
+
+          <h2 class="class-card__name">{{ cls.name }}</h2>
+          <p class="class-card__school">{{ cls.school.name }}</p>
+
+          <div class="class-card__meta">
+            <span class="meta-item">
+              <span class="meta-icon">👥</span>
+              {{ cls._count.enrollments }} học sinh
+            </span>
+            @if (cls.homeroomTeacher) {
+              <span class="meta-item">
+                <span class="meta-icon">👤</span>
+                {{ cls.homeroomTeacher.fullName }}
+              </span>
+            }
+          </div>
+        </a>
+      }
+    </div>
+
+    @if (totalPages() > 1) {
+      <nav class="pagination">
+        <button
+          class="pagination__btn"
+          [disabled]="page() === 1"
+          (click)="changePage(page() - 1)"
+        >‹</button>
+
+        @for (p of pageRange; track p) {
+          <button
+            class="pagination__btn"
+            [class.pagination__btn--active]="p === page()"
+            (click)="changePage(p)"
+          >{{ p }}</button>
+        }
+
+        <button
+          class="pagination__btn"
+          [disabled]="page() === totalPages()"
+          (click)="changePage(page() + 1)"
+        >›</button>
+      </nav>
+    }
+  }
+</section>

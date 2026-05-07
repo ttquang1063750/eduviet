@@ -1,5 +1,9 @@
 /* EduViet Global Styles — Flat Illustration Design System */
 
+/* Syntax Highlighting & Math Styles */
+@import 'highlight.js/styles/atom-one-light.css';
+@import 'katex/dist/katex.min.css';
+
 :root {
   --color-primary: #4A90E2;
   --color-primary-dark: #1a237e;

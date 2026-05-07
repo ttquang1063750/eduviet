@@ -6,14 +6,6 @@
     </div>
   } @else if (lesson()) {
     <div class="lesson-layout">
-      <nav class="breadcrumb">
-        <a routerLink="/lessons">Bài học</a>
-        <span>›</span>
-        <span [style.color]="lesson()!.subject.color ?? '#4A90E2'">{{ lesson()!.subject.name }}</span>
-        <span>›</span>
-        <span>{{ lesson()!.title }}</span>
-      </nav>
-
       <div class="lesson-header">
         <div class="lesson-badges">
           <span
@@ -43,7 +35,13 @@
             <h2>📖 Lý thuyết</h2>
           </div>
           <div class="theory-content">
-            <pre class="theory-text">{{ lesson()!.theory }}</pre>
+            <!--
+              KaTeX rendering:
+              - Inline: $...$   →  e.g. "Giải phương trình $ax^2 + bx + c = 0$"
+              - Block:  $$...$$ →  e.g. "$$x = \frac{-b \pm \sqrt{\Delta}}{2a}$$"
+              SecurityContext.NONE được đặt trong app.config.ts để KaTeX HTML không bị Angular sanitizer cắt.
+            -->
+            <markdown [data]="lesson()!.theory" [katex]="true"></markdown>
           </div>
         </div>
 
@@ -56,7 +54,9 @@
           @for (exercise of lesson()!.exercises; track exercise.id; let i = $index) {
             <div class="exercise-card">
               <div class="exercise-number">Câu {{ i + 1 }}</div>
-              <div class="exercise-question">{{ exercise.question }}</div>
+              <div class="exercise-question">
+                <markdown [data]="exercise.question" [inline]="true" [katex]="true"></markdown>
+              </div>
 
               @if (exercise.type === 'MULTIPLE_CHOICE' && exercise.options) {
                 <div class="options-list">
@@ -69,7 +69,9 @@
                         (change)="selectAnswer(exercise.id, opt)"
                       />
                       <span class="option-label">{{ 'ABCD'[j] }}</span>
-                      <span class="option-text">{{ opt }}</span>
+                      <span class="option-text">
+                        <markdown [data]="opt" [inline]="true" [katex]="true"></markdown>
+                      </span>
                     </label>
                   }
                 </div>
@@ -86,6 +88,34 @@
                 </div>
               }
 
+              @if (exercise.type === 'SHORT_ANSWER' || exercise.type === 'ESSAY') {
+                <div class="fill-blank">
+                  <textarea
+                    class="fill-textarea"
+                    rows="4"
+                    [placeholder]="exercise.type === 'ESSAY' ? 'Viết bài giải của bạn...' : 'Nhập câu trả lời ngắn...'"
+                    (input)="selectAnswer(exercise.id, $any($event.target).value)"
+                  ></textarea>
+                </div>
+              }
+
+              @if (exercise.type === 'DRAWING') {
+                <div class="drawing-exercise">
+                  <app-drawing-canvas
+                    [backgroundImageUrl]="exercise.backgroundImageUrl ?? null"
+                    (imageExported)="saveDrawing(exercise.id, $event)"
+                  />
+                  @if (hasDrawingAnswer(exercise.id)) {
+                    <div class="drawing-saved-notice">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      Đã lưu bài vẽ
+                    </div>
+                  }
+                </div>
+              }
+
               <div class="exercise-footer">
                 <span class="points-badge">{{ exercise.points }} điểm</span>
                 @if (exercise.hints.length > 0) {
@@ -94,7 +124,9 @@
               </div>
 
               @if (showHints()[exercise.id] && exercise.hints.length > 0) {
-                <div class="hint-box">{{ exercise.hints[0] }}</div>
+                <div class="hint-box">
+                  <markdown [data]="exercise.hints[0]" [inline]="true" [katex]="true"></markdown>
+                </div>
               }
             </div>
           }

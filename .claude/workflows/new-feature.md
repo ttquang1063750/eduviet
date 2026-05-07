@@ -44,7 +44,8 @@ Dùng agent `feature-builder` hoặc tạo thủ công:
 - Angular feature module (standalone, OnPush, Signals)
 - HTTP service
 - Route guards
-- Lazy route registration
+- Lazy route registration với `data: { breadcrumb: '...' }`
+- Cập nhật tên động trong component nếu cần qua `BreadcrumbService`
 
 ## Bước 5 — Tests
 ```bash

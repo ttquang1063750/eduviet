@@ -12,17 +12,37 @@ const COOKIE_OPTIONS = {
   maxAge: 7 * 24 * 60 * 60,
 };
 
+// Rate limit chặt hơn cho endpoints nhạy cảm (chống brute-force)
+const AUTH_RATE_LIMIT = {
+  config: {
+    rateLimit: {
+      max: 5,
+      timeWindow: '15 minutes',
+      errorResponseBuilder: () => ({
+        error: {
+          code: 'RATE_LIMIT_EXCEEDED',
+          message: 'Quá nhiều lần thử. Vui lòng đợi 15 phút và thử lại.',
+        },
+      }),
+    },
+  },
+};
+
 export const authRoutes: FastifyPluginAsync = async (app) => {
   const authService = new AuthService(app);
 
-  app.post('/login', async (request, reply) => {
+  // POST /auth/login — rate limited (5 req / 15 phút per IP)
+  app.post('/login', AUTH_RATE_LIMIT, async (request, reply) => {
     const body = loginSchema.safeParse(request.body);
     if (!body.success) {
       return reply.status(400).send({
         error: {
           code: 'VALIDATION_ERROR',
           message: 'Dữ liệu không hợp lệ',
-          details: body.error.errors.map((e) => ({ field: e.path.join('.'), message: e.message })),
+          details: body.error.errors.map((e) => ({
+            field: e.path.join('.'),
+            message: e.message,
+          })),
         },
       });
     }
@@ -37,19 +57,32 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
     return reply.send({ data: { accessToken, user } });
   });
 
-  app.post('/refresh', async (request, reply) => {
-    const refreshToken = request.cookies[COOKIE_NAME];
-    if (!refreshToken) {
-      return reply.status(401).send({
-        error: { code: 'UNAUTHORIZED', message: 'Refresh token không tồn tại' },
-      });
+  // POST /auth/refresh — rate limited nhẹ hơn (20 req / 15 phút)
+  app.post(
+    '/refresh',
+    {
+      config: {
+        rateLimit: {
+          max: 20,
+          timeWindow: '15 minutes',
+        },
+      },
+    },
+    async (request, reply) => {
+      const refreshToken = request.cookies[COOKIE_NAME];
+      if (!refreshToken) {
+        return reply.status(401).send({
+          error: { code: 'UNAUTHORIZED', message: 'Refresh token không tồn tại' },
+        });
+      }
+
+      const { accessToken, newRefreshToken } = await authService.refresh(refreshToken);
+      reply.setCookie(COOKIE_NAME, newRefreshToken, COOKIE_OPTIONS);
+      return reply.send({ data: { accessToken } });
     }
+  );
 
-    const { accessToken, newRefreshToken } = await authService.refresh(refreshToken);
-    reply.setCookie(COOKIE_NAME, newRefreshToken, COOKIE_OPTIONS);
-    return reply.send({ data: { accessToken } });
-  });
-
+  // POST /auth/logout
   app.post('/logout', { preHandler: [authenticate] }, async (request, reply) => {
     const refreshToken = request.cookies[COOKIE_NAME];
     await authService.logout(request.user.id, refreshToken);
@@ -57,17 +90,26 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
     return reply.send({ data: { message: 'Đăng xuất thành công' } });
   });
 
+  // GET /auth/me
   app.get('/me', { preHandler: [authenticate] }, async (request, reply) => {
     const user = await app.prisma.user.findUnique({
       where: { id: request.user.id },
       select: {
-        id: true, email: true, fullName: true, role: true,
-        avatarUrl: true, schoolId: true, isActive: true, isVerified: true,
+        id: true,
+        email: true,
+        fullName: true,
+        role: true,
+        avatarUrl: true,
+        schoolId: true,
+        isActive: true,
+        isVerified: true,
       },
     });
 
     if (!user) {
-      return reply.status(404).send({ error: { code: 'NOT_FOUND', message: 'Người dùng không tồn tại' } });
+      return reply
+        .status(404)
+        .send({ error: { code: 'NOT_FOUND', message: 'Người dùng không tồn tại' } });
     }
 
     return reply.send({ data: user });

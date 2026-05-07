@@ -1,6 +1,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
-import { authenticate, authorize } from '../../shared/middleware/authenticate.js';
+import { authorize } from '../../shared/middleware/authenticate.js';
+import { LessonsService } from './lessons.service.js';
 
 const lessonQuerySchema = z.object({
   page: z.coerce.number().min(1).default(1),
@@ -8,7 +9,9 @@ const lessonQuerySchema = z.object({
   subject: z.string().optional(),
   grade: z.coerce.number().min(1).max(12).optional(),
   difficulty: z.enum(['EASY', 'MEDIUM', 'HARD', 'ADVANCED']).optional(),
-  status: z.enum(['DRAFT', 'IN_REVIEW', 'APPROVED', 'PUBLISHED', 'REJECTED', 'ARCHIVED']).optional(),
+  status: z
+    .enum(['DRAFT', 'IN_REVIEW', 'APPROVED', 'PUBLISHED', 'REJECTED', 'ARCHIVED'])
+    .optional(),
   search: z.string().optional(),
 });
 
@@ -22,104 +25,64 @@ const createLessonSchema = z.object({
   estimatedMinutes: z.number().min(5).max(180).default(30),
 });
 
-const reviewNoteSchema = z.object({
+const reviewBodySchema = z.object({
+  action: z.enum(['approve', 'reject']),
   note: z.string().optional(),
 });
 
 export const lessonsRoutes: FastifyPluginAsync = async (app) => {
-  // Public: list published lessons
+  const service = new LessonsService(app.prisma);
+
+  // GET /lessons — danh sách (public: PUBLISHED, admin: tất cả)
   app.get('/', async (request, reply) => {
     const query = lessonQuerySchema.safeParse(request.query);
-    if (!query.success) return reply.status(400).send({ error: { code: 'VALIDATION_ERROR', message: 'Query không hợp lệ' } });
-
-    const { page, perPage, subject, grade, difficulty, status, search } = query.data;
-    const skip = (page - 1) * perPage;
-
-    // Non-authenticated users can only see PUBLISHED
-    let allowedStatuses: string[] = ['PUBLISHED'];
-    try {
-      await request.jwtVerify();
-      const userRole = (request.user as { role: string }).role;
-      if (['SUPER_ADMIN', 'SCHOOL_ADMIN', 'CONTENT_CREATOR', 'CONTENT_REVIEWER', 'CONTENT_APPROVER'].includes(userRole)) {
-        allowedStatuses = status ? [status] : ['DRAFT', 'IN_REVIEW', 'APPROVED', 'PUBLISHED', 'REJECTED', 'ARCHIVED'];
-      }
-    } catch {
-      // unauthenticated — only published
+    if (!query.success) {
+      return reply
+        .status(400)
+        .send({ error: { code: 'VALIDATION_ERROR', message: 'Query không hợp lệ' } });
     }
 
-    const where = {
-      deletedAt: null,
-      status: { in: allowedStatuses as never[] },
-      ...(subject ? { subject: { code: subject as never } } : {}),
-      ...(grade ? { grade } : {}),
-      ...(difficulty ? { difficulty: difficulty as never } : {}),
-      ...(search ? { OR: [
-        { title: { contains: search, mode: 'insensitive' as const } },
-        { topic: { contains: search, mode: 'insensitive' as const } },
-      ]} : {}),
-    };
+    // Xác định quyền (không bắt buộc đăng nhập)
+    let userRole: string | undefined;
+    try {
+      await request.jwtVerify();
+      userRole = (request.user as { role: string }).role;
+    } catch {
+      // unauthenticated — chỉ thấy PUBLISHED
+    }
 
-    const [lessons, total] = await Promise.all([
-      app.prisma.lesson.findMany({
-        where,
-        select: {
-          id: true, title: true, slug: true, grade: true, topic: true,
-          difficulty: true, status: true, estimatedMinutes: true, publishedAt: true,
-          subject: { select: { id: true, code: true, name: true, color: true } },
-        },
-        skip,
-        take: perPage,
-        orderBy: { publishedAt: 'desc' },
-      }),
-      app.prisma.lesson.count({ where }),
-    ]);
-
-    return reply.send({
-      data: lessons,
-      meta: { total, page, perPage, totalPages: Math.ceil(total / perPage) },
-    });
+    const result = await service.list(query.data, userRole as never);
+    return reply.send(result);
   });
 
-  // Get single lesson
+  // GET /lessons/:slug
   app.get('/:slug', async (request, reply) => {
     const { slug } = request.params as { slug: string };
 
-    const lesson = await app.prisma.lesson.findUnique({
-      where: { slug, deletedAt: null },
-      include: {
-        subject: true,
-        creator: { select: { id: true, fullName: true, avatarUrl: true } },
-        exercises: { orderBy: { orderIndex: 'asc' } },
-      },
-    });
-
-    if (!lesson) {
-      return reply.status(404).send({ error: { code: 'NOT_FOUND', message: 'Bài học không tồn tại' } });
+    let userRole: string | undefined;
+    try {
+      await request.jwtVerify();
+      userRole = (request.user as { role: string }).role;
+    } catch {
+      // unauthenticated
     }
 
-    if (lesson.status !== 'PUBLISHED') {
-      try {
-        await request.jwtVerify();
-      } catch {
-        return reply.status(403).send({ error: { code: 'FORBIDDEN', message: 'Bạn không có quyền xem bài học này' } });
-      }
-    }
-
-    // Hide correct answers for exercises (students see during quiz)
-    const sanitizedLesson = {
-      ...lesson,
-      exercises: lesson.exercises.map(({ correctAnswer: _ca, ...ex }) => ex),
-    };
-
-    return reply.send({ data: sanitizedLesson });
+    const lesson = await service.getBySlug(slug, userRole as never);
+    return reply.send({ data: lesson });
   });
 
-  // Create lesson — CONTENT_CREATOR+
+  // POST /lessons — tạo bài học mới
   app.post(
     '/',
     {
       preHandler: [
-        authorize('SUPER_ADMIN', 'SCHOOL_ADMIN', 'CONTENT_CREATOR', 'SUBJECT_TEACHER', 'HOMEROOM_TEACHER'),
+        authorize(
+          'SUPER_ADMIN',
+          'SCHOOL_ADMIN',
+          'CONTENT_CREATOR',
+          'SUBJECT_TEACHER',
+          'HOMEROOM_TEACHER'
+        ),
       ],
     },
     async (request, reply) => {
@@ -129,121 +92,64 @@ export const lessonsRoutes: FastifyPluginAsync = async (app) => {
           error: {
             code: 'VALIDATION_ERROR',
             message: 'Dữ liệu không hợp lệ',
-            details: body.error.errors.map((e) => ({ field: e.path.join('.'), message: e.message })),
+            details: body.error.errors.map((e) => ({
+              field: e.path.join('.'),
+              message: e.message,
+            })),
           },
         });
       }
 
-      const slug = body.data.title
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[̀-ͯ]/g, '')
-        .replace(/[^a-z0-9\s]/g, '')
-        .replace(/\s+/g, '-')
-        .substring(0, 100) + '-' + Date.now();
-
-      const lesson = await app.prisma.lesson.create({
-        data: {
-          ...body.data,
-          slug,
-          creatorId: request.user.id,
-          status: 'DRAFT',
-        },
-        include: { subject: true },
-      });
-
-      await app.prisma.auditLog.create({
-        data: {
-          userId: request.user.id,
-          action: 'LESSON_CREATED',
-          resourceType: 'LESSON',
-          resourceId: lesson.id,
-        },
-      });
-
+      const lesson = await service.create(body.data, request.user.id);
       return reply.status(201).send({ data: lesson });
     }
   );
 
-  // Submit for review
+  // POST /lessons/:id/submit-review
   app.post(
     '/:id/submit-review',
-    { preHandler: [authorize('CONTENT_CREATOR', 'SUBJECT_TEACHER', 'HOMEROOM_TEACHER', 'SUPER_ADMIN')] },
+    {
+      preHandler: [
+        authorize('CONTENT_CREATOR', 'SUBJECT_TEACHER', 'HOMEROOM_TEACHER', 'SUPER_ADMIN'),
+      ],
+    },
     async (request, reply) => {
       const { id } = request.params as { id: string };
-
-      const lesson = await app.prisma.lesson.findUnique({ where: { id, deletedAt: null } });
-      if (!lesson) return reply.status(404).send({ error: { code: 'NOT_FOUND', message: 'Bài học không tồn tại' } });
-      if (lesson.status !== 'DRAFT' && lesson.status !== 'REJECTED') {
-        return reply.status(409).send({ error: { code: 'CONFLICT', message: 'Bài học không ở trạng thái có thể submit' } });
-      }
-
-      const updated = await app.prisma.lesson.update({
-        where: { id },
-        data: { status: 'IN_REVIEW' },
-      });
-
+      const updated = await service.submitForReview(id, request.user.id);
       return reply.send({ data: updated });
     }
   );
 
-  // Reviewer approve/reject
+  // POST /lessons/:id/review — reviewer approve/reject
   app.post(
     '/:id/review',
     { preHandler: [authorize('CONTENT_REVIEWER', 'SUPER_ADMIN')] },
     async (request, reply) => {
       const { id } = request.params as { id: string };
-      const body = z.object({
-        action: z.enum(['approve', 'reject']),
-        note: z.string().optional(),
-      }).safeParse(request.body);
-
-      if (!body.success) return reply.status(400).send({ error: { code: 'VALIDATION_ERROR', message: 'Dữ liệu không hợp lệ' } });
-
-      const lesson = await app.prisma.lesson.findUnique({ where: { id, deletedAt: null } });
-      if (!lesson) return reply.status(404).send({ error: { code: 'NOT_FOUND', message: 'Bài học không tồn tại' } });
-      if (lesson.status !== 'IN_REVIEW') {
-        return reply.status(409).send({ error: { code: 'CONFLICT', message: 'Bài học không ở trạng thái chờ review' } });
+      const body = reviewBodySchema.safeParse(request.body);
+      if (!body.success) {
+        return reply
+          .status(400)
+          .send({ error: { code: 'VALIDATION_ERROR', message: 'Dữ liệu không hợp lệ' } });
       }
 
-      const newStatus = body.data.action === 'approve' ? 'APPROVED' : 'REJECTED';
-      const updated = await app.prisma.lesson.update({
-        where: { id },
-        data: { status: newStatus, reviewerId: request.user.id, reviewNote: body.data.note },
-      });
-
+      const updated = await service.review(
+        id,
+        request.user.id,
+        body.data.action,
+        body.data.note
+      );
       return reply.send({ data: updated });
     }
   );
 
-  // Approver publish
+  // POST /lessons/:id/publish — approver publish
   app.post(
     '/:id/publish',
     { preHandler: [authorize('CONTENT_APPROVER', 'SUPER_ADMIN')] },
     async (request, reply) => {
       const { id } = request.params as { id: string };
-      const body = reviewNoteSchema.safeParse(request.body);
-
-      const lesson = await app.prisma.lesson.findUnique({ where: { id, deletedAt: null } });
-      if (!lesson) return reply.status(404).send({ error: { code: 'NOT_FOUND', message: 'Bài học không tồn tại' } });
-      if (lesson.status !== 'APPROVED') {
-        return reply.status(409).send({ error: { code: 'CONFLICT', message: 'Bài học chưa được review approve' } });
-      }
-
-      const updated = await app.prisma.lesson.update({
-        where: { id },
-        data: { status: 'PUBLISHED', publishedAt: new Date() },
-      });
-
-      await app.prisma.auditLog.create({
-        data: {
-          userId: request.user.id,
-          action: 'LESSON_PUBLISHED',
-          resourceType: 'LESSON',
-          resourceId: id,
-        },
-      });
-
+      const updated = await service.publish(id, request.user.id);
       return reply.send({ data: updated });
     }
   );

@@ -1,0 +1,20 @@
+<nav class="breadcrumb-nav">
+  <div class="breadcrumb-container">
+    @for (item of breadcrumbs(); track item.url; let last = $last) {
+      <div class="breadcrumb-item-wrapper">
+        <a 
+          [routerLink]="item.url" 
+          class="breadcrumb-item"
+          [class.active]="last"
+          [attr.aria-current]="last ? 'page' : null"
+        >
+          <span class="breadcrumb-icon">{{ getIcon(item.label) }}</span>
+          <span class="breadcrumb-label">{{ item.label }}</span>
+        </a>
+        @if (!last) {
+          <span class="breadcrumb-separator">/</span>
+        }
+      </div>
+    }
+  </div>
+</nav>
