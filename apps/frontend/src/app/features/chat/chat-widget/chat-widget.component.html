@@ -20,11 +20,10 @@
         @if (!chatService.activeRoomId()) {
           <app-room-list></app-room-list>
         } @else {
-          <div class="placeholder-content">
+          <div class="room-header-back">
             <button class="btn-back" (click)="chatService.setActiveRoom(null)">← Quay lại</button>
-            <!-- <app-message-thread></app-message-thread> -->
-            <p>Nội dung tin nhắn (Đang phát triển...)</p>
           </div>
+          <app-message-thread></app-message-thread>
         }
       </div>
     </div>

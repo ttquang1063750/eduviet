@@ -1,11 +1,12 @@
 import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ChatService } from '../chat.service';
 import { RoomListComponent } from './room-list/room-list.component';
+import { MessageThreadComponent } from './message-thread/message-thread.component';
 
 @Component({
   selector: 'app-chat-widget',
   standalone: true,
-  imports: [RoomListComponent],
+  imports: [RoomListComponent, MessageThreadComponent],
   templateUrl: './chat-widget.component.html',
   styleUrl: './chat-widget.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

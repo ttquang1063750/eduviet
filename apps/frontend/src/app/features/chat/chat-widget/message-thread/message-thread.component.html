@@ -1,0 +1,44 @@
+<div class="thread-container">
+  <div class="messages-list" #scrollContainer>
+    <!-- Load more button có thể thêm ở đây nếu scroll lên top -->
+    
+    @for (msg of chatService.activeRoomMessages().slice().reverse(); track msg.id) {
+      <div class="message-wrapper" [class.is-mine]="msg.senderId === currentUserId()">
+        @if (msg.senderId !== currentUserId()) {
+          <div class="sender-name">{{ msg.sender.fullName }}</div>
+        }
+        <div class="message-bubble">
+          <p class="content">{{ msg.content }}</p>
+          <span class="time">{{ msg.createdAt | date:'HH:mm' }}</span>
+        </div>
+      </div>
+    } @empty {
+      <div class="empty-thread">
+        <p>Bắt đầu cuộc trò chuyện...</p>
+      </div>
+    }
+
+    @if (chatService.activeRoomTyping().length > 0) {
+      <div class="typing-indicator">
+        <div class="dots">
+          <span></span><span></span><span></span>
+        </div>
+        <span class="text">{{ getTypingText() }}</span>
+      </div>
+    }
+  </div>
+
+  <form class="message-input" (ngSubmit)="sendMessage()">
+    <input 
+      type="text" 
+      name="message"
+      [(ngModel)]="messageContent" 
+      (input)="onTyping($event)"
+      placeholder="Nhập tin nhắn..."
+      autocomplete="off"
+    >
+    <button type="submit" [disabled]="!messageContent().trim()">
+      <span class="icon-send">➤</span>
+    </button>
+  </form>
+</div>
