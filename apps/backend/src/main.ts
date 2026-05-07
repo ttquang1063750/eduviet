@@ -1,4 +1,4 @@
-import Fastify from 'fastify';
+import Fastify, { FastifyError } from 'fastify';
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
@@ -11,6 +11,13 @@ import { authRoutes } from './modules/auth/auth.routes.js';
 import { usersRoutes } from './modules/users/users.routes.js';
 import { lessonsRoutes } from './modules/lessons/lessons.routes.js';
 import { subjectsRoutes } from './modules/subjects/subjects.routes.js';
+import { schoolsRoutes } from './modules/schools/schools.routes.js';
+import { classesRoutes } from './modules/classes/classes.routes.js';
+import { blogRoutes } from './modules/blog/blog.routes.js';
+import { notificationsRoutes } from './modules/notifications/notifications.routes.js';
+import { chatRoutes } from './modules/chat/chat.routes.js';
+import socketPlugin from './plugins/socket.plugin.js';
+import { registerChatGateway } from './modules/chat/chat.gateway.js';
 import { AppError } from './shared/errors/app-error.js';
 
 const app = Fastify({
@@ -55,18 +62,27 @@ async function bootstrap() {
   // Plugins
   await app.register(prismaPlugin);
   await app.register(redisPlugin);
+  await app.register(socketPlugin);
 
   // Routes
   await app.register(authRoutes, { prefix: '/api/auth' });
   await app.register(usersRoutes, { prefix: '/api/users' });
   await app.register(lessonsRoutes, { prefix: '/api/lessons' });
   await app.register(subjectsRoutes, { prefix: '/api/subjects' });
+  await app.register(schoolsRoutes, { prefix: '/api/schools' });
+  await app.register(classesRoutes, { prefix: '/api/classes' });
+  await app.register(blogRoutes, { prefix: '/api/blog' });
+  await app.register(notificationsRoutes, { prefix: '/api/notifications' });
+  await app.register(chatRoutes, { prefix: '/api/chat' });
+
+  // Initialize Socket.io Gateway
+  registerChatGateway(app);
 
   // Health check
   app.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
 
   // Global error handler
-  app.setErrorHandler((error, request, reply) => {
+  app.setErrorHandler((error: FastifyError | AppError, request, reply) => {
     if (error instanceof AppError) {
       return reply.status(error.statusCode).send({
         error: { code: error.code, message: error.message, details: error.details },
