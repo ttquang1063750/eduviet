@@ -1,0 +1,67 @@
+<div class="app-layout">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 40 40" fill="none">
+          <rect width="40" height="40" rx="10" fill="#4A90E2" />
+          <path d="M10 14h20M10 20h14M10 26h17" stroke="white" stroke-width="2.5" stroke-linecap="round" />
+          <circle cx="28" cy="26" r="7" fill="#FFD700" stroke="white" stroke-width="1.5" />
+          <path d="M25 26l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </div>
+      <span class="brand-text">EduViet</span>
+    </div>
+
+    <div class="user-card">
+      <div class="user-avatar">{{ userInitial() }}</div>
+      <div class="user-info">
+        <div class="user-name">{{ user()?.fullName }}</div>
+        <div class="user-role">{{ roleLabel() }}</div>
+      </div>
+    </div>
+
+    <ul class="nav-list">
+      <li class="nav-item">
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+          <span class="nav-icon">🏠</span>
+          <span>Tổng quan</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/lessons" routerLinkActive="active" class="nav-link">
+          <span class="nav-icon">📚</span>
+          <span>Bài học</span>
+        </a>
+      </li>
+      @if (isAdmin()) {
+        <li class="nav-item">
+          <a routerLink="/admin/users" routerLinkActive="active" class="nav-link">
+            <span class="nav-icon">👥</span>
+            <span>Người dùng</span>
+          </a>
+        </li>
+      }
+      @if (isContentCreator()) {
+        <li class="nav-item">
+          <a routerLink="/lessons" routerLinkActive="active" class="nav-link">
+            <span class="nav-icon">✏️</span>
+            <span>Soạn thảo</span>
+          </a>
+        </li>
+      }
+    </ul>
+
+    <button class="logout-btn" (click)="logout()">
+      <span>🚪</span> Đăng xuất
+    </button>
+  </nav>
+
+  <!-- Main content -->
+  <main class="main-content">
+    <app-breadcrumb />
+    <router-outlet />
+  </main>
+
+  <app-chat-widget />
+</div>
