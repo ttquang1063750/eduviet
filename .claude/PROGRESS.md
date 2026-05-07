@@ -43,6 +43,11 @@
 | `modules/classes/` | routes + service + repository |
 | `modules/blog/` | routes + service + repository |
 | `modules/notifications/` | routes + service |
+| `modules/chat/` | routes + service + repository + gateway + spec |
+| `plugins/socket.plugin.ts` | Socket.io v4, JWT auth, Redis adapter |
+| `libs/storage/` | StorageService: upload, getPresignedUrl, delete, getPublicUrl |
+| `plugins/storage.plugin.ts` | fastify.decorate storage, ensureBucket on startup |
+| `modules/storage/storage.routes.ts` | POST /api/storage/upload — MIME whitelist, 10MB limit, audit log |
 
 ### Frontend (`apps/frontend/src/app/`)
 
@@ -65,6 +70,8 @@
 | `features/classes/` | list + detail |
 | `features/blog/` | list + detail + nested comments |
 | `features/admin/users/` | user list + role badges |
+| `features/chat/` | ChatService (signals), chat-widget FAB, room-list, message-thread |
+| `features/chat/` | ChatService (signals), chat-widget FAB, room-list, message-thread |
 
 ### Docs & .claude
 
@@ -121,7 +128,7 @@
 
 ---
 
-### P2 — Storage Module (MinIO wrapper) ← NEXT
+### ~~P2 — Storage Module~~ ✅ COMPLETED
 
 | # | Step | File | Ghi chú |
 |---|------|------|---------|
@@ -133,7 +140,7 @@
 
 ---
 
-### P3 — BullMQ Queues
+### P3 — BullMQ Queues [~] IN_PROGRESS
 
 | # | Step | File | Ghi chú |
 |---|------|------|---------|

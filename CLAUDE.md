@@ -33,6 +33,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 | `classes` | ✅ | ✅ | ✅ | — |
 | `blog` | ✅ | ✅ | ✅ | — |
 | `notifications` | ✅ | ✅ | — | — |
+| `chat` | ✅ | ✅ | ✅ | ✅ |
 
 #### Frontend features (`apps/frontend/src/app/features/`)
 | Feature | List | Detail | Service | Routes |
@@ -43,33 +44,41 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 | `classes` | ✅ | ✅ | ✅ | ✅ |
 | `blog` | ✅ | ✅ | ✅ | ✅ |
 | `admin/users` | ✅ | — | — | ✅ |
+| `chat` | ✅ widget (FAB) | ✅ room-list + message-thread | ✅ | — |
 
 #### Shared Components
 - ✅ `breadcrumb/` — dynamic breadcrumb
 - ✅ `drawing-canvas/` — Konva.js: freehand, line, rect, ellipse, eraser, undo/redo, background image, export PNG
 
 #### Packages & Infrastructure
-- ✅ `packages/shared-constants/` + `packages/shared-types/`
+- ✅ `packages/shared-constants/` + `packages/shared-types/` (bao gồm `chat.types.ts`)
 - ✅ `libs/prisma/` — schema (bao gồm ChatRoom/ChatMessage) + migrations + seed
 - ✅ `docker-compose.yml` / `docker-compose.prod.yml`
 - ✅ `docker/nginx/`, `docker/minio/`, `docker/postgres/`
-- ✅ `dev-start.sh` — one-command dev setup
+- ✅ `dev-start.sh` — one-command dev setup (banner, cleanup trap, test accounts)
+- ✅ `.claude/commands/` — plan-task, execute-step, check-point, resume, start-dev
+- ✅ `AI_RULES.md` — session start protocol
 
-#### 🗺️ Live Chat — Design đã duyệt (chưa implement)
-- Floating widget (FAB góc phải, badge unread)
-- 3 loại room: `CLASS`, `TEACHER_PARENT`, `ONE_ON_ONE`
-- Tính năng: typing indicator, read receipts, edit/delete message, file/image upload (MinIO)
-- Socket.io attach vào `fastify.server`, Redis Adapter (`@socket.io/redis-adapter`)
-- Files cần tạo: `socket.plugin.ts`, `chat.gateway.ts`, `chat.routes.ts`, `chat.service.ts`, `chat.repository.ts`, `ChatService` FE + `chat-widget` component tree
+#### Live Chat ✅ COMPLETED (2026-05-07)
+- ✅ `socket.plugin.ts` — Socket.io v4, JWT auth middleware, Redis adapter
+- ✅ `chat.gateway.ts` — 7 socket events (send, edit, delete, typing, mark_read)
+- ✅ `chat.service.ts` — RBAC per room type (CLASS/TEACHER_PARENT/ONE_ON_ONE)
+- ✅ `chat.repository.ts` — Prisma queries, cursor pagination
+- ✅ `chat.routes.ts` — REST API (rooms, messages, upload)
+- ✅ `chat-widget` component tree — FAB + room-list + message-thread
+- ✅ `ChatService` — signals state, socket.io-client wrapper, eager-init
+
+#### Storage Module ✅ COMPLETED (2026-05-07)
+- ✅ `libs/storage/` — `StorageService`: upload, getPresignedUrl, delete, getPublicUrl
+- ✅ `apps/backend/src/plugins/storage.plugin.ts` — `fastify.decorate('storage', ...)`
+- ✅ `apps/backend/src/modules/storage/storage.routes.ts` — `POST /api/storage/upload` (MIME check, 10MB limit)
 
 ### 🚧 Còn lại (theo độ ưu tiên)
-1. **Live Chat** — implement theo design đã duyệt (xem section trên)
-2. **Storage module** — `libs/storage/` MinIO client wrapper
-3. **BullMQ queues** — `libs/redis/` + email/SMS job queues
-4. **packages/email-templates** — React Email templates
-5. **Reports/Analytics** — Thống kê tiến độ, export PDF/Excel
-6. **Admin UI** — CRUD Schools, Classes, Content
-7. **GitHub Actions CI/CD**
+1. **BullMQ queues** — `libs/redis/` + email/SMS job queues [~] IN_PROGRESS
+2. **packages/email-templates** — React Email templates
+3. **Reports/Analytics** — Thống kê tiến độ, export PDF/Excel
+4. **Admin UI** — CRUD Schools, Classes, Content
+5. **GitHub Actions CI/CD**
 
 ---
 

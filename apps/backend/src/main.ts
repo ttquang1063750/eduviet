@@ -17,7 +17,9 @@ import { blogRoutes } from './modules/blog/blog.routes.js';
 import { notificationsRoutes } from './modules/notifications/notifications.routes.js';
 import { chatRoutes } from './modules/chat/chat.routes.js';
 import socketPlugin from './plugins/socket.plugin.js';
+import storagePlugin from './plugins/storage.plugin.js';
 import { registerChatGateway } from './modules/chat/chat.gateway.js';
+import { storageRoutes } from './modules/storage/storage.routes.js';
 import { AppError } from './shared/errors/app-error.js';
 
 const app = Fastify({
@@ -63,6 +65,7 @@ async function bootstrap() {
   await app.register(prismaPlugin);
   await app.register(redisPlugin);
   await app.register(socketPlugin);
+  await app.register(storagePlugin);
 
   // Routes
   await app.register(authRoutes, { prefix: '/api/auth' });
@@ -74,6 +77,7 @@ async function bootstrap() {
   await app.register(blogRoutes, { prefix: '/api/blog' });
   await app.register(notificationsRoutes, { prefix: '/api/notifications' });
   await app.register(chatRoutes, { prefix: '/api/chat' });
+  await app.register(storageRoutes, { prefix: '/api/storage' });
 
   // Initialize Socket.io Gateway
   registerChatGateway(app);
