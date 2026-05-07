@@ -17,12 +17,8 @@
       </div>
 
       <div class="chat-body">
-        <!-- Placeholder cho RoomList và MessageThread -->
         @if (!chatService.activeRoomId()) {
-          <div class="placeholder-content">
-            <!-- <app-room-list></app-room-list> -->
-            <p>Danh sách phòng chat (Đang phát triển...)</p>
-          </div>
+          <app-room-list></app-room-list>
         } @else {
           <div class="placeholder-content">
             <button class="btn-back" (click)="chatService.setActiveRoom(null)">← Quay lại</button>

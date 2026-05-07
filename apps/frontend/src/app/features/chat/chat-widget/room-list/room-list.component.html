@@ -1,0 +1,47 @@
+<div class="room-list-container">
+  <div class="room-tabs">
+    <button [class.active]="currentTab() === 'ALL'" (click)="currentTab.set('ALL')">Tất cả</button>
+    <button [class.active]="currentTab() === 'CLASS'" (click)="currentTab.set('CLASS')">Lớp học</button>
+    <button [class.active]="currentTab() === 'DIRECT'" (click)="currentTab.set('DIRECT')">Cá nhân</button>
+  </div>
+
+  <div class="rooms-scroll">
+    @for (room of filteredRooms(); track room.id) {
+      <div class="room-item" (click)="selectRoom(room)" [class.has-unread]="(room.unreadCount ?? 0) > 0">
+        <div class="room-avatar">
+          @if (room.type === 'CLASS') {
+            <span class="avatar-icon">🏫</span>
+          } @else {
+            <span class="avatar-icon">👤</span>
+          }
+        </div>
+        
+        <div class="room-info">
+          <div class="room-top">
+            <span class="room-name">{{ getRoomName(room) }}</span>
+            @if (room.lastMessage) {
+              <span class="room-time">{{ room.lastMessage.createdAt | date:'HH:mm' }}</span>
+            }
+          </div>
+          
+          <div class="room-bottom">
+            <span class="last-message">
+              @if (room.lastMessage) {
+                {{ room.lastMessage.sender.fullName }}: {{ room.lastMessage.content }}
+              } @else {
+                <span class="no-message">Chưa có tin nhắn</span>
+              }
+            </span>
+            @if ((room.unreadCount ?? 0) > 0) {
+              <span class="unread-count">{{ room.unreadCount }}</span>
+            }
+          </div>
+        </div>
+      </div>
+    } @empty {
+      <div class="empty-rooms">
+        <p>Không có phòng chat nào</p>
+      </div>
+    }
+  </div>
+</div>
