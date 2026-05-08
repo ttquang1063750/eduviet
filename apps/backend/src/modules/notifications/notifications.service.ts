@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { AppError } from '../../shared/errors/app-error.js';
+import { notificationQueue } from '@eduviet/redis';
 
 export class NotificationsService {
   constructor(private readonly prisma: PrismaClient) {}
@@ -44,7 +45,7 @@ export class NotificationsService {
     return { count: result.count };
   }
 
-  /** Tạo notification (gọi từ các service khác hoặc BullMQ worker) */
+  /** Tạo notification (gọi từ các service khác) - Đã được chuyển sang dùng BullMQ */
   async create(data: {
     userId: string;
     title: string;
@@ -52,14 +53,14 @@ export class NotificationsService {
     channel: 'IN_APP' | 'EMAIL' | 'SMS';
     notifData?: Record<string, unknown>;
   }) {
-    return this.prisma.notification.create({
-      data: {
-        userId: data.userId,
-        title: data.title,
-        body: data.body,
-        channel: data.channel,
-        data: data.notifData as never,
-      },
+    await notificationQueue.add('send-notification', {
+      userId: data.userId,
+      title: data.title,
+      message: data.body,
+      type: (data.notifData?.['type'] as string) || 'SYSTEM',
+      referenceId: data.notifData?.['referenceId'] as string | undefined,
     });
+
+    return { queued: true };
   }
 }

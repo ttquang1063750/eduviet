@@ -32,7 +32,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 | `schools` | ✅ | ✅ | ✅ | — |
 | `classes` | ✅ | ✅ | ✅ | — |
 | `blog` | ✅ | ✅ | ✅ | — |
-| `notifications` | ✅ | ✅ | — | — |
+| `notifications` | ✅ | ✅ (BullMQ) | — | — |
 | `chat` | ✅ | ✅ | ✅ | ✅ |
 
 #### Frontend features (`apps/frontend/src/app/features/`)
@@ -73,12 +73,18 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ `apps/backend/src/plugins/storage.plugin.ts` — `fastify.decorate('storage', ...)`
 - ✅ `apps/backend/src/modules/storage/storage.routes.ts` — `POST /api/storage/upload` (MIME check, 10MB limit)
 
+#### BullMQ Queues ✅ COMPLETED (2026-05-07)
+- ✅ `libs/redis/` — Cấu hình ioredis (`maxRetriesPerRequest: null`) cho BullMQ
+- ✅ `email.queue.ts` & `email.worker.ts` — Gửi email qua Nodemailer/MailHog
+- ✅ `notification.queue.ts` & `notification.worker.ts` — Xử lý ghi thông báo vào DB
+- ✅ `queues.plugin.ts` — Khởi tạo workers & quản lý lifecycle trong Fastify
+- ✅ `notifications.service.ts` — Push job vào queue thay vì gọi Prisma trực tiếp
+
 ### 🚧 Còn lại (theo độ ưu tiên)
-1. **BullMQ queues** — `libs/redis/` + email/SMS job queues [~] IN_PROGRESS
-2. **packages/email-templates** — React Email templates
-3. **Reports/Analytics** — Thống kê tiến độ, export PDF/Excel
-4. **Admin UI** — CRUD Schools, Classes, Content
-5. **GitHub Actions CI/CD**
+1. **packages/email-templates** — React Email templates
+2. **Reports/Analytics** — Thống kê tiến độ, export PDF/Excel
+3. **Admin UI** — CRUD Schools, Classes, Content
+4. **GitHub Actions CI/CD**
 
 ---
 

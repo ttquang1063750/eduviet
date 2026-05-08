@@ -7,6 +7,9 @@ import jwt from '@fastify/jwt';
 
 import prismaPlugin from './plugins/prisma.plugin.js';
 import redisPlugin from './plugins/redis.plugin.js';
+import socketPlugin from './plugins/socket.plugin.js';
+import storagePlugin from './plugins/storage.plugin.js';
+import queuesPlugin from './plugins/queues.plugin.js';
 import { authRoutes } from './modules/auth/auth.routes.js';
 import { usersRoutes } from './modules/users/users.routes.js';
 import { lessonsRoutes } from './modules/lessons/lessons.routes.js';
@@ -16,10 +19,8 @@ import { classesRoutes } from './modules/classes/classes.routes.js';
 import { blogRoutes } from './modules/blog/blog.routes.js';
 import { notificationsRoutes } from './modules/notifications/notifications.routes.js';
 import { chatRoutes } from './modules/chat/chat.routes.js';
-import socketPlugin from './plugins/socket.plugin.js';
-import storagePlugin from './plugins/storage.plugin.js';
-import { registerChatGateway } from './modules/chat/chat.gateway.js';
 import { storageRoutes } from './modules/storage/storage.routes.js';
+import { registerChatGateway } from './modules/chat/chat.gateway.js';
 import { AppError } from './shared/errors/app-error.js';
 
 const app = Fastify({
@@ -66,6 +67,7 @@ async function bootstrap() {
   await app.register(redisPlugin);
   await app.register(socketPlugin);
   await app.register(storagePlugin);
+  await app.register(queuesPlugin);
 
   // Routes
   await app.register(authRoutes, { prefix: '/api/auth' });

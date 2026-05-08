@@ -23,6 +23,7 @@
 | `libs/prisma/src/seed.ts` | Seed data mẫu |
 | `packages/shared-types/src/` | lesson.types.ts, user.types.ts, auth.types.ts, common.types.ts |
 | `packages/shared-constants/src/` | roles.ts, content.ts, pagination.ts |
+| `libs/redis/` | Redis (ioredis) wrapper, BullMQ queues (email, notification) |
 
 ### Backend (`apps/backend/src/`)
 
@@ -42,12 +43,13 @@
 | `modules/schools/` | routes + service + repository |
 | `modules/classes/` | routes + service + repository |
 | `modules/blog/` | routes + service + repository |
-| `modules/notifications/` | routes + service |
+| `modules/notifications/` | routes + service (sử dụng BullMQ queue) |
 | `modules/chat/` | routes + service + repository + gateway + spec |
 | `plugins/socket.plugin.ts` | Socket.io v4, JWT auth, Redis adapter |
 | `libs/storage/` | StorageService: upload, getPresignedUrl, delete, getPublicUrl |
 | `plugins/storage.plugin.ts` | fastify.decorate storage, ensureBucket on startup |
 | `modules/storage/storage.routes.ts` | POST /api/storage/upload — MIME whitelist, 10MB limit, audit log |
+| `plugins/queues.plugin.ts` | BullMQ workers setup (email, notifications) |
 
 ### Frontend (`apps/frontend/src/app/`)
 
@@ -70,7 +72,6 @@
 | `features/classes/` | list + detail |
 | `features/blog/` | list + detail + nested comments |
 | `features/admin/users/` | user list + role badges |
-| `features/chat/` | ChatService (signals), chat-widget FAB, room-list, message-thread |
 | `features/chat/` | ChatService (signals), chat-widget FAB, room-list, message-thread |
 
 ### Docs & .claude
@@ -140,13 +141,13 @@
 
 ---
 
-### P3 — BullMQ Queues [~] IN_PROGRESS
+### ~~P3 — BullMQ Queues~~ ✅ COMPLETED
 
 | # | Step | File | Ghi chú |
 |---|------|------|---------|
-| Q1 | Tạo `libs/redis/` package | `libs/redis/src/redis.client.ts` | ioredis wrapper, đã có ioredis trong deps |
+| Q1 | Tạo `libs/redis/` package | `libs/redis/src/redis.config.ts` | ioredis wrapper, đã có ioredis trong deps |
 | Q2 | Tạo email queue | `libs/redis/src/queues/email.queue.ts` | BullMQ Queue + Worker |
-| Q3 | Tạo notification queue | `libs/redis/src/queues/notification.queue.ts` | |
+| Q3 | Tạo notification queue | `libs/redis/src/queues/notification.queue.ts` | BullMQ Queue + Worker |
 | Q4 | Kết nối NotificationsService | `apps/backend/src/modules/notifications/notifications.service.ts` | Publish job thay vì chỉ ghi DB |
 
 ---
@@ -196,13 +197,11 @@
 
 2. **Blog auth optional** — dùng try/catch quanh `jwtVerify()`. Nên tạo `optionalAuthenticate` middleware riêng.
 
-3. **Notification delivery** — `NotificationsService.create()` ghi DB nhưng chưa trigger email/SMS. Sẽ fix ở P3.
+3. **`as never` Prisma JSON** — `details` field trong AuditLog cần `as never` cast. Cân nhắc dùng `Prisma.InputJsonValue`.
 
-4. **`as never` Prisma JSON** — `details` field trong AuditLog cần `as never` cast. Cân nhắc dùng `Prisma.InputJsonValue`.
+4. **konva chưa install** — đã add vào package.json, cần `pnpm install` trên Mac để có trong node_modules.
 
-5. **konva chưa install** — đã add vào package.json, cần `pnpm install` trên Mac để có trong node_modules.
-
-6. **CLASS ChatRoom auto-create** — Khi tạo Class mới cần tự tạo ChatRoom type CLASS. Đây là step B8 trong P1.
+5. **CLASS ChatRoom auto-create** — Khi tạo Class mới cần tự tạo ChatRoom type CLASS. Đây là step B8 trong P1.
 
 ---
 
@@ -221,3 +220,4 @@
 | Socket.io attach fastify.server port 3000 | Dùng chung port REST, không cần Nginx config thêm |
 | Redis Adapter Socket.io | Scale multi-instance |
 | Chat floating widget (FAB) | Available mọi trang, không chiếm layout |
+| BullMQ Notification/Email worker | Không làm chậm HTTP request khi lưu DB / gửi email |
