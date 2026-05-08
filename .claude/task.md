@@ -1,42 +1,28 @@
-# Active Task: BullMQ Queues — P3
+# Active Task: CI/CD — P7
 
 ## Mục tiêu
-Tạo Redis wrapper và BullMQ queues dùng chung. Tách việc gửi email/notification ra background jobs để không làm chậm request chính.
+Thiết lập CI/CD pipelines cho project sử dụng GitHub Actions.
 
-## Trạng thái: COMPLETED
+## Trạng thái: IN PROGRESS
 Bắt đầu: 2026-05-07
-Step hiện tại: Đã hoàn thành
+Step hiện tại: CI1
 
 ## Steps
-- [x] 1. [BE] Tạo `libs/redis/package.json` + `tsconfig.json` — Cấu trúc package mới
-- [x] 2. [BE] Tạo `libs/redis/src/redis.config.ts` — Connection options cho ioredis & BullMQ
-- [x] 3. [BE] Tạo `libs/redis/src/queues/email.queue.ts` — BullMQ Queue cho email
-- [x] 4. [BE] Tạo `libs/redis/src/workers/email.worker.ts` — BullMQ Worker xử lý gửi email (dùng nodemailer)
-- [x] 5. [BE] Tạo `libs/redis/src/queues/notification.queue.ts` — BullMQ Queue cho push notifications
-- [x] 6. [BE] Tạo `libs/redis/src/workers/notification.worker.ts` — BullMQ Worker xử lý notifications
-- [x] 7. [BE] Tạo `libs/redis/src/index.ts` — Re-export queues & workers
-- [x] 8. [BE] Cập nhật `apps/backend/package.json` — Add `@eduviet/redis` dependency
-- [x] 9. [BE] Tạo `apps/backend/src/plugins/queues.plugin.ts` — Khởi tạo workers khi start server
-- [x] 10. [BE] Kết nối `NotificationsService` — Thay việc gọi trực tiếp bằng `notificationQueue.add()`
+- [ ] 1. [CI] Tạo workflow file `.github/workflows/ci.yml`
+- [ ] 2. [CI] Cấu hình các job: lint, test, build cho cả frontend và backend
+- [ ] 3. [CD] Tạo workflow file `.github/workflows/deploy.yml`
+- [ ] 4. [CD] Cấu hình job build và push Docker images lên registry (VD: Docker Hub, GHCR)
+- [ ] 5. [CD] Cấu hình job deploy lên server (VD: dùng `ssh-action` để chạy `docker compose up` trên server)
 
 ## Context quan trọng
-- BullMQ yêu cầu `maxRetriesPerRequest: null` hoặc `enableReadyCheck: false` cho connection của Worker.
-- Worker nên chạy trong context của backend app hoặc một process riêng (ở đây sẽ chạy cùng backend qua plugin).
-- Dùng `Nodemailer` với MailHog port 1025 cho local dev.
+- CI trigger on: `push` to `main` và `pull_request` to `main`.
+- CD trigger on: `push` to `main` (sau khi CI thành công).
+- Cần setup secrets trong GitHub repo (DOCKER_USERNAME, DOCKER_PASSWORD, SSH_HOST, SSH_USER, SSH_KEY).
+- Sử dụng `pnpm` và caching để tăng tốc độ CI.
+- Chú ý vấn đề `@rollup/rollup-linux-arm64-gnu` khi chạy test trên runner Linux ARM64. Có thể cần chỉ định runner `ubuntu-latest` (x86).
 
 ## Files đã tạo/sửa
-- `libs/redis/package.json`
-- `libs/redis/tsconfig.json`
-- `libs/redis/src/redis.config.ts`
-- `libs/redis/src/queues/email.queue.ts`
-- `libs/redis/src/workers/email.worker.ts`
-- `libs/redis/src/queues/notification.queue.ts`
-- `libs/redis/src/workers/notification.worker.ts`
-- `libs/redis/src/index.ts`
-- `apps/backend/package.json`
-- `apps/backend/src/plugins/queues.plugin.ts`
-- `apps/backend/src/main.ts`
-- `apps/backend/src/modules/notifications/notifications.service.ts`
+- (chưa có)
 
 ## Bước tiếp theo sau task này
-→ P4: Email Templates (React Email)
+→ Hoàn thành project!

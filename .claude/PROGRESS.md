@@ -24,6 +24,7 @@
 | `packages/shared-types/src/` | lesson.types.ts, user.types.ts, auth.types.ts, common.types.ts |
 | `packages/shared-constants/src/` | roles.ts, content.ts, pagination.ts |
 | `libs/redis/` | Redis (ioredis) wrapper, BullMQ queues (email, notification) |
+| `packages/email-templates/` | React Email templates (Welcome, Verify, Reset Password) |
 
 ### Backend (`apps/backend/src/`)
 
@@ -50,6 +51,7 @@
 | `plugins/storage.plugin.ts` | fastify.decorate storage, ensureBucket on startup |
 | `modules/storage/storage.routes.ts` | POST /api/storage/upload — MIME whitelist, 10MB limit, audit log |
 | `plugins/queues.plugin.ts` | BullMQ workers setup (email, notifications) |
+| `modules/reports/` | Reports/Analytics module với _count, _sum, groupBy |
 
 ### Frontend (`apps/frontend/src/app/`)
 
@@ -73,6 +75,10 @@
 | `features/blog/` | list + detail + nested comments |
 | `features/admin/users/` | user list + role badges |
 | `features/chat/` | ChatService (signals), chat-widget FAB, room-list, message-thread |
+| `features/reports/` | Dashboard reports dùng Chart.js |
+| `features/admin/schools/` | Schools CRUD UI |
+| `features/admin/classes/` | Classes CRUD UI |
+| `features/admin/content/` | Content moderation UI |
 
 ### Docs & .claude
 
@@ -99,86 +105,11 @@
 ## 🚧 Backlog (theo độ ưu tiên)
 
 ### ~~P1 — Live Chat~~ ✅ COMPLETED
-
-> Design đã duyệt. Prisma schema đã có (ChatRoom, ChatRoomMember, ChatMessage). socket.io v4 đã có trong backend package.json.
-
-**Backend** (8 steps):
-
-| # | Step | File | Ghi chú |
-|---|------|------|---------|
-| B1 | Thêm `@socket.io/redis-adapter` vào backend | `apps/backend/package.json` | Cần trước B2 |
-| B2 | Tạo `socket.plugin.ts` | `apps/backend/src/plugins/socket.plugin.ts` | Attach IO vào fastify.server, JWT auth middleware, Redis adapter |
-| B3 | Tạo `chat.repository.ts` | `apps/backend/src/modules/chat/chat.repository.ts` | Prisma: getRoom, getRooms(userId), getMessages(roomId, cursor), createMessage, editMessage, softDeleteMessage, markRead, createRoom |
-| B4 | Tạo `chat.service.ts` | `apps/backend/src/modules/chat/chat.service.ts` | RBAC per room type: CLASS/TEACHER_PARENT/ONE_ON_ONE, writeAuditLog |
-| B5 | Tạo `chat.gateway.ts` | `apps/backend/src/modules/chat/chat.gateway.ts` | Events: join_rooms, send_message, typing_start/stop, mark_read, edit_message, delete_message |
-| B6 | Tạo `chat.routes.ts` | `apps/backend/src/modules/chat/chat.routes.ts` | REST: GET /rooms, GET /rooms/:id/messages, POST /rooms, POST /rooms/:id/upload, PATCH/DELETE /messages/:id |
-| B7 | Đăng ký socket + chat vào main.ts | `apps/backend/src/main.ts` | socketPlugin + chatRoutes |
-| B8 | Auto-create CLASS ChatRoom khi tạo lớp | `apps/backend/src/modules/classes/classes.service.ts` | Thêm logic tạo ChatRoom sau khi tạo Class |
-
-**Frontend** (7 steps):
-
-| # | Step | File | Ghi chú |
-|---|------|------|---------|
-| F1 | Thêm `socket.io-client` + chat types | `apps/frontend/package.json` + `packages/shared-types/src/chat.types.ts` | Interface: ChatRoom, ChatMessage, ChatRoomType |
-| F2 | Tạo `chat.service.ts` | `apps/frontend/src/app/features/chat/chat.service.ts` | socket.io-client wrapper, signals: rooms, activeRoom, messages, typingUsers, totalUnread |
-| F3 | Tạo `chat-widget.component.*` | `apps/frontend/src/app/features/chat/chat-widget/chat-widget.component.{ts,html,scss}` | FAB button + popup container, badge unread |
-| F4 | Tạo `room-list.component.*` | `apps/frontend/src/app/features/chat/chat-widget/room-list/room-list.component.{ts,html,scss}` | Danh sách rooms + tabs (Tất cả/Lớp học/1-1) |
-| F5 | Tạo `message-thread.component.*` | `apps/frontend/src/app/features/chat/chat-widget/message-thread/message-thread.component.{ts,html,scss}` | Messages list + typing indicator + input + send |
-| F6 | Tích hợp chat-widget vào layout | `apps/frontend/src/app/layout/main-layout.component.html` | Thêm `<app-chat-widget>` cuối body |
-| F7 | Provide ChatService toàn app | `apps/frontend/src/app/app.config.ts` | Thêm ChatService vào providers |
-
----
-
 ### ~~P2 — Storage Module~~ ✅ COMPLETED
-
-| # | Step | File | Ghi chú |
-|---|------|------|---------|
-| S1 | Tạo `libs/storage/` package | `libs/storage/package.json` + `tsconfig.json` | |
-| S2 | Tạo `storage.service.ts` | `libs/storage/src/storage.service.ts` | MinIO client: upload(buffer, key), getPresignedUrl(key), delete(key) |
-| S3 | Export index | `libs/storage/src/index.ts` | |
-| S4 | Tích hợp vào backend | `apps/backend/src/plugins/storage.plugin.ts` | fastify.decorate('storage', ...) |
-| S5 | Tạo storage routes | `apps/backend/src/modules/storage/storage.routes.ts` | POST /api/storage/upload (multipart, check MIME + size) |
-
----
-
 ### ~~P3 — BullMQ Queues~~ ✅ COMPLETED
-
-| # | Step | File | Ghi chú |
-|---|------|------|---------|
-| Q1 | Tạo `libs/redis/` package | `libs/redis/src/redis.config.ts` | ioredis wrapper, đã có ioredis trong deps |
-| Q2 | Tạo email queue | `libs/redis/src/queues/email.queue.ts` | BullMQ Queue + Worker |
-| Q3 | Tạo notification queue | `libs/redis/src/queues/notification.queue.ts` | BullMQ Queue + Worker |
-| Q4 | Kết nối NotificationsService | `apps/backend/src/modules/notifications/notifications.service.ts` | Publish job thay vì chỉ ghi DB |
-
----
-
-### P4 — Email Templates
-
-| # | Step | File |
-|---|------|------|
-| E1 | Setup package | `packages/email-templates/package.json` |
-| E2 | Welcome email | `packages/email-templates/src/welcome.tsx` |
-| E3 | Verify email | `packages/email-templates/src/verify-email.tsx` |
-| E4 | Reset password | `packages/email-templates/src/reset-password.tsx` |
-
----
-
-### P5 — Reports/Analytics
-
-| # | Step | File |
-|---|------|------|
-| R1 | BE: reports module | `apps/backend/src/modules/reports/` |
-| R2 | FE: reports feature | `apps/frontend/src/app/features/reports/` |
-
----
-
-### P6 — Admin UI
-
-| # | Step | File |
-|---|------|------|
-| A1 | Schools CRUD | `apps/frontend/src/app/features/admin/schools/` |
-| A2 | Classes CRUD | `apps/frontend/src/app/features/admin/classes/` |
-| A3 | Content moderation | `apps/frontend/src/app/features/admin/content/` |
+### ~~P4 — Email Templates~~ ✅ COMPLETED
+### ~~P5 — Reports/Analytics~~ ✅ COMPLETED
+### ~~P6 — Admin UI~~ ✅ COMPLETED
 
 ---
 

@@ -6,7 +6,7 @@ export const EMAIL_QUEUE_NAME = 'email-queue';
 export interface EmailJobData {
   to: string;
   subject: string;
-  templateName?: string;
+  template?: 'welcome' | 'verify-email' | 'reset-password' | string;
   context?: Record<string, any>;
   html?: string;
 }

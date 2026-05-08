@@ -20,6 +20,7 @@ import { blogRoutes } from './modules/blog/blog.routes.js';
 import { notificationsRoutes } from './modules/notifications/notifications.routes.js';
 import { chatRoutes } from './modules/chat/chat.routes.js';
 import { storageRoutes } from './modules/storage/storage.routes.js';
+import { reportsRoutes } from './modules/reports/reports.routes.js';
 import { registerChatGateway } from './modules/chat/chat.gateway.js';
 import { AppError } from './shared/errors/app-error.js';
 
@@ -80,6 +81,7 @@ async function bootstrap() {
   await app.register(notificationsRoutes, { prefix: '/api/notifications' });
   await app.register(chatRoutes, { prefix: '/api/chat' });
   await app.register(storageRoutes, { prefix: '/api/storage' });
+  await app.register(reportsRoutes, { prefix: '/api/reports' });
 
   // Initialize Socket.io Gateway
   registerChatGateway(app);

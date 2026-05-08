@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from 'fastify';
 import { AuthService } from './auth.service.js';
-import { loginSchema } from './auth.schema.js';
+import { loginSchema, registerSchema } from './auth.schema.js';
 import { authenticate } from '../../shared/middleware/authenticate.js';
 
 const COOKIE_NAME = 'refresh_token';
@@ -30,6 +30,26 @@ const AUTH_RATE_LIMIT = {
 
 export const authRoutes: FastifyPluginAsync = async (app) => {
   const authService = new AuthService(app);
+
+  // POST /auth/register
+  app.post('/register', AUTH_RATE_LIMIT, async (request, reply) => {
+    const body = registerSchema.safeParse(request.body);
+    if (!body.success) {
+      return reply.status(400).send({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Dữ liệu không hợp lệ',
+          details: body.error.errors.map((e) => ({
+            field: e.path.join('.'),
+            message: e.message,
+          })),
+        },
+      });
+    }
+
+    const result = await authService.register(body.data, request.ip);
+    return reply.status(201).send({ data: result });
+  });
 
   // POST /auth/login — rate limited (5 req / 15 phút per IP)
   app.post('/login', AUTH_RATE_LIMIT, async (request, reply) => {

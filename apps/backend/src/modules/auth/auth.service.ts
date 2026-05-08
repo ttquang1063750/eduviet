@@ -1,13 +1,72 @@
 import { FastifyInstance } from 'fastify';
 import bcrypt from 'bcryptjs';
 import { AppError } from '../../shared/errors/app-error.js';
-import { LoginInput } from './auth.schema.js';
+import { LoginInput, RegisterInput } from './auth.schema.js';
 import { AuthUser } from '@eduviet/shared-types';
+import { emailQueue } from '@eduviet/redis';
 
 const REFRESH_TOKEN_COOKIE = 'refresh_token';
 
 export class AuthService {
   constructor(private readonly app: FastifyInstance) {}
+
+  async register(input: RegisterInput, ipAddress?: string) {
+    const existingUser = await this.app.prisma.user.findUnique({
+      where: { email: input.email },
+    });
+
+    if (existingUser) {
+      throw AppError.conflict('Email đã được sử dụng');
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(input.password, salt);
+
+    const user = await this.app.prisma.user.create({
+      data: {
+        email: input.email,
+        passwordHash,
+        fullName: input.fullName,
+        phone: input.phone,
+        role: 'STUDENT', // Default role for public registration
+        isActive: true,
+        isVerified: false,
+      },
+    });
+
+    await this.app.prisma.auditLog.create({
+      data: {
+        userId: user.id,
+        action: 'USER_REGISTER',
+        resourceType: 'AUTH',
+        ipAddress,
+      },
+    });
+
+    // Send welcome email
+    await emailQueue.add('welcome-email', {
+      to: user.email,
+      subject: 'Chào mừng bạn đến với EduViet',
+      template: 'welcome',
+      context: {
+        name: user.fullName,
+        loginUrl: `${process.env['FRONTEND_URL'] || 'http://localhost:4200'}/login`,
+      },
+    });
+
+    // We can also send a verification email if needed here or in a separate endpoint
+    await emailQueue.add('verify-email', {
+      to: user.email,
+      subject: 'Xác thực tài khoản EduViet',
+      template: 'verify-email',
+      context: {
+        name: user.fullName,
+        verifyUrl: `${process.env['FRONTEND_URL'] || 'http://localhost:4200'}/verify?token=dummy_token_for_now`, // TODO: implement real token
+      },
+    });
+
+    return { message: 'Đăng ký thành công', userId: user.id };
+  }
 
   async login(input: LoginInput, userAgent?: string, ipAddress?: string) {
     const user = await this.app.prisma.user.findUnique({

@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
-import { authorize } from '../../shared/middleware/authenticate.js';
+import { authorize, authenticate } from '../../shared/middleware/authenticate.js';
 import { LessonsService } from './lessons.service.js';
 
 const lessonQuerySchema = z.object({
@@ -76,6 +76,7 @@ export const lessonsRoutes: FastifyPluginAsync = async (app) => {
     '/',
     {
       preHandler: [
+        authenticate,
         authorize(
           'SUPER_ADMIN',
           'SCHOOL_ADMIN',
@@ -110,6 +111,7 @@ export const lessonsRoutes: FastifyPluginAsync = async (app) => {
     '/:id/submit-review',
     {
       preHandler: [
+        authenticate,
         authorize('CONTENT_CREATOR', 'SUBJECT_TEACHER', 'HOMEROOM_TEACHER', 'SUPER_ADMIN'),
       ],
     },
@@ -123,7 +125,7 @@ export const lessonsRoutes: FastifyPluginAsync = async (app) => {
   // POST /lessons/:id/review — reviewer approve/reject
   app.post(
     '/:id/review',
-    { preHandler: [authorize('CONTENT_REVIEWER', 'SUPER_ADMIN')] },
+    { preHandler: [authenticate, authorize('CONTENT_REVIEWER', 'SUPER_ADMIN')] },
     async (request, reply) => {
       const { id } = request.params as { id: string };
       const body = reviewBodySchema.safeParse(request.body);
@@ -146,7 +148,7 @@ export const lessonsRoutes: FastifyPluginAsync = async (app) => {
   // POST /lessons/:id/publish — approver publish
   app.post(
     '/:id/publish',
-    { preHandler: [authorize('CONTENT_APPROVER', 'SUPER_ADMIN')] },
+    { preHandler: [authenticate, authorize('CONTENT_APPROVER', 'SUPER_ADMIN')] },
     async (request, reply) => {
       const { id } = request.params as { id: string };
       const updated = await service.publish(id, request.user.id);

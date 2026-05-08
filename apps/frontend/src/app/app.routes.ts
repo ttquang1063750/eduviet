@@ -94,6 +94,13 @@ export const routes: Routes = [
           },
         ],
       },
+      // ── Reports ─────────────────────────────────────────────────
+      {
+        path: 'reports',
+        data: { breadcrumb: 'Báo cáo' },
+        loadChildren: () =>
+          import('./features/reports/reports.routes').then((m) => m.REPORTS_ROUTES),
+      },
       // ── Admin ─────────────────────────────────────────────────
       {
         path: 'admin',
@@ -105,6 +112,30 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./features/admin/users/users-admin.component').then(
                 (m) => m.UsersAdminComponent
+              ),
+          },
+          {
+            path: 'schools',
+            data: { breadcrumb: 'Trường học' },
+            loadChildren: () =>
+              import('./features/admin/schools/schools-admin.routes').then(
+                (m) => m.SCHOOLS_ADMIN_ROUTES
+              ),
+          },
+          {
+            path: 'classes',
+            data: { breadcrumb: 'Lớp học' },
+            loadChildren: () =>
+              import('./features/admin/classes/classes-admin.routes').then(
+                (m) => m.CLASSES_ADMIN_ROUTES
+              ),
+          },
+          {
+            path: 'content',
+            data: { breadcrumb: 'Kiểm duyệt' },
+            loadChildren: () =>
+              import('./features/admin/content/content-admin.routes').then(
+                (m) => m.CONTENT_ADMIN_ROUTES
               ),
           },
         ],

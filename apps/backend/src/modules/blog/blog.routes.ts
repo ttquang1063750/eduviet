@@ -54,7 +54,7 @@ export const blogRoutes: FastifyPluginAsync = async (app) => {
   // POST /blog — tạo bài viết
   app.post(
     '/',
-    { preHandler: [authorize('SUPER_ADMIN', 'SCHOOL_ADMIN', 'CONTENT_CREATOR', 'SUBJECT_TEACHER', 'HOMEROOM_TEACHER')] },
+    { preHandler: [authenticate, authorize('SUPER_ADMIN', 'SCHOOL_ADMIN', 'CONTENT_CREATOR', 'SUBJECT_TEACHER', 'HOMEROOM_TEACHER')] },
     async (request, reply) => {
       const body = createPostSchema.safeParse(request.body);
       if (!body.success) {
@@ -86,7 +86,7 @@ export const blogRoutes: FastifyPluginAsync = async (app) => {
   // POST /blog/:id/publish
   app.post(
     '/:id/publish',
-    { preHandler: [authorize('SUPER_ADMIN', 'SCHOOL_ADMIN', 'CONTENT_APPROVER')] },
+    { preHandler: [authenticate, authorize('SUPER_ADMIN', 'SCHOOL_ADMIN', 'CONTENT_APPROVER')] },
     async (request, reply) => {
       const { id } = request.params as { id: string };
       const post = await service.publish(id, request.user.id);
@@ -123,7 +123,7 @@ export const blogRoutes: FastifyPluginAsync = async (app) => {
   // PATCH /blog/comments/:commentId/hide — moderator ẩn comment
   app.patch(
     '/comments/:commentId/hide',
-    { preHandler: [authorize('SUPER_ADMIN', 'SCHOOL_ADMIN', 'CONTENT_REVIEWER', 'CONTENT_APPROVER')] },
+    { preHandler: [authenticate, authorize('SUPER_ADMIN', 'SCHOOL_ADMIN', 'CONTENT_REVIEWER', 'CONTENT_APPROVER')] },
     async (request, reply) => {
       const { commentId } = request.params as { commentId: string };
       const comment = await service.hideComment(commentId, request.user.role as UserRole);
