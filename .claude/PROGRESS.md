@@ -1,6 +1,6 @@
 # EduViet — Progress Tracker
 
-> Cập nhật lần cuối: 2026-05-08 (session 2 — security + sidebar + breadcrumb fix)
+> Cập nhật lần cuối: 2026-05-08 (session 3 — cập nhật tài liệu: security.md, features.md, CLAUDE.md)
 > Workflow: `/plan-task` → `/execute-step` (lặp) → `/check-point` → `/resume` → tiếp tục
 
 ---

@@ -38,11 +38,17 @@
 - **bcrypt** — hash passwords
 - **Prisma parameterized queries** — SQL injection prevention
 - **`SecurityContext.NONE` scoped** — chỉ cho markdown rendering với KaTeX
+- **CSRF protection** — `@fastify/csrf-protection` bảo vệ `/auth/refresh` + `/auth/logout` (httpOnly cookie endpoints); JWT Bearer routes tự miễn nhiễm
+- **XSS defense in depth** — `sanitize-html` (BE) strip HTML trước khi lưu DB; `DOMPurify` (FE, `safe-html.pipe.ts`) strip trước khi render — 2 lớp độc lập
+
+## Checklist PR mở rộng
+
+- [ ] Route có `preHandler: [authenticate]` hoặc `optionalAuthenticate` nếu public
+- [ ] Route mutation của cookie (refresh/logout) phải có `app.csrfProtection`
+- [ ] Blog content đi qua `sanitizeContent()` trước khi INSERT/UPDATE
+- [ ] FE render HTML user-generated dùng `| safeHtml` pipe (không dùng `[innerHTML]` thô)
 
 ## Chưa implement
 
-- CSRF protection (cần thêm khi có form mutations không qua API)
-- DOMPurify (FE input sanitization)
-- sanitize-html (BE)
-- pgcrypto cho PII fields
-- Dependency scanning (Dependabot)
+- pgcrypto cho PII fields (email, phone) — mã hóa at-rest trong DB
+- Dependency scanning (Dependabot) — `.github/dependabot.yml`
