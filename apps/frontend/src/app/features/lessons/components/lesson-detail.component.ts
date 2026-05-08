@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { MarkdownComponent } from 'ngx-markdown';
 import { LessonsService } from '../../../core/services/lessons.service';
 import { BreadcrumbService } from '../../../core/services/breadcrumb.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { DrawingCanvasComponent } from '../../../shared/components/drawing-canvas/drawing-canvas.component';
 import type { Lesson } from '@eduviet/shared-types';
 
@@ -17,6 +18,7 @@ import type { Lesson } from '@eduviet/shared-types';
 export class LessonDetailComponent implements OnInit {
   private lessonsService = inject(LessonsService);
   private breadcrumbService = inject(BreadcrumbService);
+  private toastService = inject(ToastService);
 
   readonly slug = input.required<string>();
   readonly loading = signal(true);
@@ -59,7 +61,7 @@ export class LessonDetailComponent implements OnInit {
     const answered = Object.keys(this.selectedAnswers()).length;
     const total = this.lesson()?.exercises.length ?? 0;
     // TODO: Thay bằng API call khi hệ thống chấm điểm sẵn sàng
-    alert(
+    this.toastService.info(
       `Đã nộp ${answered}/${total} câu trả lời!\n(Chức năng chấm điểm sẽ được tích hợp trong phiên bản đầy đủ)`
     );
   }

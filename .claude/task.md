@@ -1,28 +1,28 @@
-# Active Task: CI/CD — P7
+# Active Task: Security items
 
-## Mục tiêu
-Thiết lập CI/CD pipelines cho project sử dụng GitHub Actions.
+## Trạng thái: COMPLETED
+Hoàn thành: 2026-05-08
 
-## Trạng thái: IN PROGRESS
-Bắt đầu: 2026-05-07
-Step hiện tại: CI1
-
-## Steps
-- [ ] 1. [CI] Tạo workflow file `.github/workflows/ci.yml`
-- [ ] 2. [CI] Cấu hình các job: lint, test, build cho cả frontend và backend
-- [ ] 3. [CD] Tạo workflow file `.github/workflows/deploy.yml`
-- [ ] 4. [CD] Cấu hình job build và push Docker images lên registry (VD: Docker Hub, GHCR)
-- [ ] 5. [CD] Cấu hình job deploy lên server (VD: dùng `ssh-action` để chạy `docker compose up` trên server)
-
-## Context quan trọng
-- CI trigger on: `push` to `main` và `pull_request` to `main`.
-- CD trigger on: `push` to `main` (sau khi CI thành công).
-- Cần setup secrets trong GitHub repo (DOCKER_USERNAME, DOCKER_PASSWORD, SSH_HOST, SSH_USER, SSH_KEY).
-- Sử dụng `pnpm` và caching để tăng tốc độ CI.
-- Chú ý vấn đề `@rollup/rollup-linux-arm64-gnu` khi chạy test trên runner Linux ARM64. Có thể cần chỉ định runner `ubuntu-latest` (x86).
+## Steps (tất cả hoàn thành)
+- [x] 1. Thêm `sanitize-html` vào backend package.json
+- [x] 2. Tạo `apps/backend/src/shared/utils/sanitize.ts` (sanitizeContent + sanitizeText)
+- [x] 3. Wire sanitize vào `blog.service.ts` (create + update)
+- [x] 4. Thêm `dompurify` + `@types/dompurify` vào frontend package.json
+- [x] 5. Tạo `apps/frontend/src/app/shared/pipes/safe-html.pipe.ts`
+- [x] 6. Wire SafeHtmlPipe vào blog-detail.component (innerHTML)
+- [x] 7. Register `@fastify/csrf-protection` trong main.ts, thêm /csrf-token endpoint, bảo vệ /refresh + /logout
+- [x] 8. Email welcome + verify trigger → đã có sẵn trong auth.service.ts (không cần thêm)
 
 ## Files đã tạo/sửa
-- (chưa có)
+- apps/backend/package.json (+sanitize-html, @fastify/csrf-protection)
+- apps/frontend/package.json (+dompurify, @types/dompurify)
+- apps/backend/src/shared/utils/sanitize.ts (MỚI)
+- apps/backend/src/modules/blog/blog.service.ts
+- apps/frontend/src/app/shared/pipes/safe-html.pipe.ts (MỚI)
+- apps/frontend/src/app/features/blog/components/blog-detail.component.ts
+- apps/frontend/src/app/features/blog/components/blog-detail.component.html
+- apps/backend/src/main.ts
+- apps/backend/src/modules/auth/auth.routes.ts
 
-## Bước tiếp theo sau task này
-→ Hoàn thành project!
+## Sau task này
+→ Tech debt còn lại (thấp ưu tiên): pgcrypto PII fields, Dependabot

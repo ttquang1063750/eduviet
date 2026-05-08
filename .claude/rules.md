@@ -61,6 +61,9 @@ export class FooComponent {
 - Không dùng `any` type.
 - Không import `CommonModule`.
 - `provideZonelessChangeDetection()` đã có trong app.config.ts — không thêm zone.js.
+- **KHÔNG dùng** `alert()`, `confirm()`, `prompt()` của trình duyệt.
+  - Dùng `ToastService` (`success`, `error`, `info`, `warning`) cho thông báo.
+  - Dùng `ConfirmService.confirm()` (trả về `Promise<boolean>`) cho các hộp thoại xác nhận.
 
 ## Prisma / Database
 - UUID primary key: `@id @default(uuid())`.

@@ -3,6 +3,14 @@ import { AuthService } from './auth.service.js';
 import { loginSchema, registerSchema } from './auth.schema.js';
 import { authenticate } from '../../shared/middleware/authenticate.js';
 
+// Type augmentation cho CSRF methods của @fastify/csrf-protection
+declare module 'fastify' {
+  interface FastifyInstance {
+    generateCsrfToken(reply: FastifyReply): string;
+    csrfProtection(request: FastifyRequest, reply: FastifyReply, done: (err?: Error) => void): void;
+  }
+}
+
 const COOKIE_NAME = 'refresh_token';
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -30,6 +38,12 @@ const AUTH_RATE_LIMIT = {
 
 export const authRoutes: FastifyPluginAsync = async (app) => {
   const authService = new AuthService(app);
+
+  // GET /auth/csrf-token — FE gọi endpoint này để lấy CSRF token trước khi gọi refresh/logout
+  app.get('/csrf-token', async (request, reply) => {
+    const token = app.generateCsrfToken(reply);
+    return reply.send({ data: { token } });
+  });
 
   // POST /auth/register
   app.post('/register', AUTH_RATE_LIMIT, async (request, reply) => {
@@ -77,10 +91,11 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
     return reply.send({ data: { accessToken, user } });
   });
 
-  // POST /auth/refresh — rate limited nhẹ hơn (20 req / 15 phút)
+  // POST /auth/refresh — rate limited + CSRF protected (dùng httpOnly cookie)
   app.post(
     '/refresh',
     {
+      preHandler: [app.csrfProtection],
       config: {
         rateLimit: {
           max: 20,
@@ -102,8 +117,8 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
     }
   );
 
-  // POST /auth/logout
-  app.post('/logout', { preHandler: [authenticate] }, async (request, reply) => {
+  // POST /auth/logout — CSRF protected
+  app.post('/logout', { preHandler: [app.csrfProtection, authenticate] }, async (request, reply) => {
     const refreshToken = request.cookies[COOKIE_NAME];
     await authService.logout(request.user.id, refreshToken);
     reply.clearCookie(COOKIE_NAME, { path: '/api/auth' });

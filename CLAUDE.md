@@ -18,7 +18,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-07)
+## Trạng thái hiện tại (cập nhật 2026-05-08 — session 2)
 
 ### ✅ Đã hoàn thành
 
@@ -34,6 +34,8 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 | `blog` | ✅ | ✅ | ✅ | — |
 | `notifications` | ✅ | ✅ (BullMQ) | — | — |
 | `chat` | ✅ | ✅ | ✅ | ✅ |
+| `storage` | ✅ | — | — | — |
+| `reports` | ✅ | ✅ | ✅ | — |
 
 #### Frontend features (`apps/frontend/src/app/features/`)
 | Feature | List | Detail | Service | Routes |
@@ -43,12 +45,17 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 | `lessons` | ✅ | ✅ + KaTeX + Konva | ✅ | ✅ |
 | `classes` | ✅ | ✅ | ✅ | ✅ |
 | `blog` | ✅ | ✅ | ✅ | ✅ |
-| `admin/users` | ✅ | — | — | ✅ |
+| `admin/users` | ✅ CRUD complete | ✅ CRUD complete | ✅ | ✅ |
+| `admin/schools` | ✅ | ✅ | — | ✅ |
+| `admin/classes` | ✅ | ✅ | — | ✅ |
+| `admin/content` | ✅ | — | — | ✅ |
+| `reports` | ✅ | — | ✅ | ✅ |
 | `chat` | ✅ widget (FAB) | ✅ room-list + message-thread | ✅ | — |
 
 #### Shared Components
-- ✅ `breadcrumb/` — dynamic breadcrumb
+- ✅ `breadcrumb/` — dynamic breadcrumb (fix duplicate route data inheritance)
 - ✅ `drawing-canvas/` — Konva.js: freehand, line, rect, ellipse, eraser, undo/redo, background image, export PNG
+- ✅ `shared/pipes/safe-html.pipe.ts` — DOMPurify + bypassSecurityTrustHtml cho blog content
 
 #### Packages & Infrastructure
 - ✅ `packages/shared-constants/` + `packages/shared-types/` (bao gồm `chat.types.ts`)
@@ -80,11 +87,26 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ `queues.plugin.ts` — Khởi tạo workers & quản lý lifecycle trong Fastify
 - ✅ `notifications.service.ts` — Push job vào queue thay vì gọi Prisma trực tiếp
 
+### ✅ Đã hoàn thành thêm (2026-05-08)
+- ✅ `packages/email-templates/` — React Email: welcome, verify-email, reset-password
+- ✅ `features/reports/` — Dashboard analytics với Chart.js
+- ✅ `features/admin/schools/` + `admin/classes/` + `admin/content/`
+- ✅ `.github/workflows/ci.yml` + `deploy.yml` — GitHub Actions CI/CD (GHCR + SSH deploy)
+
+### ✅ Đã hoàn thành thêm (2026-05-08 — session 2)
+- ✅ Refactor admin components (schools + classes + content) → 3 file riêng, OnPush, signals, @for/@if
+- ✅ `optionalAuthenticate` middleware — blog GET routes public nhưng nhận biết role
+- ✅ `AuditEntry.details` → `Prisma.InputJsonValue`, bỏ `as never` trong writeAuditLog
+- ✅ `shared/utils/sanitize.ts` — sanitize-html cho blog content (BE)
+- ✅ `shared/pipes/safe-html.pipe.ts` — DOMPurify pipe cho blog detail (FE)
+- ✅ `@fastify/csrf-protection` — bảo vệ /refresh + /logout, thêm GET /auth/csrf-token
+- ✅ Sidebar navigation đầy đủ: classes, blog, reports, admin/schools, admin/classes, admin/content
+- ✅ Fix breadcrumb duplicate — Angular route data inheritance
+
 ### 🚧 Còn lại (theo độ ưu tiên)
-1. **packages/email-templates** — React Email templates
-2. **Reports/Analytics** — Thống kê tiến độ, export PDF/Excel
-3. **Admin UI** — CRUD Schools, Classes, Content
-4. **GitHub Actions CI/CD**
+1. **pgcrypto** cho PII fields (email, phone) trong DB — thấp ưu tiên
+2. **Dependabot** `.github/dependabot.yml` — quét dependency vulnerabilities
+3. **`optionalAuthenticate` tách file riêng** — hiện nằm chung `authenticate.ts`
 
 ---
 

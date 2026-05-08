@@ -109,6 +109,16 @@
   font-size: 1.1rem;
 }
 
+.nav-section-title {
+  list-style: none;
+  padding: 1rem 1rem 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+}
+
 .logout-btn {
   display: flex;
   align-items: center;

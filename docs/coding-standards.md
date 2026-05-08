@@ -36,6 +36,9 @@ export class LessonCardComponent {
 - File tối đa 300 dòng, tách nhỏ nếu vượt quá
 - **Breadcrumb**: `this.breadcrumbService.setLabel('alias', 'Tên mới')` để cập nhật tên động
 - **Layout**: Sử dụng `MainLayoutComponent` cho các route yêu cầu xác thực
+- **UI/UX**: KHÔNG dùng `alert()`, `confirm()`, `prompt()`.
+  - Dùng `ToastService` cho thông báo.
+  - Dùng `ConfirmService` cho hộp thoại xác nhận.
 
 ### Angular 21 Zoneless — bắt buộc
 

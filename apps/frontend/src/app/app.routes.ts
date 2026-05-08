@@ -109,10 +109,23 @@ export const routes: Routes = [
           {
             path: 'users',
             data: { breadcrumb: 'Người dùng' },
-            loadComponent: () =>
-              import('./features/admin/users/users-admin.component').then(
-                (m) => m.UsersAdminComponent
-              ),
+            children: [
+              {
+                path: '',
+                loadComponent: () =>
+                  import('./features/admin/users/users-admin.component').then(
+                    (m) => m.UsersAdminComponent
+                  ),
+              },
+              {
+                path: ':id',
+                data: { breadcrumb: 'Chi tiết', breadcrumbAlias: 'admin/users/:id' },
+                loadComponent: () =>
+                  import('./features/admin/users/users-admin-detail.component').then(
+                    (m) => m.UsersAdminDetailComponent
+                  ),
+              },
+            ],
           },
           {
             path: 'schools',

@@ -1,0 +1,42 @@
+<div class="admin-container">
+  <h2>{{ isEditMode() ? 'Chỉnh sửa trường học' : 'Tạo trường học mới' }}</h2>
+
+  <form [formGroup]="schoolForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="name">Tên trường</label>
+      <input id="name" type="text" formControlName="name" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label for="code">Mã trường</label>
+      <input id="code" type="text" formControlName="code" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label for="address">Địa chỉ</label>
+      <input id="address" type="text" formControlName="address" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label for="phone">Số điện thoại</label>
+      <input id="phone" type="text" formControlName="phone" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input id="email" type="email" formControlName="email" class="form-control">
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" [disabled]="schoolForm.invalid" class="btn btn-primary">
+        {{ isEditMode() ? 'Lưu thay đổi' : 'Tạo mới' }}
+      </button>
+      <a routerLink="/admin/schools" class="btn btn-secondary">Hủy</a>
+      @if (isEditMode()) {
+        <button type="button" (click)="onDelete()" class="btn btn-danger">
+          Xóa
+        </button>
+      }
+    </div>
+  </form>
+</div>

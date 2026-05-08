@@ -1,0 +1,27 @@
+<div class="admin-container">
+  <h2>{{ isEditMode() ? 'Chỉnh sửa lớp học' : 'Tạo lớp học mới' }}</h2>
+
+  <form [formGroup]="classForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="name">Tên lớp</label>
+      <input id="name" type="text" formControlName="name" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label for="schoolId">Trường</label>
+      <input id="schoolId" type="text" formControlName="schoolId" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label for="homeroomTeacherId">Giáo viên chủ nhiệm</label>
+      <input id="homeroomTeacherId" type="text" formControlName="homeroomTeacherId" class="form-control">
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" [disabled]="classForm.invalid" class="btn btn-primary">
+        {{ isEditMode() ? 'Lưu thay đổi' : 'Tạo mới' }}
+      </button>
+      <a routerLink="/admin/classes" class="btn btn-secondary">Hủy</a>
+    </div>
+  </form>
+</div>

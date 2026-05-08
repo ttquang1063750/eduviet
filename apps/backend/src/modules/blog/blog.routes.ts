@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
-import { authenticate, authorize } from '../../shared/middleware/authenticate.js';
+import { authenticate, authorize, optionalAuthenticate } from '../../shared/middleware/authenticate.js';
 import { BlogService } from './blog.service.js';
 import { UserRole } from '@eduviet/shared-types';
 
@@ -30,23 +30,21 @@ const listSchema = z.object({
 export const blogRoutes: FastifyPluginAsync = async (app) => {
   const service = new BlogService(app.prisma);
 
-  // GET /blog
-  app.get('/', async (request, reply) => {
+  // GET /blog — public, nhưng role ảnh hưởng filter nội dung (vd: DRAFT chỉ hiện cho author/admin)
+  app.get('/', { preHandler: [optionalAuthenticate] }, async (request, reply) => {
     const query = listSchema.safeParse(request.query);
     if (!query.success) {
       return reply.status(400).send({ error: { code: 'VALIDATION_ERROR', message: 'Query không hợp lệ' } });
     }
-    let userRole: UserRole | undefined;
-    try { await request.jwtVerify(); userRole = (request.user as { role: UserRole }).role; } catch { /* public */ }
+    const userRole = (request.user as { role?: UserRole } | undefined)?.role;
     const result = await service.list(query.data, userRole);
     return reply.send(result);
   });
 
-  // GET /blog/:slug
-  app.get('/:slug', async (request, reply) => {
+  // GET /blog/:slug — public, nhưng role quyết định có xem DRAFT/REVIEW không
+  app.get('/:slug', { preHandler: [optionalAuthenticate] }, async (request, reply) => {
     const { slug } = request.params as { slug: string };
-    let userRole: UserRole | undefined;
-    try { await request.jwtVerify(); userRole = (request.user as { role: UserRole }).role; } catch { /* public */ }
+    const userRole = (request.user as { role?: UserRole } | undefined)?.role;
     const post = await service.getBySlug(slug, userRole);
     return reply.send({ data: post });
   });

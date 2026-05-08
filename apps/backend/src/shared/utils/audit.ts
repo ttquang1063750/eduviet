@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 export type AuditAction =
   // Auth
@@ -36,7 +36,7 @@ export interface AuditEntry {
   resourceType: AuditResourceType;
   resourceId?: string;
   ipAddress?: string;
-  details?: Record<string, unknown>;
+  details?: Prisma.InputJsonValue;
 }
 
 /**
@@ -48,7 +48,16 @@ export async function writeAuditLog(
   entry: AuditEntry
 ): Promise<void> {
   try {
-    await prisma.auditLog.create({ data: entry as never });
+    await prisma.auditLog.create({
+      data: {
+        userId: entry.userId,
+        action: entry.action,
+        resourceType: entry.resourceType,
+        resourceId: entry.resourceId,
+        ipAddress: entry.ipAddress,
+        details: entry.details ?? Prisma.DbNull,
+      },
+    });
   } catch (err) {
     // Không throw — audit failure không nên làm gián đoạn request
     console.error('[AuditLog] Failed to write audit entry:', { entry, err });

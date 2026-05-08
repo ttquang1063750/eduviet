@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { Router, NavigationEnd, ActivatedRoute, Data } from '@angular/router';
+import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { filter } from 'rxjs/operators';
 
 export interface BreadcrumbItem {
@@ -58,7 +58,10 @@ export class BreadcrumbService {
         label = this._dynamicLabels.get(child.snapshot.data['breadcrumbAlias']);
       }
 
-      if (label) {
+      // Chỉ push nếu label tồn tại VÀ url này chưa có trong danh sách.
+      // Angular kế thừa data từ route cha xuống child path:'' → tránh duplicate.
+      const alreadyAdded = breadcrumbs.some((b) => b.url === fullUrl);
+      if (label && !alreadyAdded) {
         breadcrumbs.push({ label, url: fullUrl });
       }
 

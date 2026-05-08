@@ -1,0 +1,24 @@
+@if (state()) {
+  <div class="confirm-overlay" (click)="handle(false)">
+    <div class="confirm-card" (click)="$event.stopPropagation()">
+      <div class="confirm-header">
+        <h3>{{ state()?.options?.title }}</h3>
+      </div>
+      <div class="confirm-body">
+        <p>{{ state()?.options?.message }}</p>
+      </div>
+      <div class="confirm-actions">
+        <button class="btn-secondary" (click)="handle(false)">
+          {{ state()?.options?.cancelText }}
+        </button>
+        <button 
+          class="btn" 
+          [class]="state()?.options?.type || 'primary'" 
+          (click)="handle(true)"
+        >
+          {{ state()?.options?.confirmText }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

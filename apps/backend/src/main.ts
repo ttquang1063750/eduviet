@@ -4,6 +4,7 @@ import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import jwt from '@fastify/jwt';
+import csrf from '@fastify/csrf-protection';
 
 import prismaPlugin from './plugins/prisma.plugin.js';
 import redisPlugin from './plugins/redis.plugin.js';
@@ -61,6 +62,14 @@ async function bootstrap() {
   await app.register(cookie, { secret: process.env['JWT_SECRET'] ?? 'cookie-secret' });
   await app.register(jwt, {
     secret: process.env['JWT_SECRET'] ?? 'jwt-secret-change-in-production',
+  });
+
+  // CSRF protection — chỉ bảo vệ các endpoint dùng httpOnly cookie (refresh, logout).
+  // Các endpoint khác dùng Authorization: Bearer header → tự miễn nhiễm CSRF.
+  // FE gọi GET /api/auth/csrf-token để lấy token, sau đó gửi header x-csrf-token.
+  await app.register(csrf, {
+    cookieOpts: { httpOnly: true, path: '/', sameSite: 'strict' },
+    sessionPlugin: '@fastify/cookie',
   });
 
   // Plugins

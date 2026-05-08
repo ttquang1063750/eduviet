@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { UserRole } from '@eduviet/shared-types';
 import { AppError } from '../../shared/errors/app-error.js';
 import { writeAuditLog } from '../../shared/utils/audit.js';
+import { sanitizeContent, sanitizeText } from '../../shared/utils/sanitize.js';
 import { BlogRepository, BlogFilters } from './blog.repository.js';
 
 const CONTENT_ADMIN_ROLES: UserRole[] = [
@@ -47,11 +48,13 @@ export class BlogService {
     data: { title: string; content: string; coverImage?: string; tags?: string[] },
     authorId: string
   ) {
-    const slug = buildSlug(data.title);
+    const cleanTitle = sanitizeText(data.title);
+    const cleanContent = sanitizeContent(data.content);
+    const slug = buildSlug(cleanTitle);
     const post = await this.repo.create({
-      title: data.title,
+      title: cleanTitle,
       slug,
-      content: data.content,
+      content: cleanContent,
       coverImage: data.coverImage,
       tags: data.tags ?? [],
       authorId,
@@ -96,7 +99,12 @@ export class BlogService {
         throw AppError.forbidden('Bạn không có quyền chỉnh sửa bài viết này');
       }
     }
-    return this.repo.update(id, data);
+    const cleanData = {
+      ...data,
+      ...(data.title !== undefined && { title: sanitizeText(data.title) }),
+      ...(data.content !== undefined && { content: sanitizeContent(data.content) }),
+    };
+    return this.repo.update(id, cleanData);
   }
 
   async delete(id: string, actorId: string) {

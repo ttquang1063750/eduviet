@@ -7,7 +7,7 @@ description: Khởi động toàn bộ môi trường dev — Docker services + 
 Chạy lệnh sau trong terminal tại thư mục gốc dự án:
 
 ```bash
-bash dev-start.sh
+bash start-dev.sh
 ```
 
 Script tự động thực hiện:
@@ -60,6 +60,5 @@ pnpm db:studio
 
 ## Lưu ý
 
-- Chỉ có **`dev-start.sh`** — `start-dev.sh` đã bị xóa (outdated)
 - Dùng `Ctrl+C` để dừng FE+BE. Docker services vẫn chạy ngầm sau khi dừng
 - Nếu lần đầu chạy bị lỗi seed: xóa file `.seeded` rồi chạy lại `pnpm db:seed`

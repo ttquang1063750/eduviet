@@ -6,11 +6,12 @@ import { switchMap } from 'rxjs';
 import { BlogService, BlogPost, Comment } from '../../../core/services/blog.service';
 import { BreadcrumbService } from '../../../core/services/breadcrumb.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { SafeHtmlPipe } from '../../../shared/pipes/safe-html.pipe';
 
 @Component({
   selector: 'app-blog-detail',
   standalone: true,
-  imports: [RouterLink, DatePipe, ReactiveFormsModule],
+  imports: [RouterLink, DatePipe, ReactiveFormsModule, SafeHtmlPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './blog-detail.component.html',
   styleUrl: './blog-detail.component.scss',

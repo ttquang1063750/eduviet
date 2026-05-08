@@ -3,11 +3,21 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 import { BreadcrumbComponent } from '../shared/components/breadcrumb/breadcrumb.component';
 import { ChatWidgetComponent } from '../features/chat/chat-widget/chat-widget.component';
+import { ToastComponent } from '../shared/components/toast/toast.component';
+import { ConfirmComponent } from '../shared/components/confirm/confirm.component';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, BreadcrumbComponent, ChatWidgetComponent],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    BreadcrumbComponent,
+    ChatWidgetComponent,
+    ToastComponent,
+    ConfirmComponent,
+  ],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -19,8 +29,17 @@ export class MainLayoutComponent {
   readonly isAdmin = computed(() =>
     this.authService.hasRole('SUPER_ADMIN', 'SCHOOL_ADMIN', 'PROVINCE_ADMIN', 'DISTRICT_ADMIN')
   );
-  readonly isContentCreator = computed(() =>
-    this.authService.hasRole('CONTENT_CREATOR', 'SUBJECT_TEACHER', 'HOMEROOM_TEACHER')
+  readonly isContentRole = computed(() =>
+    this.authService.hasRole(
+      'CONTENT_CREATOR', 'CONTENT_REVIEWER', 'CONTENT_APPROVER',
+      'SUBJECT_TEACHER', 'HOMEROOM_TEACHER'
+    )
+  );
+  readonly canViewReports = computed(() =>
+    this.authService.hasRole(
+      'SUPER_ADMIN', 'SCHOOL_ADMIN', 'PROVINCE_ADMIN', 'DISTRICT_ADMIN',
+      'HOMEROOM_TEACHER', 'SUBJECT_TEACHER'
+    )
   );
 
   readonly userInitial = computed(() => {

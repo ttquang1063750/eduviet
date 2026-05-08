@@ -28,7 +28,7 @@
       </header>
 
       <!-- Body -->
-      <div class="article-body" [innerHTML]="p.content"></div>
+      <div class="article-body" [innerHTML]="p.content | safeHtml"></div>
 
       <!-- Comments section -->
       <section class="comments-section">

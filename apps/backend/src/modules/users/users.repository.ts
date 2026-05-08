@@ -1,4 +1,13 @@
-import { PrismaClient, Prisma } from '@prisma/client';
+import { PrismaClient, Prisma, Role } from '@prisma/client';
+
+export interface CreateUserData {
+  email: string;
+  passwordHash: string;
+  fullName: string;
+  phone?: string;
+  role: Role;
+  schoolId?: string;
+}
 
 export interface UserFilters {
   page: number;
@@ -63,6 +72,28 @@ export class UsersRepository {
     return this.prisma.user.findUnique({
       where: { id, deletedAt: null },
       select: DETAIL_SELECT,
+    });
+  }
+
+  async create(data: CreateUserData) {
+    return this.prisma.user.create({
+      data: {
+        email: data.email,
+        passwordHash: data.passwordHash,
+        fullName: data.fullName,
+        phone: data.phone,
+        role: data.role,
+        schoolId: data.schoolId,
+      },
+      select: PUBLIC_SELECT,
+    });
+  }
+
+  async softDelete(id: string) {
+    return this.prisma.user.update({
+      where: { id, deletedAt: null },
+      data: { deletedAt: new Date() },
+      select: { id: true },
     });
   }
 
