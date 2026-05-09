@@ -1,6 +1,6 @@
 # EduViet — Progress Tracker
 
-> Cập nhật lần cuối: 2026-05-09 (session 4)
+> Cập nhật lần cuối: 2026-05-09 (session 4 — hotfix)
 > Workflow: `/plan-task` → `/execute-step` (lặp) → `/check-point` → `/resume` → tiếp tục
 
 ---
@@ -142,3 +142,7 @@ PDFKit mặc định không hỗ trợ tiếng Việt. Cần nhúng font (VD: Ro
 | ESLint flat config (v9) | Enforce Angular rules tự động — không phụ thuộc AI nhớ rules |
 | `getApiErrorMessage()` util | Xử lý `catch (error: unknown)` an toàn, tái sử dụng |
 | `getInputValue()` helper | Thay `$any($event.target).value` trong template — type-safe |
+
+### Hotfixes (2026-05-09)
+- `docker-compose.yml` — MinIO tag `RELEASE.2024-05-01T01-10-10Z` → `RELEASE.2025-04-22T22-12-26Z`
+- `apps/frontend/src/main.ts` — `window as Window & Record<string,unknown>` → `Object.assign(window, {...})`

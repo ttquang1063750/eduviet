@@ -6,16 +6,7 @@ import * as marked from 'marked';
 import hljs from 'highlight.js';
 import katex from 'katex';
 
-declare global {
-  interface Window {
-    marked: typeof marked;
-    hljs: typeof hljs;
-    katex: typeof katex;
-  }
-}
-
-window.marked = marked;
-window.hljs = hljs;
-window.katex = katex;
+// Gán các thư viện vào window để ngx-markdown có thể dùng ở runtime.
+Object.assign(window, { marked, hljs, katex });
 
 bootstrapApplication(App, appConfig).catch((err) => console.error(err));
