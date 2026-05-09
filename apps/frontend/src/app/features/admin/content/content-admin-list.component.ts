@@ -51,7 +51,7 @@ export class ContentAdminListComponent implements OnInit {
     this.loadPendingContent();
   }
 
-  async approve(id: string): Promise<void> {
+  async approve(_id: string): Promise<void> {
     const confirmed = await this.confirmService.confirm({
       title: 'Xác nhận duyệt',
       message: 'Bạn có chắc chắn muốn duyệt bài viết này?',
@@ -64,7 +64,7 @@ export class ContentAdminListComponent implements OnInit {
     }
   }
 
-  async reject(id: string): Promise<void> {
+  async reject(_id: string): Promise<void> {
     const confirmed = await this.confirmService.confirm({
       title: 'Xác nhận từ chối',
       message: 'Bạn có chắc chắn muốn từ chối bài viết này?',

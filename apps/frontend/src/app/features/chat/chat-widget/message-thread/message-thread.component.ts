@@ -41,7 +41,7 @@ export class MessageThreadComponent {
     this.chatService.sendTyping(false);
   }
 
-  onTyping(event: Event) {
+  onTyping(_event: Event) {
     const isTyping = this.messageContent().length > 0;
     this.chatService.sendTyping(isTyping);
   }

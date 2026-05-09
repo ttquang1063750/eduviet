@@ -83,7 +83,7 @@
                     type="text"
                     class="fill-input"
                     placeholder="Nhập đáp án của bạn..."
-                    (input)="selectAnswer(exercise.id, $any($event.target).value)"
+                    (input)="selectAnswer(exercise.id, getInputValue($event))"
                   />
                 </div>
               }
@@ -94,7 +94,7 @@
                     class="fill-textarea"
                     rows="4"
                     [placeholder]="exercise.type === 'ESSAY' ? 'Viết bài giải của bạn...' : 'Nhập câu trả lời ngắn...'"
-                    (input)="selectAnswer(exercise.id, $any($event.target).value)"
+                    (input)="selectAnswer(exercise.id, getInputValue($event))"
                   ></textarea>
                 </div>
               }

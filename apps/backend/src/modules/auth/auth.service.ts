@@ -4,16 +4,20 @@ import { AppError } from '../../shared/errors/app-error.js';
 import { LoginInput, RegisterInput } from './auth.schema.js';
 import { AuthUser } from '@eduviet/shared-types';
 import { emailQueue } from '@eduviet/redis';
+import { UsersRepository } from '../users/users.repository.js';
+import { Role } from '@prisma/client';
 
 const REFRESH_TOKEN_COOKIE = 'refresh_token';
 
 export class AuthService {
-  constructor(private readonly app: FastifyInstance) {}
+  private readonly usersRepo: UsersRepository;
+
+  constructor(private readonly app: FastifyInstance) {
+    this.usersRepo = new UsersRepository(app.prisma);
+  }
 
   async register(input: RegisterInput, ipAddress?: string) {
-    const existingUser = await this.app.prisma.user.findUnique({
-      where: { email: input.email },
-    });
+    const existingUser = await this.usersRepo.findByEmail(input.email);
 
     if (existingUser) {
       throw AppError.conflict('Email đã được sử dụng');
@@ -22,16 +26,12 @@ export class AuthService {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(input.password, salt);
 
-    const user = await this.app.prisma.user.create({
-      data: {
-        email: input.email,
-        passwordHash,
-        fullName: input.fullName,
-        phone: input.phone,
-        role: 'STUDENT', // Default role for public registration
-        isActive: true,
-        isVerified: false,
-      },
+    const user = await this.usersRepo.create({
+      email: input.email,
+      passwordHash,
+      fullName: input.fullName,
+      phone: input.phone,
+      role: 'STUDENT' as Role, // Default role for public registration
     });
 
     await this.app.prisma.auditLog.create({
@@ -45,7 +45,7 @@ export class AuthService {
 
     // Send welcome email
     await emailQueue.add('welcome-email', {
-      to: user.email,
+      to: input.email,
       subject: 'Chào mừng bạn đến với EduViet',
       template: 'welcome',
       context: {
@@ -56,7 +56,7 @@ export class AuthService {
 
     // We can also send a verification email if needed here or in a separate endpoint
     await emailQueue.add('verify-email', {
-      to: user.email,
+      to: input.email,
       subject: 'Xác thực tài khoản EduViet',
       template: 'verify-email',
       context: {
@@ -69,15 +69,13 @@ export class AuthService {
   }
 
   async login(input: LoginInput, userAgent?: string, ipAddress?: string) {
-    const user = await this.app.prisma.user.findUnique({
-      where: { email: input.email, deletedAt: null },
-    });
+    const user = await this.usersRepo.findByEmail(input.email);
 
     if (!user || !user.isActive) {
       throw AppError.unauthorized('Email hoặc mật khẩu không đúng');
     }
 
-    const passwordValid = await bcrypt.compare(input.password, user.passwordHash);
+    const passwordValid = await bcrypt.compare(input.password, user.passwordHash!);
     if (!passwordValid) {
       throw AppError.unauthorized('Email hoặc mật khẩu không đúng');
     }
@@ -136,7 +134,6 @@ export class AuthService {
 
     const storedToken = await this.app.prisma.refreshToken.findUnique({
       where: { token: refreshToken },
-      include: { user: true },
     });
 
     if (!storedToken || storedToken.revokedAt || storedToken.expiresAt < new Date()) {
@@ -147,13 +144,17 @@ export class AuthService {
       throw AppError.unauthorized('Refresh token không hợp lệ');
     }
 
+    const user = await this.usersRepo.findById(storedToken.userId);
+    if (!user) {
+      throw AppError.unauthorized('Người dùng không tồn tại');
+    }
+
     // Rotate: revoke old, issue new
     await this.app.prisma.refreshToken.update({
       where: { id: storedToken.id },
       data: { revokedAt: new Date() },
     });
 
-    const user = storedToken.user;
     const accessToken = this.app.jwt.sign(
       { sub: user.id, email: user.email, role: user.role },
       { expiresIn: process.env['JWT_ACCESS_EXPIRES_IN'] ?? '15m' }

@@ -1,102 +1,150 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReportsService } from './reports.service';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+} from '@angular/core';
 import { Chart, registerables } from 'chart.js';
+import { ReportsService, ReportSummary } from './reports.service';
+import { ToastService } from '../../core/services/toast.service';
 
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule],
-  template: `
-    <div class="container">
-      <h1>Reports</h1>
-      <div class="charts">
-        <div class="chart-container">
-          <h2>Users by Role</h2>
-          <canvas id="userRolesChart"></canvas>
-        </div>
-        <div class="chart-container">
-          <h2>Content Overview</h2>
-          <canvas id="contentChart"></canvas>
-        </div>
-        <div class="chart-container">
-          <h2>Login Activity (Last 7 Days)</h2>
-          <canvas id="loginActivityChart"></canvas>
-        </div>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .container { padding: 2rem; }
-    .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; }
-    .chart-container { background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-  `]
+  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './reports.component.html',
+  styleUrl: './reports.component.scss',
 })
-export class ReportsComponent {
+export class ReportsComponent implements AfterViewInit {
   private reportsService = inject(ReportsService);
-  
-  userRolesChart: Chart | undefined;
-  contentChart: Chart | undefined;
-  loginActivityChart: Chart | undefined;
+  private toast = inject(ToastService);
 
-  ngOnInit() {
-    this.reportsService.getSummary().subscribe(summary => {
-      this.createUserRolesChart(summary.userCounts);
-      this.createContentChart(summary.contentCounts);
-      this.createLoginActivityChart(summary.loginActivities);
+  isExportingExcel = signal(false);
+  isExportingPdf = signal(false);
+
+  private userRolesChart: Chart | undefined;
+  private contentChart: Chart | undefined;
+  private loginActivityChart: Chart | undefined;
+
+  ngAfterViewInit(): void {
+    this.reportsService.getSummary().subscribe({
+      next: (summary) => {
+        this.createUserRolesChart(summary.userCounts);
+        this.createContentChart(summary.contentCounts);
+        this.createLoginActivityChart(summary.loginActivities);
+      },
+      error: () => this.toast.error('Không thể tải dữ liệu báo cáo'),
     });
   }
 
-  createUserRolesChart(data: any) {
+  exportExcel(): void {
+    if (this.isExportingExcel()) return;
+    this.isExportingExcel.set(true);
+
+    this.reportsService.exportExcel().subscribe({
+      next: (blob) => {
+        this.triggerDownload(blob, `eduviet-report-${this.todayStr()}.xlsx`);
+        this.toast.success('Đã xuất báo cáo Excel thành công');
+        this.isExportingExcel.set(false);
+      },
+      error: () => {
+        this.toast.error('Xuất Excel thất bại. Vui lòng thử lại');
+        this.isExportingExcel.set(false);
+      },
+    });
+  }
+
+  exportPdf(): void {
+    if (this.isExportingPdf()) return;
+    this.isExportingPdf.set(true);
+
+    this.reportsService.exportPdf().subscribe({
+      next: (blob) => {
+        this.triggerDownload(blob, `eduviet-report-${this.todayStr()}.pdf`);
+        this.toast.success('Đã xuất báo cáo PDF thành công');
+        this.isExportingPdf.set(false);
+      },
+      error: () => {
+        this.toast.error('Xuất PDF thất bại. Vui lòng thử lại');
+        this.isExportingPdf.set(false);
+      },
+    });
+  }
+
+  private triggerDownload(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(url);
+  }
+
+  private todayStr(): string {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  private createUserRolesChart(data: Record<string, number>): void {
+    this.userRolesChart?.destroy();
     this.userRolesChart = new Chart('userRolesChart', {
       type: 'pie',
       data: {
         labels: Object.keys(data),
-        datasets: [{
-          label: 'User Roles',
-          data: Object.values(data),
-          backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'],
-        }]
-      }
+        datasets: [
+          {
+            label: 'Người dùng theo vai trò',
+            data: Object.values(data),
+            backgroundColor: [
+              '#FF6384', '#36A2EB', '#FFCE56',
+              '#4BC0C0', '#9966FF', '#FF9F40',
+            ],
+          },
+        ],
+      },
     });
   }
 
-  createContentChart(data: any) {
+  private createContentChart(data: ReportSummary['contentCounts']): void {
+    this.contentChart?.destroy();
     this.contentChart = new Chart('contentChart', {
       type: 'bar',
       data: {
-        labels: ['Lessons', 'Classes', 'Blog Posts'],
-        datasets: [{
-          label: 'Total Count',
-          data: [data.lessons, data.classes, data.blogPosts],
-          backgroundColor: ['#36A2EB', '#FFCE56', '#4BC0C0'],
-        }]
+        labels: ['Bài học', 'Lớp học', 'Bài viết Blog'],
+        datasets: [
+          {
+            label: 'Tổng số',
+            data: [data.lessons, data.classes, data.blogPosts],
+            backgroundColor: ['#36A2EB', '#FFCE56', '#4BC0C0'],
+          },
+        ],
       },
-      options: {
-        scales: {
-          y: {
-            beginAtZero: true
-          }
-        }
-      }
+      options: { scales: { y: { beginAtZero: true } } },
     });
   }
 
-  createLoginActivityChart(data: any) {
+  private createLoginActivityChart(data: Record<string, number>): void {
+    const sorted = Object.entries(data).sort((a, b) => a[0].localeCompare(b[0]));
+    this.loginActivityChart?.destroy();
     this.loginActivityChart = new Chart('loginActivityChart', {
       type: 'line',
       data: {
-        labels: Object.keys(data),
-        datasets: [{
-          label: 'Logins',
-          data: Object.values(data),
-          fill: false,
-          borderColor: '#FF6384',
-          tension: 0.1
-        }]
-      }
+        labels: sorted.map(([date]) => date),
+        datasets: [
+          {
+            label: 'Lượt đăng nhập',
+            data: sorted.map(([, count]) => count),
+            fill: false,
+            borderColor: '#FF6384',
+            tension: 0.1,
+          },
+        ],
+      },
     });
   }
 }

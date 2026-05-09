@@ -26,4 +26,12 @@ export class ReportsService {
       map(response => response.data)
     );
   }
+
+  exportExcel(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/export/excel`, { responseType: 'blob' });
+  }
+
+  exportPdf(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/export/pdf`, { responseType: 'blob' });
+  }
 }

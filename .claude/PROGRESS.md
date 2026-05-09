@@ -1,6 +1,6 @@
 # EduViet — Progress Tracker
 
-> Cập nhật lần cuối: 2026-05-08 (session 3 — cập nhật tài liệu: security.md, features.md, CLAUDE.md)
+> Cập nhật lần cuối: 2026-05-09 (session 4)
 > Workflow: `/plan-task` → `/execute-step` (lặp) → `/check-point` → `/resume` → tiếp tục
 
 ---
@@ -31,111 +31,94 @@
 
 | File | Mô tả |
 |------|-------|
-| `main.ts` | Fastify bootstrap, đăng ký tất cả modules |
+| `main.ts` | Fastify bootstrap |
 | `plugins/prisma.plugin.ts` | Prisma client plugin |
-| `plugins/redis.plugin.ts` | Redis (ioredis) plugin |
+| `plugins/redis.plugin.ts` | Redis plugin |
 | `plugins/socket.plugin.ts` | Socket.io v4, JWT auth, Redis adapter |
-| `plugins/storage.plugin.ts` | fastify.decorate storage, ensureBucket on startup |
-| `plugins/queues.plugin.ts` | BullMQ workers setup (email, notifications) |
-| `shared/middleware/authenticate.ts` | JWT verify + `authenticate` + `optionalAuthenticate` + `authorize()` |
-| `shared/utils/sanitize.ts` | `sanitizeContent()` + `sanitizeText()` — sanitize-html, bảo vệ XSS trước khi lưu DB |
+| `plugins/storage.plugin.ts` | fastify.decorate storage |
+| `plugins/queues.plugin.ts` | BullMQ workers (email, notifications) |
+| `shared/middleware/authenticate.ts` | JWT verify + authenticate + authorize() |
+| `shared/middleware/optional-authenticate.ts` | optionalAuthenticate |
+| `shared/utils/sanitize.ts` | sanitizeContent() + sanitizeText() |
 | `shared/errors/app-error.ts` | AppError class |
-| `shared/utils/audit.ts` | writeAuditLog() — `Prisma.InputJsonValue`, explicit mapping, no `as never` |
-| `modules/auth/` | routes + service + schema (login, register, refresh, logout) |
+| `shared/utils/audit.ts` | writeAuditLog() |
+| `modules/auth/` | routes + service + schema |
 | `modules/users/` | routes + service + repository + spec |
 | `modules/lessons/` | routes + service + repository + spec |
 | `modules/subjects/` | routes + service |
 | `modules/schools/` | routes + service + repository |
 | `modules/classes/` | routes + service + repository |
 | `modules/blog/` | routes + service + repository |
-| `modules/notifications/` | routes + service (BullMQ queue) |
+| `modules/notifications/` | routes + service (BullMQ) |
 | `modules/chat/` | routes + service + repository + gateway + spec |
-| `modules/storage/storage.routes.ts` | POST /api/storage/upload — MIME whitelist, 10MB limit, audit log |
-| `modules/reports/` | routes + service + repository (analytics, _count, _sum, groupBy) |
+| `modules/storage/storage.routes.ts` | POST /api/storage/upload |
+| `modules/reports/` | routes + service + repository + **export Excel/PDF** |
 
 ### Frontend (`apps/frontend/src/app/`)
 
 | File/Folder | Mô tả |
 |-------------|-------|
-| `app.config.ts` | zoneless, provideMarkdown(SecurityContext.NONE), markedKatex |
-| `app.routes.ts` | Lazy routes cho tất cả features |
+| `app.config.ts` | zoneless, provideMarkdown, markedKatex |
+| `app.routes.ts` | Lazy routes |
 | `core/guards/auth.guard.ts` | — |
 | `core/interceptors/auth.interceptor.ts` | — |
 | `core/services/auth.service.ts` | — |
-| `core/services/lessons.service.ts` | — |
-| `core/services/classes.service.ts` | — |
-| `core/services/blog.service.ts` | — |
-| `layout/main-layout.component.*` | Shell layout — sidebar đầy đủ 9 routes theo role |
-| `shared/components/breadcrumb/` | Dynamic breadcrumb (fix duplicate route data inheritance) |
-| `shared/pipes/safe-html.pipe.ts` | DOMPurify + bypassSecurityTrustHtml — render blog content an toàn |
-| `shared/components/drawing-canvas/` | Konva.js: freehand/line/rect/ellipse/eraser/undo/redo/export |
-| `features/auth/` | login component (3 files) |
+| `core/utils/http-error.ts` | `getApiErrorMessage()` helper cho catch blocks |
+| `layout/main-layout.component.*` | Shell layout — sidebar 9 routes |
+| `shared/components/breadcrumb/` | Dynamic breadcrumb |
+| `shared/pipes/safe-html.pipe.ts` | DOMPurify + bypassSecurityTrustHtml |
+| `shared/components/drawing-canvas/` | Konva.js canvas + `getInputValue()` helper |
+| `features/auth/` | login (3 files) |
 | `features/dashboard/` | Stats cards (3 files) |
-| `features/lessons/` | list + detail (KaTeX + Konva DRAWING type) |
+| `features/lessons/` | list + detail (KaTeX + Konva) + `getInputValue()` helper |
 | `features/classes/` | list + detail |
 | `features/blog/` | list + detail + nested comments |
 | `features/chat/` | ChatService (signals), chat-widget FAB, room-list, message-thread |
-| `features/reports/` | Dashboard reports (Chart.js), reports.service.ts, routes |
-| `features/admin/users/` | CRUD đầy đủ (list, search, filter, modal create, detail edit) |
-| `features/admin/schools/` | Schools CRUD — refactored: 3 file, OnPush, signals, @for/@if |
-| `features/admin/classes/` | Classes CRUD — refactored: 3 file, OnPush, signals, @for/@if |
-| `features/admin/content/` | Content moderation — refactored: 3 file, OnPush, signals, fix prompt() |
+| `features/reports/` | Dashboard reports (Chart.js) + **nút Xuất Excel/PDF** (3 files, OnPush) |
+| `features/admin/users/` | CRUD đầy đủ |
+| `features/admin/schools/` | Schools CRUD (3 file, OnPush) |
+| `features/admin/classes/` | Classes CRUD (3 file, OnPush) |
+| `features/admin/content/` | Content moderation (3 file, OnPush) |
 
-### CI/CD ✅ COMPLETED (2026-05-07)
-
-| File | Mô tả |
-|------|-------|
-| `.github/workflows/ci.yml` | CI: lint + test (BE+FE) + build — trigger push/PR to main |
-| `.github/workflows/deploy.yml` | CD: build & push Docker images (GHCR) + deploy via SSH |
-
-### Docs & .claude
+### ESLint ✅ COMPLETED (2026-05-09)
 
 | File | Mô tả |
 |------|-------|
-| `docs/tech-stack.md` + `docs/architecture.md` + `docs/coding-standards.md` | — |
-| `docs/rbac.md` + `docs/features.md` + `docs/dev-setup.md` | — |
-| `docs/security.md` + `docs/api-conventions.md` | — |
-| `.claude/rules.md` | Coding rules bất biến |
-| `.claude/commands/` | plan-task, execute-step, check-point, resume, sync-progress |
+| `apps/frontend/eslint.config.js` | ESLint 9 flat config — enforce OnPush, no-inline, no-any, prefer-control-flow |
+| `apps/frontend/angular.json` | schematics mặc định: 3 file + OnPush; thêm lint target |
+| `apps/frontend/package.json` | thêm `@angular-eslint/template-parser`, `@eslint/js` |
+| `.claude/commands/execute-step.md` | Component Checklist 8 điểm bắt buộc |
+
+### CI/CD ✅
+
+| File | Mô tả |
+|------|-------|
+| `.github/workflows/ci.yml` | CI: lint + test + build |
+| `.github/workflows/deploy.yml` | CD: GHCR + SSH deploy |
 
 ---
 
 ## 🚧 Backlog (theo độ ưu tiên)
 
-### ~~P1 — Live Chat~~ ✅ COMPLETED
-### ~~P2 — Storage Module~~ ✅ COMPLETED
-### ~~P3 — BullMQ Queues~~ ✅ COMPLETED
-### ~~P4 — Email Templates~~ ✅ COMPLETED
-### ~~P5 — Reports/Analytics~~ ✅ COMPLETED
-### ~~P6 — Admin UI (Schools/Classes/Content)~~ ✅ COMPLETED
-### ~~P7 — CI/CD~~ ✅ COMPLETED
-### ~~P8 — Admin Users CRUD~~ ✅ COMPLETED (2026-05-08)
+### P1 — pgcrypto cho PII fields
+Mã hóa `email`, `phone` at-rest trong PostgreSQL bằng pgcrypto. Cần migration + update Prisma queries.
 
----
+### P2 — Dependabot
+Tạo `.github/dependabot.yml` để tự động quét dependency vulnerabilities.
 
-## 🚧 Backlog (theo độ ưu tiên)
+### P3 — SMS notifications (ESMS.vn)
+Tích hợp ESMS.vn vào notification queue. Pattern tương tự email.queue.ts.
 
-### ~~P1 — Refactor admin components~~ ✅ COMPLETED (2026-05-08)
-schools-admin + classes-admin + content-admin: 3 file riêng, OnPush, signals, @for/@if, bỏ CommonModule, fix prompt().
-
-### ~~P2 — Class ChatRoom auto-create~~ ✅ ALREADY DONE
-Đã implement trong `classes.service.ts`: create() tạo ChatRoom CLASS, enroll()/unenroll() sync members tự động.
+### P4 — Export reports PDF cải thiện font
+PDFKit mặc định không hỗ trợ tiếng Việt. Cần nhúng font (VD: Roboto) hoặc dùng Puppeteer để render HTML → PDF.
 
 ---
 
 ## 🐛 Known Issues / Tech Debt
 
-1. **Vitest ARM64** — `@rollup/rollup-linux-arm64-gnu` missing trên Linux ARM64. CI đã dùng `ubuntu-latest` (x86) để tránh. Tests chạy ok trên Mac.
-
-2. ~~**Blog auth optional**~~ — ✅ Đã tạo `optionalAuthenticate` middleware, refactor blog.routes.ts.
-
-3. ~~**`as never` Prisma JSON**~~ — ✅ `AuditEntry.details` đổi sang `Prisma.InputJsonValue`, explicit mapping trong writeAuditLog.
-
-4. ~~**CLASS ChatRoom auto-create**~~ — ✅ Đã implement đầy đủ trong classes.service.ts (create + enroll + unenroll).
-
-5. **`authorize` không phải file riêng** — `authorize()` nằm trong `authenticate.ts`. Chấp nhận — cùng file với `authenticate` là hợp lý.
-
-6. ~~**schools-admin components**~~ — ✅ Đã refactor: 3 file riêng, OnPush, signals, @for/@if (2026-05-08).
+1. **Vitest ARM64** — `@rollup/rollup-linux-arm64-gnu` missing trên Linux ARM64. CI dùng `ubuntu-latest` (x86).
+2. **PDF font Vietnamese** — PDFKit dùng font mặc định, nội dung export bỏ dấu tiếng Việt.
+3. **`authorize` không phải file riêng** — nằm chung `authenticate.ts`. Chấp nhận.
 
 ---
 
@@ -146,15 +129,16 @@ schools-admin + classes-admin + content-admin: 3 file riêng, OnPush, signals, @
 | Routes → Service → Repository | Separation of concerns, testability |
 | `writeAuditLog()` non-throwing | Audit failure không break main flow |
 | `@fastify/jwt` augmentation | Tránh conflict với JWT user type |
-| `satisfies Prisma.XxxSelect` | Type-safe selects, IDE inference |
+| `satisfies Prisma.XxxSelect` | Type-safe selects |
 | `SecurityContext.NONE` provideMarkdown | KaTeX HTML/SVG bị Angular sanitizer cắt |
-| Konva lazy-loaded + runOutsideAngular | Không tăng initial bundle, không trigger CD mỗi mousemove |
-| Socket.io attach fastify.server port 3000 | Dùng chung port REST, không cần Nginx config thêm |
+| Konva lazy-loaded + runOutsideAngular | Không tăng initial bundle |
+| Socket.io attach fastify.server port 3000 | Dùng chung port REST |
 | Redis Adapter Socket.io | Scale multi-instance |
-| Chat floating widget (FAB) | Available mọi trang, không chiếm layout |
-| BullMQ Notification/Email worker | Không làm chậm HTTP request khi lưu DB / gửi email |
-| GHCR cho Docker registry | Free với GitHub repo, tích hợp sẵn secrets GITHUB_TOKEN |
-| `optionalAuthenticate` middleware | Blog public nhưng cần biết role để filter DRAFT/REVIEW |
-| DOMPurify + sanitize-html 2 lớp | BE strip trước khi lưu, FE strip trước khi render — defense in depth |
-| `@fastify/csrf-protection` chỉ trên cookie endpoints | JWT Bearer routes tự miễn nhiễm CSRF |
-| Breadcrumb dedup theo fullUrl | Angular kế thừa route data → child path:'' nhận breadcrumb của cha |
+| BullMQ Notification/Email worker | Không làm chậm HTTP request |
+| GHCR cho Docker registry | Free với GitHub repo |
+| `optionalAuthenticate` middleware | Blog public nhưng cần biết role |
+| DOMPurify + sanitize-html 2 lớp | Defense in depth |
+| `@fastify/csrf-protection` chỉ trên cookie endpoints | JWT Bearer tự miễn nhiễm |
+| ESLint flat config (v9) | Enforce Angular rules tự động — không phụ thuộc AI nhớ rules |
+| `getApiErrorMessage()` util | Xử lý `catch (error: unknown)` an toàn, tái sử dụng |
+| `getInputValue()` helper | Thay `$any($event.target).value` trong template — type-safe |

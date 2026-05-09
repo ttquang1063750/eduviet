@@ -74,7 +74,7 @@
         <input
           type="color"
           [value]="strokeColor()"
-          (input)="setColor($any($event.target).value)"
+          (input)="setColor(getInputValue($event))"
           aria-label="Màu nét vẽ"
           class="color-picker"
         />
@@ -83,7 +83,7 @@
       <select
         class="width-select"
         [value]="strokeWidth()"
-        (change)="setWidth(+$any($event.target).value)"
+        (change)="setWidth(+getInputValue($event))"
         aria-label="Độ dày nét vẽ"
         title="Độ dày nét"
       >

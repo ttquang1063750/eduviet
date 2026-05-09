@@ -18,9 +18,9 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-08 — session 3)
+## Trạng thái hiện tại (cập nhật 2026-05-09 — session 4)
 
-> ⚠️ Cần chạy `pnpm install` nếu chưa: thêm `sanitize-html`, `dompurify`, `@fastify/csrf-protection` vào package.json trong session 2.
+> ⚠️ Cần chạy `pnpm install` nếu chưa: thêm `@angular-eslint/template-parser`, `@eslint/js` vào package.json trong session 4.
 
 ### ✅ Đã hoàn thành
 
@@ -37,7 +37,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 | `notifications` | ✅ | ✅ (BullMQ) | — | — |
 | `chat` | ✅ | ✅ | ✅ | ✅ |
 | `storage` | ✅ | — | — | — |
-| `reports` | ✅ | ✅ | ✅ | — |
+| `reports` | ✅ + export | ✅ + export | ✅ | — |
 
 #### Frontend features (`apps/frontend/src/app/features/`)
 | Feature | List | Detail | Service | Routes |
@@ -51,64 +51,40 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 | `admin/schools` | ✅ | ✅ | — | ✅ |
 | `admin/classes` | ✅ | ✅ | — | ✅ |
 | `admin/content` | ✅ | — | — | ✅ |
-| `reports` | ✅ | — | ✅ | ✅ |
+| `reports` | ✅ + Xuất Excel/PDF | — | ✅ | ✅ |
 | `chat` | ✅ widget (FAB) | ✅ room-list + message-thread | ✅ | — |
 
 #### Shared Components
-- ✅ `breadcrumb/` — dynamic breadcrumb (fix duplicate route data inheritance)
-- ✅ `drawing-canvas/` — Konva.js: freehand, line, rect, ellipse, eraser, undo/redo, background image, export PNG
-- ✅ `shared/pipes/safe-html.pipe.ts` — DOMPurify + bypassSecurityTrustHtml cho blog content
+- ✅ `breadcrumb/` — dynamic breadcrumb
+- ✅ `drawing-canvas/` — Konva.js + `getInputValue()` typed helper
+- ✅ `shared/pipes/safe-html.pipe.ts` — DOMPurify + bypassSecurityTrustHtml
+- ✅ `core/utils/http-error.ts` — `getApiErrorMessage()` cho catch blocks
 
-#### Packages & Infrastructure
-- ✅ `packages/shared-constants/` + `packages/shared-types/` (bao gồm `chat.types.ts`)
-- ✅ `libs/prisma/` — schema (bao gồm ChatRoom/ChatMessage) + migrations + seed
-- ✅ `docker-compose.yml` / `docker-compose.prod.yml`
-- ✅ `docker/nginx/`, `docker/minio/`, `docker/postgres/`
-- ✅ `dev-start.sh` — one-command dev setup (banner, cleanup trap, test accounts)
-- ✅ `.claude/commands/` — plan-task, execute-step, check-point, resume, start-dev
-- ✅ `AI_RULES.md` — session start protocol
+#### ESLint ✅ COMPLETED (2026-05-09)
+- ✅ `apps/frontend/eslint.config.js` — ESLint 9 flat config, 0 lỗi trên toàn bộ src/
+- ✅ Rules bắt buộc: `prefer-on-push` + `no-inline-declarations` + `no-explicit-any` + `prefer-control-flow`
+- ✅ `angular.json` schematics — `ng generate component` mặc định tạo 3 file + OnPush
+- ✅ `.claude/commands/execute-step.md` — Component Checklist 8 điểm
 
-#### Live Chat ✅ COMPLETED (2026-05-07)
-- ✅ `socket.plugin.ts` — Socket.io v4, JWT auth middleware, Redis adapter
-- ✅ `chat.gateway.ts` — 7 socket events (send, edit, delete, typing, mark_read)
-- ✅ `chat.service.ts` — RBAC per room type (CLASS/TEACHER_PARENT/ONE_ON_ONE)
-- ✅ `chat.repository.ts` — Prisma queries, cursor pagination
-- ✅ `chat.routes.ts` — REST API (rooms, messages, upload)
-- ✅ `chat-widget` component tree — FAB + room-list + message-thread
-- ✅ `ChatService` — signals state, socket.io-client wrapper, eager-init
+#### Reports Export ✅ COMPLETED (2026-05-09)
+- ✅ `GET /api/reports/export/excel` — xuất Excel (exceljs), 2 sheets, styled
+- ✅ `GET /api/reports/export/pdf` — xuất PDF (pdfkit)
+- ✅ FE: nút "Xuất Excel" + "Xuất PDF" với loading state, ToastService
 
-#### Storage Module ✅ COMPLETED (2026-05-07)
-- ✅ `libs/storage/` — `StorageService`: upload, getPresignedUrl, delete, getPublicUrl
-- ✅ `apps/backend/src/plugins/storage.plugin.ts` — `fastify.decorate('storage', ...)`
-- ✅ `apps/backend/src/modules/storage/storage.routes.ts` — `POST /api/storage/upload` (MIME check, 10MB limit)
-
-#### BullMQ Queues ✅ COMPLETED (2026-05-07)
-- ✅ `libs/redis/` — Cấu hình ioredis (`maxRetriesPerRequest: null`) cho BullMQ
-- ✅ `email.queue.ts` & `email.worker.ts` — Gửi email qua Nodemailer/MailHog
-- ✅ `notification.queue.ts` & `notification.worker.ts` — Xử lý ghi thông báo vào DB
-- ✅ `queues.plugin.ts` — Khởi tạo workers & quản lý lifecycle trong Fastify
-- ✅ `notifications.service.ts` — Push job vào queue thay vì gọi Prisma trực tiếp
-
-### ✅ Đã hoàn thành thêm (2026-05-08)
-- ✅ `packages/email-templates/` — React Email: welcome, verify-email, reset-password
-- ✅ `features/reports/` — Dashboard analytics với Chart.js
-- ✅ `features/admin/schools/` + `admin/classes/` + `admin/content/`
-- ✅ `.github/workflows/ci.yml` + `deploy.yml` — GitHub Actions CI/CD (GHCR + SSH deploy)
-
-### ✅ Đã hoàn thành thêm (2026-05-08 — session 2)
-- ✅ Refactor admin components (schools + classes + content) → 3 file riêng, OnPush, signals, @for/@if
-- ✅ `optionalAuthenticate` middleware — blog GET routes public nhưng nhận biết role
-- ✅ `AuditEntry.details` → `Prisma.InputJsonValue`, bỏ `as never` trong writeAuditLog
-- ✅ `shared/utils/sanitize.ts` — sanitize-html cho blog content (BE)
-- ✅ `shared/pipes/safe-html.pipe.ts` — DOMPurify pipe cho blog detail (FE)
-- ✅ `@fastify/csrf-protection` — bảo vệ /refresh + /logout, thêm GET /auth/csrf-token
-- ✅ Sidebar navigation đầy đủ: classes, blog, reports, admin/schools, admin/classes, admin/content
-- ✅ Fix breadcrumb duplicate — Angular route data inheritance
+#### Các module lớn trước đó
+- ✅ Live Chat (Socket.io v4, Redis adapter, RBAC per room)
+- ✅ Storage Module (MinIO)
+- ✅ BullMQ Queues (email + notification workers)
+- ✅ Email Templates (React Email)
+- ✅ CI/CD (GitHub Actions, GHCR)
+- ✅ CSRF Protection + XSS Defense in depth
+- ✅ Admin UI (Users/Schools/Classes/Content CRUD)
 
 ### 🚧 Còn lại (theo độ ưu tiên)
-1. **pgcrypto** cho PII fields (email, phone) trong DB — thấp ưu tiên
-2. **Dependabot** `.github/dependabot.yml` — quét dependency vulnerabilities
-3. **`optionalAuthenticate` tách file riêng** — hiện nằm chung `authenticate.ts`
+1. **pgcrypto** cho PII fields (email, phone) trong DB
+2. **Dependabot** `.github/dependabot.yml`
+3. **PDF font tiếng Việt** — PDFKit không hỗ trợ dấu, cần nhúng font hoặc dùng Puppeteer
+4. **SMS notifications** (ESMS.vn)
 
 ---
 
@@ -152,3 +128,5 @@ await writeAuditLog(this.prisma, {
 - `inject()` thay constructor injection
 - Signals cho state, control flow `@if`/`@for`, không `*ngIf`/`*ngFor`
 - `provideZonelessChangeDetection()` (Angular 21 zoneless)
+- Catch blocks: `catch (error: unknown)` + `getApiErrorMessage()` từ `core/utils/http-error.ts`
+- Template event value: `getInputValue($event)` thay `$any($event.target).value`

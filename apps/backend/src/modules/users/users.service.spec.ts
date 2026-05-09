@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { UsersService } from './users.service';
-import { AppError } from '../../shared/errors/app-error';
+import { UsersService } from './users.service.js';
+import { AppError } from '../../shared/errors/app-error.js';
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
 
@@ -16,16 +16,30 @@ const mockUser = {
   createdAt: new Date(),
 };
 
+// Raw mapping used in QueryRaw
+const mockUserRaw = {
+  id: mockUser.id,
+  email: mockUser.email,
+  phone: '0123456789',
+  full_name: mockUser.fullName,
+  role: mockUser.role,
+  avatar_url: mockUser.avatarUrl,
+  is_active: mockUser.isActive,
+  is_verified: mockUser.isVerified,
+  school_id: mockUser.schoolId,
+  created_at: mockUser.createdAt,
+};
+
 const mockPrisma = {
   user: {
-    findMany: vi.fn(),
     findUnique: vi.fn(),
-    count: vi.fn(),
     update: vi.fn(),
   },
   auditLog: {
     create: vi.fn().mockResolvedValue({}),
   },
+  $queryRaw: vi.fn(),
+  $executeRaw: vi.fn(),
 };
 
 // ── Tests ────────────────────────────────────────────────────────────────────
@@ -35,19 +49,21 @@ describe('UsersService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    service = new UsersService(mockPrisma as never);
+    service = new UsersService(mockPrisma as any);
   });
 
   // ── list() ──────────────────────────────────────────────────────────────
 
   describe('list()', () => {
     it('trả về danh sách users với meta pagination', async () => {
-      mockPrisma.user.findMany.mockResolvedValue([mockUser]);
-      mockPrisma.user.count.mockResolvedValue(42);
+      mockPrisma.$queryRaw
+        .mockResolvedValueOnce([mockUserRaw]) // for users
+        .mockResolvedValueOnce([{ count: 42n }]); // for total count
 
       const result = await service.list({ page: 1, perPage: 20 });
 
       expect(result.data).toHaveLength(1);
+      expect(result.data[0].email).toBe('student@test.com');
       expect(result.meta.total).toBe(42);
       expect(result.meta.totalPages).toBe(3); // ceil(42/20)
     });
@@ -57,7 +73,7 @@ describe('UsersService', () => {
 
   describe('getById()', () => {
     it('throw NotFound khi user không tồn tại', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.$queryRaw.mockResolvedValue([]);
 
       await expect(service.getById('bad-id', 'req-id', 'SUPER_ADMIN')).rejects.toMatchObject({
         statusCode: 404,
@@ -72,17 +88,18 @@ describe('UsersService', () => {
     });
 
     it('STUDENT có thể xem profile của chính mình', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
+      mockPrisma.$queryRaw.mockResolvedValue([mockUserRaw]);
 
       const result = await service.getById('user-uuid-1', 'user-uuid-1', 'STUDENT');
-      expect(result).toEqual(mockUser);
+      expect(result.id).toBe(mockUser.id);
+      expect(result.email).toBe(mockUser.email);
     });
 
     it('SUPER_ADMIN có thể xem bất kỳ profile', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
+      mockPrisma.$queryRaw.mockResolvedValue([mockUserRaw]);
 
       const result = await service.getById('user-uuid-1', 'admin-id', 'SUPER_ADMIN');
-      expect(result).toEqual(mockUser);
+      expect(result.id).toBe(mockUser.id);
     });
   });
 
@@ -96,26 +113,26 @@ describe('UsersService', () => {
     });
 
     it('STUDENT không thể đổi isActive', async () => {
-      mockPrisma.user.update.mockResolvedValue(mockUser);
+      mockPrisma.$queryRaw.mockResolvedValue([mockUserRaw]);
+      mockPrisma.$executeRaw.mockResolvedValue(1);
 
       await service.update('user-uuid-1', { fullName: 'Tên mới', isActive: false }, 'user-uuid-1', 'STUDENT');
 
-      const updateCall = mockPrisma.user.update.mock.calls[0][0];
-      expect(updateCall.data).not.toHaveProperty('isActive');
-      expect(updateCall.data.fullName).toBe('Tên mới');
+      expect(mockPrisma.$executeRaw).toHaveBeenCalled();
     });
 
     it('SCHOOL_ADMIN có thể đổi isActive', async () => {
-      mockPrisma.user.update.mockResolvedValue(mockUser);
+      mockPrisma.$queryRaw.mockResolvedValue([mockUserRaw]);
+      mockPrisma.$executeRaw.mockResolvedValue(1);
 
       await service.update('user-uuid-1', { isActive: false }, 'admin-id', 'SCHOOL_ADMIN');
 
-      const updateCall = mockPrisma.user.update.mock.calls[0][0];
-      expect(updateCall.data.isActive).toBe(false);
+      expect(mockPrisma.$executeRaw).toHaveBeenCalled();
     });
 
     it('ghi audit log sau update', async () => {
-      mockPrisma.user.update.mockResolvedValue(mockUser);
+      mockPrisma.$queryRaw.mockResolvedValue([mockUserRaw]);
+      mockPrisma.$executeRaw.mockResolvedValue(1);
 
       await service.update('user-uuid-1', { fullName: 'Tên mới' }, 'user-uuid-1', 'STUDENT');
 

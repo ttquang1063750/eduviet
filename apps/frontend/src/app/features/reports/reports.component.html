@@ -1,0 +1,52 @@
+<div class="reports-container">
+  <div class="reports-header">
+    <h1 class="reports-title">Báo cáo & Phân tích</h1>
+    <div class="export-actions">
+      <button
+        class="btn btn-export btn-excel"
+        [disabled]="isExportingExcel()"
+        (click)="exportExcel()"
+      >
+        @if (isExportingExcel()) {
+          <span class="spinner"></span> Đang xuất...
+        } @else {
+          <span class="icon">📊</span> Xuất Excel
+        }
+      </button>
+      <button
+        class="btn btn-export btn-pdf"
+        [disabled]="isExportingPdf()"
+        (click)="exportPdf()"
+      >
+        @if (isExportingPdf()) {
+          <span class="spinner"></span> Đang xuất...
+        } @else {
+          <span class="icon">📄</span> Xuất PDF
+        }
+      </button>
+    </div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h2 class="chart-title">Người dùng theo vai trò</h2>
+      <div class="chart-wrapper">
+        <canvas id="userRolesChart"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h2 class="chart-title">Tổng quan nội dung</h2>
+      <div class="chart-wrapper">
+        <canvas id="contentChart"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h2 class="chart-title">Hoạt động đăng nhập (7 ngày qua)</h2>
+      <div class="chart-wrapper">
+        <canvas id="loginActivityChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>

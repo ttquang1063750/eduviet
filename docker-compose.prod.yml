@@ -146,7 +146,7 @@ services:
 
   # ── Nginx (reverse proxy + SSL) ───────────────────────────────
   nginx:
-    image: nginx:alpine
+    image: nginx:1.27-alpine
     container_name: eduviet_nginx_prod
     restart: always
     ports:
@@ -171,3 +171,4 @@ volumes:
 networks:
   eduviet-net:
     driver: bridge
+  driver: bridge

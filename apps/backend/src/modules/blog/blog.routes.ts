@@ -1,6 +1,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
-import { authenticate, authorize, optionalAuthenticate } from '../../shared/middleware/authenticate.js';
+import { authenticate, authorize } from '../../shared/middleware/authenticate.js';
+import { optionalAuthenticate } from '../../shared/middleware/optional-authenticate.js';
 import { BlogService } from './blog.service.js';
 import { UserRole } from '@eduviet/shared-types';
 

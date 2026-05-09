@@ -1,11 +1,13 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
   provider          = "postgresql"
   url               = env("DATABASE_URL")
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+  extensions        = [pgcrypto, unaccent]
 }
 
 // ===========================
@@ -182,8 +184,10 @@ model ClassEnrollment {
 
 model User {
   id           String    @id @default(uuid())
-  email        String    @unique
-  phone        String?   @unique
+  email        Bytes
+  emailHash    String    @unique @map("email_hash")
+  phone        Bytes?
+  phoneHash    String?   @unique @map("phone_hash")
   passwordHash String    @map("password_hash")
   fullName     String    @map("full_name")
   avatarUrl    String?   @map("avatar_url")
@@ -211,7 +215,7 @@ model User {
   studentParents     ParentStudent[]      @relation("ParentRelation")
   parentOf           ParentStudent[]      @relation("StudentRelation")
 
-  @@index([email])
+  @@index([emailHash])
   @@index([role])
   @@index([schoolId])
   @@map("users")

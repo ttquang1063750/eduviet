@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform, inject, SecurityContext } from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import DOMPurify from 'dompurify';
 

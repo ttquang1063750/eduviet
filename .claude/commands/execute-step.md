@@ -14,12 +14,22 @@ description: Đọc .claude/task.md, thực thi bước [ ] đầu tiên chưa l
    - Kiểm tra TypeScript sơ bộ (đọc lại file vừa tạo, check import/export).
    - Viết test nếu có thể.
 
-5. **Cập nhật task.md**:
+5. **Nếu step tạo/sửa Angular component — PHẢI tự kiểm tra checklist sau trước khi đánh dấu done**:
+   - [ ] 3 file riêng: `.ts` + `.html` + `.scss` (không inline template, không inline styles)
+   - [ ] `changeDetection: ChangeDetectionStrategy.OnPush` có mặt
+   - [ ] Dùng `inject()`, không dùng constructor injection
+   - [ ] Không import `CommonModule`
+   - [ ] Không dùng `any` type
+   - [ ] State dùng `signal()` / `computed()` / `input()` / `output()`
+   - [ ] Control flow: `@if` / `@for` — không `*ngIf` / `*ngFor`
+   - [ ] Không dùng `alert()` / `confirm()` / `prompt()` — dùng `ToastService` / `ConfirmService`
+
+6. **Cập nhật task.md**:
    - Đánh dấu step vừa làm: `[ ]` → `[x]`.
    - Cập nhật "Step hiện tại" sang step tiếp theo.
    - Thêm file vào mục "Files đã tạo/sửa".
 
-6. **Báo cáo**:
+7. **Báo cáo**:
    ```
    ✅ Step [N] done: [tên step]
    📁 File: [đường dẫn]
@@ -27,7 +37,7 @@ description: Đọc .claude/task.md, thực thi bước [ ] đầu tiên chưa l
    💡 Ghi chú: [nếu có gì cần lưu ý]
    ```
 
-7. **Sau khi báo cáo — BẮT BUỘC**:chec
+8. **Sau khi báo cáo — BẮT BUỘC**:
    - Nếu còn step chưa làm → nhắc: **"Gõ `/execute-step` để tiếp tục bước tiếp theo."**
    - Nếu đây là step CUỐI CÙNG → nhắc: **"Task hoàn thành! Gõ `/check-point` để lưu tiến độ."**
    - **KHÔNG tự động làm bước tiếp theo — dừng lại và chờ lệnh.**

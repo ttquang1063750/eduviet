@@ -117,7 +117,7 @@ export class ChatService {
       this.removeMessageFromState(deleted.id, deleted.roomId);
     });
 
-    this.socket.on('error', (err: any) => {
+    this.socket.on('error', (err: unknown) => {
       console.error('[ChatService] Socket error:', err);
     });
   }
@@ -243,7 +243,7 @@ export class ChatService {
     });
   }
 
-  private updateTypingStatus(roomId: string, fullName: string, isTyping: boolean, userId?: string) {
+  private updateTypingStatus(roomId: string, fullName: string, isTyping: boolean, _userId?: string) {
     this._typingUsersMap.update((map) => {
       const newMap = new Map(map);
       let users = newMap.get(roomId) ?? [];

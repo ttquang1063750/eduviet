@@ -80,4 +80,9 @@ export class LessonDetailComponent implements OnInit {
     const ans = this.selectedAnswers()[exerciseId];
     return Boolean(ans?.startsWith('data:image/'));
   }
+
+  /** Typed helper thay thế $any($event.target).value trong template */
+  getInputValue(event: Event): string {
+    return (event.target as HTMLInputElement).value;
+  }
 }

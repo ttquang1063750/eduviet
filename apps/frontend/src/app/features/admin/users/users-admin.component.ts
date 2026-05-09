@@ -7,12 +7,13 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { RouterLink, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { UsersService } from '../../../core/services/users.service';
 import { SchoolsService } from '../../../core/services/schools.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { getApiErrorMessage } from '../../../core/utils/http-error';
 import type { User, CreateUserRequest, School } from '@eduviet/shared-types';
 
 @Component({
@@ -145,9 +146,9 @@ export class UsersAdminComponent {
       this.toastService.success('Tạo người dùng thành công');
       this.closeCreateModal();
       this.fetchUsers(); // Refresh list
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to create user', error);
-      this.toastService.error(error.error?.error?.message || 'Có lỗi xảy ra khi tạo người dùng');
+      this.toastService.error(getApiErrorMessage(error, 'Có lỗi xảy ra khi tạo người dùng'));
     } finally {
       this.isSaving.set(false);
     }

@@ -1,28 +1,28 @@
-# Active Task: Security items
+# Task: Export PDF/Excel cho module Reports
 
 ## Trạng thái: COMPLETED
-Hoàn thành: 2026-05-08
+Hoàn thành: 2026-05-09
 
-## Steps (tất cả hoàn thành)
-- [x] 1. Thêm `sanitize-html` vào backend package.json
-- [x] 2. Tạo `apps/backend/src/shared/utils/sanitize.ts` (sanitizeContent + sanitizeText)
-- [x] 3. Wire sanitize vào `blog.service.ts` (create + update)
-- [x] 4. Thêm `dompurify` + `@types/dompurify` vào frontend package.json
-- [x] 5. Tạo `apps/frontend/src/app/shared/pipes/safe-html.pipe.ts`
-- [x] 6. Wire SafeHtmlPipe vào blog-detail.component (innerHTML)
-- [x] 7. Register `@fastify/csrf-protection` trong main.ts, thêm /csrf-token endpoint, bảo vệ /refresh + /logout
-- [x] 8. Email welcome + verify trigger → đã có sẵn trong auth.service.ts (không cần thêm)
+## Steps
+- [x] 1. **Dependencies & Setup** — Cài đặt `exceljs` và `pdfkit`.
+- [x] 2. **Excel Export** — `exportSummaryExcel()` trong reports.service.ts (BE).
+- [x] 3. **PDF Export** — `exportSummaryPdf()` trong reports.service.ts (BE).
+- [x] 4. **Routes** — `GET /api/reports/export/excel` và `GET /api/reports/export/pdf`.
+- [x] 5. **FE Integration** — Nút "Xuất báo cáo" trong Frontend (refactor 3 file, OnPush, signals).
+- [x] 6. **Validation** — ESLint pass 0 lỗi. File validation thực tế cần chạy server thủ công.
 
 ## Files đã tạo/sửa
-- apps/backend/package.json (+sanitize-html, @fastify/csrf-protection)
-- apps/frontend/package.json (+dompurify, @types/dompurify)
-- apps/backend/src/shared/utils/sanitize.ts (MỚI)
-- apps/backend/src/modules/blog/blog.service.ts
-- apps/frontend/src/app/shared/pipes/safe-html.pipe.ts (MỚI)
-- apps/frontend/src/app/features/blog/components/blog-detail.component.ts
-- apps/frontend/src/app/features/blog/components/blog-detail.component.html
-- apps/backend/src/main.ts
-- apps/backend/src/modules/auth/auth.routes.ts
+### Backend
+- apps/backend/src/modules/reports/reports.service.ts — thêm exportSummaryExcel(), exportSummaryPdf()
+- apps/backend/src/modules/reports/reports.routes.ts — thêm 2 GET export routes
 
-## Sau task này
-→ Tech debt còn lại (thấp ưu tiên): pgcrypto PII fields, Dependabot
+### Frontend
+- apps/frontend/src/app/features/reports/reports.service.ts — thêm exportExcel(), exportPdf()
+- apps/frontend/src/app/features/reports/reports.component.ts — refactor OnPush/signals + export logic
+- apps/frontend/src/app/features/reports/reports.component.html — nút Excel/PDF + loading state
+- apps/frontend/src/app/features/reports/reports.component.scss — styles nút export
+
+## Lưu ý
+- PDF dùng font mặc định PDFKit (không hỗ trợ tốt Vietnamese accents), nội dung bỏ dấu.
+- Filename tự động: `eduviet-report-YYYY-MM-DD.xlsx/.pdf`.
+- Export require role SUPER_ADMIN hoặc SCHOOL_ADMIN.

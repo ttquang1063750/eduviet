@@ -344,4 +344,9 @@ export class DrawingCanvasComponent implements AfterViewInit, OnDestroy, OnChang
     this.canUndo.set(this.history.length > 0);
     this.canRedo.set(this.redoStack.length > 0);
   }
+
+  /** Typed helper thay thế $any($event.target).value trong template */
+  getInputValue(event: Event): string {
+    return (event.target as HTMLInputElement).value;
+  }
 }

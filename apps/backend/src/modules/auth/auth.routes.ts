@@ -2,6 +2,7 @@ import { FastifyPluginAsync } from 'fastify';
 import { AuthService } from './auth.service.js';
 import { loginSchema, registerSchema } from './auth.schema.js';
 import { authenticate } from '../../shared/middleware/authenticate.js';
+import { UsersRepository } from '../users/users.repository.js';
 
 // Type augmentation cho CSRF methods của @fastify/csrf-protection
 declare module 'fastify' {
@@ -38,6 +39,7 @@ const AUTH_RATE_LIMIT = {
 
 export const authRoutes: FastifyPluginAsync = async (app) => {
   const authService = new AuthService(app);
+  const usersRepo = new UsersRepository(app.prisma);
 
   // GET /auth/csrf-token — FE gọi endpoint này để lấy CSRF token trước khi gọi refresh/logout
   app.get('/csrf-token', async (request, reply) => {
@@ -127,19 +129,7 @@ export const authRoutes: FastifyPluginAsync = async (app) => {
 
   // GET /auth/me
   app.get('/me', { preHandler: [authenticate] }, async (request, reply) => {
-    const user = await app.prisma.user.findUnique({
-      where: { id: request.user.id },
-      select: {
-        id: true,
-        email: true,
-        fullName: true,
-        role: true,
-        avatarUrl: true,
-        schoolId: true,
-        isActive: true,
-        isVerified: true,
-      },
-    });
+    const user = await usersRepo.findById(request.user.id);
 
     if (!user) {
       return reply

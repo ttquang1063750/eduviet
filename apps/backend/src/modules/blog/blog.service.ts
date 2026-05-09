@@ -4,6 +4,7 @@ import { AppError } from '../../shared/errors/app-error.js';
 import { writeAuditLog } from '../../shared/utils/audit.js';
 import { sanitizeContent, sanitizeText } from '../../shared/utils/sanitize.js';
 import { BlogRepository, BlogFilters } from './blog.repository.js';
+import { UsersRepository } from '../users/users.repository.js';
 
 const CONTENT_ADMIN_ROLES: UserRole[] = [
   'SUPER_ADMIN', 'SCHOOL_ADMIN', 'CONTENT_CREATOR', 'CONTENT_REVIEWER', 'CONTENT_APPROVER',
@@ -19,9 +20,11 @@ function buildSlug(title: string): string {
 
 export class BlogService {
   private readonly repo: BlogRepository;
+  private readonly usersRepo: UsersRepository;
 
   constructor(private readonly prisma: PrismaClient) {
     this.repo = new BlogRepository(prisma);
+    this.usersRepo = new UsersRepository(prisma);
   }
 
   async list(filters: BlogFilters, userRole?: UserRole) {
@@ -94,7 +97,7 @@ export class BlogService {
     if (!post) throw AppError.notFound('Bài viết');
     if (post.authorId !== actorId) {
       // Check if actor is admin
-      const user = await this.prisma.user.findUnique({ where: { id: actorId }, select: { role: true } });
+      const user = await this.usersRepo.findById(actorId);
       if (!user || !CONTENT_ADMIN_ROLES.includes(user.role as UserRole)) {
         throw AppError.forbidden('Bạn không có quyền chỉnh sửa bài viết này');
       }

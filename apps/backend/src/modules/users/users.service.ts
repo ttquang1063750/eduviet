@@ -75,6 +75,11 @@ export class UsersService {
       schoolId = requester.schoolId;
     }
 
+    const existingUser = await this.repo.findByEmail(input.email);
+    if (existingUser) {
+      throw AppError.conflict('Email này đã được sử dụng');
+    }
+
     const passwordHash = await bcrypt.hash(input.password, 10);
 
     try {

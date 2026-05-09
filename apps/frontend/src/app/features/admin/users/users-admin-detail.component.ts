@@ -8,6 +8,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { BreadcrumbService } from '../../../core/services/breadcrumb.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
+import { getApiErrorMessage } from '../../../core/utils/http-error';
 import type { User, School, UserRole } from '@eduviet/shared-types';
 
 @Component({
@@ -101,8 +102,8 @@ export class UsersAdminDetailComponent implements OnInit {
     try {
       await this.usersService.update(this.user()!.id, { fullName, phone, isActive }).toPromise();
       this.toastService.success('Cập nhật thông tin thành công');
-    } catch (error: any) {
-      this.toastService.error(error.error?.error?.message || 'Lỗi cập nhật');
+    } catch (error: unknown) {
+      this.toastService.error(getApiErrorMessage(error, 'Lỗi cập nhật'));
     } finally {
       this.isSaving.set(false);
     }
@@ -121,8 +122,8 @@ export class UsersAdminDetailComponent implements OnInit {
     try {
       await this.usersService.changeRole(this.user()!.id, role as UserRole).toPromise();
       this.toastService.success('Thay đổi vai trò thành công');
-    } catch (error: any) {
-      this.toastService.error(error.error?.error?.message || 'Lỗi đổi vai trò');
+    } catch (error: unknown) {
+      this.toastService.error(getApiErrorMessage(error, 'Lỗi đổi vai trò'));
     } finally {
       this.isSaving.set(false);
     }
@@ -136,8 +137,8 @@ export class UsersAdminDetailComponent implements OnInit {
     try {
       await this.usersService.assignSchool(this.user()!.id, schoolId || null).toPromise();
       this.toastService.success('Gán trường học thành công');
-    } catch (error: any) {
-      this.toastService.error(error.error?.error?.message || 'Lỗi gán trường');
+    } catch (error: unknown) {
+      this.toastService.error(getApiErrorMessage(error, 'Lỗi gán trường'));
     } finally {
       this.isSaving.set(false);
     }
@@ -162,8 +163,8 @@ export class UsersAdminDetailComponent implements OnInit {
         await this.usersService.delete(this.user()!.id).toPromise();
         this.toastService.success('Xóa người dùng thành công');
         this.router.navigate(['/admin/users']);
-      } catch (error: any) {
-        this.toastService.error(error.error?.error?.message || 'Lỗi xóa người dùng');
+      } catch (error: unknown) {
+        this.toastService.error(getApiErrorMessage(error, 'Lỗi xóa người dùng'));
       }
     }
   }
