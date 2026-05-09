@@ -30,6 +30,7 @@ const paginationSchema = z.object({
   perPage: z.coerce.number().min(1).max(100).default(20),
   role: z.string().optional(),
   search: z.string().optional(),
+  schoolId: z.string().uuid().optional(),
 });
 
 export const usersRoutes: FastifyPluginAsync = async (app) => {

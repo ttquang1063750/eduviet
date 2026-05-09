@@ -1,0 +1,81 @@
+<div class="editor-layout">
+
+  <!-- Toolbar -->
+  <div class="editor-toolbar">
+    <div class="editor-toolbar__left">
+      <a routerLink="/admin/blog" class="btn btn-ghost">← Danh sách</a>
+      <h2 class="editor-toolbar__title">
+        {{ isEditMode() ? 'Chỉnh sửa bài viết' : 'Viết bài mới' }}
+      </h2>
+      <span class="status-badge" [class]="'status-badge--' + postStatus().toLowerCase()">
+        {{ postStatus() }}
+      </span>
+    </div>
+    <div class="editor-toolbar__actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        [disabled]="postForm.invalid || saving()"
+        (click)="onSave()"
+      >
+        @if (saving()) { Đang lưu... } @else { 💾 Lưu nháp }
+      </button>
+      @if (postId()) {
+        <button
+          type="button"
+          class="btn btn-publish"
+          (click)="onPublish()"
+        >
+          🚀 Xuất bản
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Editor body -->
+  <div class="editor-body" [formGroup]="postForm">
+
+    <!-- Title -->
+    <input
+      type="text"
+      formControlName="title"
+      class="title-input"
+      placeholder="Tiêu đề bài viết..."
+    />
+
+    <!-- Cover image URL -->
+    <div class="meta-row">
+      <div class="meta-field">
+        <label class="meta-label">Ảnh bìa (URL)</label>
+        <input
+          type="url"
+          formControlName="coverImage"
+          class="form-control"
+          placeholder="https://example.com/image.jpg"
+        />
+      </div>
+      <div class="meta-field">
+        <label class="meta-label">Tags (phân cách bằng dấu phẩy)</label>
+        <input
+          type="text"
+          formControlName="tags"
+          class="form-control"
+          placeholder="học toán, lớp 10, đại số"
+        />
+      </div>
+    </div>
+
+    <!-- Quill editor -->
+    <div class="content-editor">
+      <quill-editor
+        formControlName="content"
+        [modules]="quillModules"
+        (onContentChanged)="onContentChange($event)"
+        placeholder="Bắt đầu viết nội dung bài học..."
+        class="quill-editor"
+      ></quill-editor>
+    </div>
+
+  </div>
+
+</div>

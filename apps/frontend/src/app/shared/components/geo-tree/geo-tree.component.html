@@ -1,0 +1,96 @@
+@if (loading()) {
+  <div class="geo-tree__loading">
+    <span class="geo-tree__spinner"></span>
+    <span>Đang tải...</span>
+  </div>
+}
+
+@if (!loading() && nodes().length === 0) {
+  <p class="geo-tree__empty">Không có dữ liệu địa lý.</p>
+}
+
+<ul class="geo-tree__list" role="tree">
+  @for (node of nodes(); track trackById($index, node)) {
+    <li
+      class="geo-tree__item"
+      [class.geo-tree__item--selected]="selectedNodeId() === node.id"
+      role="treeitem"
+      [attr.aria-expanded]="node.hasChildren ? node.expanded : null"
+    >
+      <button
+        class="geo-tree__label"
+        [class.geo-tree__label--leaf]="!node.hasChildren"
+        (click)="toggleNode(node)"
+        type="button"
+      >
+        @if (node.hasChildren) {
+          <span class="geo-tree__chevron" [class.geo-tree__chevron--open]="node.expanded">
+            &#8250;
+          </span>
+        } @else {
+          <span class="geo-tree__chevron geo-tree__chevron--leaf">&#8226;</span>
+        }
+        <span class="geo-tree__name">{{ node.name }}</span>
+        <span class="geo-tree__code">({{ node.code }})</span>
+        @if (node.loadingChildren) {
+          <span class="geo-tree__spinner geo-tree__spinner--inline"></span>
+        }
+      </button>
+
+      @if (node.expanded && node.children.length > 0) {
+        <ul class="geo-tree__list geo-tree__list--nested" role="group">
+          @for (child of node.children; track trackById($index, child)) {
+            <li
+              class="geo-tree__item"
+              [class.geo-tree__item--selected]="selectedNodeId() === child.id"
+              role="treeitem"
+              [attr.aria-expanded]="child.hasChildren ? child.expanded : null"
+            >
+              <button
+                class="geo-tree__label"
+                [class.geo-tree__label--leaf]="!child.hasChildren"
+                (click)="toggleNode(child)"
+                type="button"
+              >
+                @if (child.hasChildren) {
+                  <span class="geo-tree__chevron" [class.geo-tree__chevron--open]="child.expanded">
+                    &#8250;
+                  </span>
+                } @else {
+                  <span class="geo-tree__chevron geo-tree__chevron--leaf">&#8226;</span>
+                }
+                <span class="geo-tree__name">{{ child.name }}</span>
+                <span class="geo-tree__code">({{ child.code }})</span>
+                @if (child.loadingChildren) {
+                  <span class="geo-tree__spinner geo-tree__spinner--inline"></span>
+                }
+              </button>
+
+              @if (child.expanded && child.children.length > 0) {
+                <ul class="geo-tree__list geo-tree__list--nested" role="group">
+                  @for (grandchild of child.children; track trackById($index, grandchild)) {
+                    <li
+                      class="geo-tree__item"
+                      [class.geo-tree__item--selected]="selectedNodeId() === grandchild.id"
+                      role="treeitem"
+                    >
+                      <button
+                        class="geo-tree__label geo-tree__label--leaf"
+                        (click)="selectNode(grandchild)"
+                        type="button"
+                      >
+                        <span class="geo-tree__chevron geo-tree__chevron--leaf">&#8226;</span>
+                        <span class="geo-tree__name">{{ grandchild.name }}</span>
+                        <span class="geo-tree__code">({{ grandchild.code }})</span>
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </li>
+  }
+</ul>

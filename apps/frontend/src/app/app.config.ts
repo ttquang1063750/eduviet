@@ -10,6 +10,7 @@ import { provideRouter, withComponentInputBinding, withViewTransitions } from '@
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideMarkdown, MARKED_EXTENSIONS, SANITIZE } from 'ngx-markdown';
+import { provideQuillConfig } from 'ngx-quill';
 import { HttpClient } from '@angular/common/http';
 import { SecurityContext } from '@angular/core';
 import markedKatex from 'marked-katex-extension';
@@ -41,6 +42,12 @@ export const appConfig: ApplicationConfig = {
     provideMarkdown({
       loader: HttpClient,
       sanitize: { provide: SANITIZE, useValue: SecurityContext.NONE },
+    }),
+    provideQuillConfig({
+      modules: {
+        syntax: false,
+        toolbar: false,
+      },
     }),
     {
       provide: MARKED_EXTENSIONS,

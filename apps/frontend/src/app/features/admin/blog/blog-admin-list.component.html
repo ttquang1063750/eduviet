@@ -1,0 +1,108 @@
+<div class="admin-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2 class="page-header__title">Quản lý Blog</h2>
+      @if (!loading()) {
+        <p class="page-header__sub">{{ total() }} bài viết</p>
+      }
+    </div>
+    <a routerLink="new" class="btn btn-primary">+ Viết bài mới</a>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <input
+      type="text"
+      [formControl]="searchControl"
+      placeholder="Tìm kiếm tiêu đề, nội dung..."
+      class="form-control search-input"
+    />
+    <select class="form-control status-select" (change)="onStatusChange($event)">
+      @for (s of statuses; track s.value) {
+        <option [value]="s.value" [selected]="statusFilter() === s.value">{{ s.label }}</option>
+      }
+    </select>
+  </div>
+
+  <!-- Table -->
+  @if (loading()) {
+    <div class="loading-state">Đang tải...</div>
+  } @else {
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Tiêu đề</th>
+            <th>Tác giả</th>
+            <th>Trạng thái</th>
+            <th>Tags</th>
+            <th>Ngày tạo</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (post of posts(); track trackById($index, post)) {
+            <tr>
+              <td class="post-title">
+                <a [routerLink]="[post.id, 'edit']" class="post-link">{{ post.title }}</a>
+                <span class="post-slug">{{ post.slug }}</span>
+              </td>
+              <td>{{ post.author.fullName }}</td>
+              <td>
+                <span class="status-badge" [class]="'status-badge--' + post.status.toLowerCase()">
+                  {{ statusLabels[post.status] }}
+                </span>
+              </td>
+              <td>
+                <div class="tags">
+                  @for (tag of post.tags.slice(0, 3); track tag) {
+                    <span class="tag">{{ tag }}</span>
+                  }
+                  @if (post.tags.length > 3) {
+                    <span class="tag tag--more">+{{ post.tags.length - 3 }}</span>
+                  }
+                </div>
+              </td>
+              <td class="date">{{ post.createdAt | date:'dd/MM/yyyy' }}</td>
+              <td class="actions">
+                <a [routerLink]="[post.id, 'edit']" class="btn btn-sm btn-outline">Sửa</a>
+                @if (post.status === 'APPROVED') {
+                  <button
+                    class="btn btn-sm btn-success"
+                    (click)="onPublish(post)"
+                    type="button"
+                  >Xuất bản</button>
+                }
+                <button
+                  class="btn btn-sm btn-danger"
+                  (click)="onDelete(post)"
+                  type="button"
+                >Xóa</button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-row">Không có bài viết nào.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- Pagination -->
+  @if (total() > perPage) {
+    <div class="pagination">
+      <button [disabled]="page() === 1" (click)="onPageChange(page() - 1)" class="btn btn-sm">
+        Trước
+      </button>
+      <span>Trang {{ page() }} / {{ totalPages() }}</span>
+      <button [disabled]="page() >= totalPages()" (click)="onPageChange(page() + 1)" class="btn btn-sm">
+        Sau
+      </button>
+    </div>
+  }
+
+</div>

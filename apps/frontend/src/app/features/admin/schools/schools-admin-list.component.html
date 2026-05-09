@@ -1,60 +1,94 @@
-<div class="admin-container">
-  <div class="header-actions">
-    <h2>Quản lý trường học</h2>
-    <a routerLink="new" class="btn btn-primary">Thêm trường mới</a>
-  </div>
-
-  <div class="filters">
-    <input
-      type="text"
-      [formControl]="searchControl"
-      placeholder="Tìm kiếm trường..."
-      class="form-control search-input"
-    >
-  </div>
-
-  <div class="table-responsive">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Mã</th>
-          <th>Tên trường</th>
-          <th>Địa chỉ</th>
-          <th>Hành động</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (school of schools(); track school.id) {
-          <tr>
-            <td>{{ school.code }}</td>
-            <td>{{ school.name }}</td>
-            <td>{{ school.address }}</td>
-            <td class="actions">
-              <a [routerLink]="[school.id]" class="btn btn-sm btn-outline">Sửa</a>
-            </td>
-          </tr>
-        } @empty {
-          <tr>
-            <td colspan="4" class="text-center">Không tìm thấy trường nào.</td>
-          </tr>
+<div class="schools-layout">
+  @if (showGeoTree()) {
+    <aside class="schools-layout__sidebar">
+      <div class="geo-panel">
+        <div class="geo-panel__header">
+          <h3 class="geo-panel__title">Địa lý</h3>
+          @if (selectedGeo()) {
+            <button class="geo-panel__clear" (click)="clearGeoFilter()" type="button">
+              Bỏ lọc
+            </button>
+          }
+        </div>
+        @if (selectedGeo()) {
+          <div class="geo-panel__active">
+            <span class="geo-panel__badge">{{ selectedGeoLabel() }}</span>
+          </div>
         }
-      </tbody>
-    </table>
-  </div>
-
-  @if (total() > perPage) {
-    <div class="pagination">
-      <button
-        [disabled]="page() === 1"
-        (click)="onPageChange(page() - 1)"
-        class="btn btn-sm"
-      >Trước</button>
-      <span>Trang {{ page() }} / {{ totalPages() }}</span>
-      <button
-        [disabled]="page() >= totalPages()"
-        (click)="onPageChange(page() + 1)"
-        class="btn btn-sm"
-      >Sau</button>
-    </div>
+        <app-geo-tree
+          maxDepth="district"
+          (nodeSelected)="onGeoSelected($event)"
+        />
+      </div>
+    </aside>
   }
+
+  <main class="schools-layout__content">
+    <div class="admin-container">
+      <div class="header-actions">
+        <h2>Quản lý trường học</h2>
+        <a routerLink="new" class="btn btn-primary">Thêm trường mới</a>
+      </div>
+
+      <div class="filters">
+        <input
+          type="text"
+          [formControl]="searchControl"
+          placeholder="Tìm kiếm trường..."
+          class="form-control search-input"
+        />
+        @if (selectedGeo()) {
+          <span class="filters__geo-tag">
+            {{ selectedGeoLabel() }}
+            <button (click)="clearGeoFilter()" type="button">✕</button>
+          </span>
+        }
+      </div>
+
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Mã</th>
+              <th>Tên trường</th>
+              <th>Địa chỉ</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (school of schools(); track school.id) {
+              <tr>
+                <td>{{ school.code }}</td>
+                <td>{{ school.name }}</td>
+                <td>{{ school.address }}</td>
+                <td class="actions">
+                  <a [routerLink]="[school.id]" class="btn btn-sm btn-outline">Sửa</a>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="text-center">Không tìm thấy trường nào.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (total() > perPage) {
+        <div class="pagination">
+          <button
+            [disabled]="page() === 1"
+            (click)="onPageChange(page() - 1)"
+            class="btn btn-sm"
+          >Trước</button>
+          <span>Trang {{ page() }} / {{ totalPages() }}</span>
+          <button
+            [disabled]="page() >= totalPages()"
+            (click)="onPageChange(page() + 1)"
+            class="btn btn-sm"
+          >Sau</button>
+        </div>
+      }
+    </div>
+  </main>
 </div>

@@ -18,9 +18,9 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-09 — session 4)
+## Trạng thái hiện tại (cập nhật 2026-05-09 — session 5)
 
-> ⚠️ Cần chạy `pnpm install` nếu chưa: thêm `@angular-eslint/template-parser`, `@eslint/js` vào package.json trong session 4.
+> ⚠️ Cần chạy `pnpm install` sau session 5: thêm `ngx-quill`, `quill`, `@types/quill` (Quill.js editor cho Blog admin).
 
 ### ✅ Đã hoàn thành
 
@@ -30,7 +30,8 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 | `auth` | ✅ | ✅ | — | — |
 | `users` | ✅ | ✅ | ✅ | ✅ |
 | `lessons` | ✅ | ✅ | ✅ | ✅ |
-| `subjects` | ✅ | ✅ | — | — |
+| `subjects` | ✅ | ✅ (CRUD + AI suggest) | — | — |
+| `geo` | ✅ | ✅ | — | — |
 | `schools` | ✅ | ✅ | ✅ | — |
 | `classes` | ✅ | ✅ | ✅ | — |
 | `blog` | ✅ | ✅ | ✅ | — |
@@ -51,6 +52,8 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 | `admin/schools` | ✅ | ✅ | — | ✅ |
 | `admin/classes` | ✅ | ✅ | — | ✅ |
 | `admin/content` | ✅ | — | — | ✅ |
+| `admin/subjects` | ✅ | — | — | — |
+| `admin/blog` | ✅ list + editor | — | — | — |
 | `reports` | ✅ + Xuất Excel/PDF | — | ✅ | ✅ |
 | `chat` | ✅ widget (FAB) | ✅ room-list + message-thread | ✅ | — |
 
@@ -58,6 +61,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ `breadcrumb/` — dynamic breadcrumb
 - ✅ `drawing-canvas/` — Konva.js + `getInputValue()` typed helper
 - ✅ `shared/pipes/safe-html.pipe.ts` — DOMPurify + bypassSecurityTrustHtml
+- ✅ `shared/components/geo-tree/` — GeoTreeComponent: lazy-load Nations→Provinces→Districts, RBAC scoping, emits nodeSelected
 - ✅ `core/utils/http-error.ts` — `getApiErrorMessage()` cho catch blocks
 
 #### ESLint ✅ COMPLETED (2026-05-09)
@@ -85,6 +89,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 2. **Dependabot** `.github/dependabot.yml`
 3. **PDF font tiếng Việt** — PDFKit không hỗ trợ dấu, cần nhúng font hoặc dùng Puppeteer
 4. **SMS notifications** (ESMS.vn)
+5. **Blog**: Thêm tag autocomplete, slug auto-gen từ title
 
 ---
 

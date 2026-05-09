@@ -151,6 +151,22 @@ export const routes: Routes = [
                 (m) => m.CONTENT_ADMIN_ROUTES
               ),
           },
+          {
+            path: 'subjects',
+            data: { breadcrumb: 'Môn học' },
+            loadChildren: () =>
+              import('./features/admin/subjects/subjects-admin.routes').then(
+                (m) => m.subjectsAdminRoutes
+              ),
+          },
+          {
+            path: 'blog',
+            data: { breadcrumb: 'Blog' },
+            loadChildren: () =>
+              import('./features/admin/blog/blog-admin.routes').then(
+                (m) => m.blogAdminRoutes
+              ),
+          },
         ],
       },
     ],

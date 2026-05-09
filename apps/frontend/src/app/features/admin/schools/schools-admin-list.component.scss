@@ -1,3 +1,105 @@
+// Layout with sidebar
+.schools-layout {
+  display: flex;
+  min-height: 100%;
+
+  &__sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    border-right: 1px solid #e5e7eb;
+    background: #fff;
+    overflow-y: auto;
+    max-height: calc(100vh - 80px);
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+// Geo panel inside sidebar
+.geo-panel {
+  padding: 12px;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  &__title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  &__clear {
+    font-size: 11px;
+    color: #6b7280;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 3px;
+
+    &:hover {
+      background: #f3f4f6;
+    }
+  }
+
+  &__active {
+    margin-bottom: 8px;
+  }
+
+  &__badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: 500;
+  }
+}
+
+// Geo filter tag inside main area
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  &__geo-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+
+    button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #3b82f6;
+      font-size: 11px;
+      padding: 0;
+      line-height: 1;
+
+      &:hover {
+        color: #1d4ed8;
+      }
+    }
+  }
+}
+
 .admin-container {
   padding: 20px;
 }

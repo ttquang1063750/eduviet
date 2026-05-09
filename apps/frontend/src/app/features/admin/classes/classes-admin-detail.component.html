@@ -1,27 +1,147 @@
 <div class="admin-container">
-  <h2>{{ isEditMode() ? 'Chỉnh sửa lớp học' : 'Tạo lớp học mới' }}</h2>
+  <div class="page-header">
+    <h2>{{ isEditMode() ? 'Chỉnh sửa lớp học' : 'Tạo lớp học mới' }}</h2>
+    <a routerLink="/admin/classes" class="btn btn-ghost">← Quay lại</a>
+  </div>
 
-  <form [formGroup]="classForm" (ngSubmit)="onSubmit()">
+  <form [formGroup]="classForm" (ngSubmit)="onSubmit()" class="class-form">
+
+    <!-- Tên lớp -->
     <div class="form-group">
-      <label for="name">Tên lớp</label>
-      <input id="name" type="text" formControlName="name" class="form-control">
+      <label for="name" class="form-label">Tên lớp <span class="required">*</span></label>
+      <input
+        id="name"
+        type="text"
+        formControlName="name"
+        class="form-control"
+        placeholder="VD: 10A1, 11B2..."
+      />
     </div>
 
-    <div class="form-group">
-      <label for="schoolId">Trường</label>
-      <input id="schoolId" type="text" formControlName="schoolId" class="form-control">
+    <!-- Khối lớp + Năm học (2 cột) -->
+    <div class="form-row">
+      <div class="form-group">
+        <label for="grade" class="form-label">Khối <span class="required">*</span></label>
+        <select id="grade" formControlName="grade" class="form-control">
+          @for (g of [1,2,3,4,5,6,7,8,9,10,11,12]; track g) {
+            <option [value]="g">Khối {{ g }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="academicYear" class="form-label">Năm học <span class="required">*</span></label>
+        <input
+          id="academicYear"
+          type="text"
+          formControlName="academicYear"
+          class="form-control"
+          placeholder="VD: 2025-2026"
+        />
+      </div>
     </div>
 
+    <!-- Trường học (picker) -->
     <div class="form-group">
-      <label for="homeroomTeacherId">Giáo viên chủ nhiệm</label>
-      <input id="homeroomTeacherId" type="text" formControlName="homeroomTeacherId" class="form-control">
+      <label class="form-label">Trường <span class="required">*</span></label>
+      <div class="picker-wrapper">
+        @if (selectedSchool()) {
+          <div class="picker-selected">
+            <span class="picker-selected__name">{{ selectedSchool()!.name }}</span>
+            <span class="picker-selected__code">{{ selectedSchool()!.code }}</span>
+            <button type="button" class="picker-selected__clear" (click)="clearSchool()">✕</button>
+          </div>
+        } @else {
+          <div class="picker-input-wrap">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Tìm kiếm trường..."
+              [value]="schoolSearch()"
+              (input)="onSchoolSearchInput($event)"
+              (focus)="openSchoolDropdown()"
+            />
+            @if (loadingSchools()) {
+              <span class="picker-spinner"></span>
+            }
+          </div>
+
+          @if (showSchoolDropdown() && schools().length > 0) {
+            <ul class="picker-dropdown">
+              @for (school of schools(); track school.id) {
+                <li class="picker-dropdown__item" (click)="selectSchool(school)">
+                  <span class="picker-dropdown__name">{{ school.name }}</span>
+                  <span class="picker-dropdown__meta">{{ school.code }}</span>
+                </li>
+              }
+            </ul>
+          }
+        }
+      </div>
     </div>
 
+    <!-- Giáo viên chủ nhiệm (picker, phụ thuộc trường) -->
+    <div class="form-group">
+      <label class="form-label">Giáo viên chủ nhiệm</label>
+      @if (!selectedSchool()) {
+        <p class="form-hint">Chọn trường trước để xem danh sách giáo viên.</p>
+      } @else {
+        <div class="picker-wrapper">
+          @if (selectedTeacher()) {
+            <div class="picker-selected">
+              <span class="picker-selected__name">{{ selectedTeacher()!.fullName }}</span>
+              <span class="picker-selected__code">{{ selectedTeacher()!.email }}</span>
+              <button type="button" class="picker-selected__clear" (click)="clearTeacher()">✕</button>
+            </div>
+          } @else {
+            <div class="picker-input-wrap">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Tìm giáo viên chủ nhiệm..."
+                [value]="teacherSearch()"
+                (input)="onTeacherSearchInput($event)"
+                (focus)="openTeacherDropdown()"
+              />
+              @if (loadingTeachers()) {
+                <span class="picker-spinner"></span>
+              }
+            </div>
+
+            @if (showTeacherDropdown()) {
+              @if (teachers().length === 0 && !loadingTeachers()) {
+                <div class="picker-empty">Không tìm thấy giáo viên chủ nhiệm nào tại trường này.</div>
+              } @else {
+                <ul class="picker-dropdown">
+                  @for (teacher of teachers(); track teacher.id) {
+                    <li class="picker-dropdown__item" (click)="selectTeacher(teacher)">
+                      <span class="picker-dropdown__name">{{ teacher.fullName }}</span>
+                      <span class="picker-dropdown__meta">{{ teacher.email }}</span>
+                    </li>
+                  }
+                </ul>
+              }
+            }
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Actions -->
     <div class="form-actions">
-      <button type="submit" [disabled]="classForm.invalid" class="btn btn-primary">
-        {{ isEditMode() ? 'Lưu thay đổi' : 'Tạo mới' }}
+      <button
+        type="submit"
+        [disabled]="classForm.invalid || saving()"
+        class="btn btn-primary"
+      >
+        @if (saving()) {
+          Đang lưu...
+        } @else {
+          {{ isEditMode() ? 'Lưu thay đổi' : 'Tạo lớp' }}
+        }
       </button>
       <a routerLink="/admin/classes" class="btn btn-secondary">Hủy</a>
     </div>
+
   </form>
 </div>

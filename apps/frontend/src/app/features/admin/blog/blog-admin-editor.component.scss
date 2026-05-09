@@ -1,0 +1,241 @@
+// ─── Layout ───────────────────────────────────────────────────────────────────
+
+.editor-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #f9fafb;
+}
+
+// ─── Toolbar ──────────────────────────────────────────────────────────────────
+
+.editor-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 10px;
+  }
+}
+
+// ─── Status badge ─────────────────────────────────────────────────────────────
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+
+  &--draft { background: #f3f4f6; color: #6b7280; }
+  &--review { background: #fef3c7; color: #d97706; }
+  &--approved { background: #d1fae5; color: #065f46; }
+  &--published { background: #dbeafe; color: #1d4ed8; }
+  &--archived { background: #f3f4f6; color: #9ca3af; }
+  &--rejected { background: #fee2e2; color: #dc2626; }
+}
+
+// ─── Editor body ──────────────────────────────────────────────────────────────
+
+.editor-body {
+  flex: 1;
+  padding: 32px;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+// Title input
+.title-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  background: transparent;
+  padding: 0 0 12px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e5e7eb;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: #d1d5db;
+  }
+
+  &:focus {
+    border-bottom-color: #3b82f6;
+  }
+}
+
+// Meta row
+.meta-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.meta-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.meta-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-control {
+  padding: 9px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #111827;
+  background: #fff;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+}
+
+// Quill container
+.content-editor {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+
+  ::ng-deep {
+    .ql-toolbar {
+      border: none;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 12px;
+      background: #f9fafb;
+    }
+
+    .ql-container {
+      border: none;
+      font-size: 16px;
+      font-family: inherit;
+    }
+
+    .ql-editor {
+      min-height: 400px;
+      padding: 20px 24px;
+      color: #111827;
+      line-height: 1.8;
+
+      &.ql-blank::before {
+        font-style: normal;
+        color: #d1d5db;
+        font-size: 15px;
+      }
+
+      h1, h2, h3 {
+        color: #111827;
+        font-weight: 700;
+      }
+
+      blockquote {
+        border-left: 4px solid #3b82f6;
+        background: #eff6ff;
+        padding: 8px 16px;
+        border-radius: 0 8px 8px 0;
+        color: #1d4ed8;
+      }
+
+      pre.ql-syntax {
+        background: #1e293b;
+        color: #e2e8f0;
+        border-radius: 8px;
+        padding: 16px;
+        font-size: 14px;
+        overflow-x: auto;
+      }
+    }
+  }
+}
+
+// ─── Buttons ─────────────────────────────────────────────────────────────────
+
+.btn {
+  padding: 9px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.15s;
+  white-space: nowrap;
+
+  &-ghost {
+    background: none;
+    border: 1px solid #e5e7eb;
+    color: #6b7280;
+
+    &:hover {
+      background: #f9fafb;
+    }
+  }
+
+  &-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+
+    &:hover:not(:disabled) {
+      background: #e5e7eb;
+    }
+  }
+
+  &-publish {
+    background: linear-gradient(135deg, #3b82f6, #7c3aed);
+    color: white;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}

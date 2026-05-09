@@ -1,6 +1,6 @@
 # EduViet — Progress Tracker
 
-> Cập nhật lần cuối: 2026-05-09 (session 4 — hotfix)
+> Cập nhật lần cuối: 2026-05-09 (session 5 — Admin UI: Geo Tree + Subjects + Blog)
 > Workflow: `/plan-task` → `/execute-step` (lặp) → `/check-point` → `/resume` → tiếp tục
 
 ---
@@ -146,3 +146,65 @@ PDFKit mặc định không hỗ trợ tiếng Việt. Cần nhúng font (VD: Ro
 ### Hotfixes (2026-05-09)
 - `docker-compose.yml` — MinIO tag `RELEASE.2024-05-01T01-10-10Z` → `RELEASE.2025-04-22T22-12-26Z`
 - `apps/frontend/src/main.ts` — `window as Window & Record<string,unknown>` → `Object.assign(window, {...})`
+
+---
+
+## 📋 Specs đã viết
+
+| File | Nội dung |
+|------|---------|
+| `docs/superpowers/specs/2026-05-09-admin-ui-tree-subjects-blog-design.md` | Admin UI: Geo Tree + Schools/Classes enhancement + Subjects + Blog editor |
+
+### Backlog mới từ spec (thêm vào sau P4)
+
+**P5 — Admin UI: Geographic Tree + Schools/Classes Enhancement**
+- Shared `<app-geo-tree>` component
+- `/admin/schools` thêm sidebar cây
+- `/admin/classes` thêm school picker + teacher picker (HOMEROOM_TEACHER filtered by school)
+
+**P6 — Admin UI: Subjects Admin**
+- CRUD + AI auto-suggest (ngx-quill không cần ở đây)
+- BE: POST/PUT/DELETE/suggest routes
+
+**P7 — Admin UI: Blog Editor**
+- WYSIWYG editor với Quill.js (ngx-quill)
+- Draft → Review workflow
+
+---
+
+## Session 5 — Admin UI: Geo Tree + Subjects + Blog (2026-05-09)
+
+### Backend (thêm mới)
+
+| File | Mô tả |
+|------|-------|
+| `modules/geo/geo.routes.ts` | GET /api/geo/nations, /provinces?nationId=, /districts?provinceId= |
+| `modules/geo/geo.service.ts` | GeoService: getNations/getProvinces/getDistricts |
+| `modules/subjects/subjects.routes.ts` | CRUD routes + AI suggest (SUPER_ADMIN only) |
+| `modules/subjects/subjects.service.ts` | create/update/delete + suggest() Anthropic API |
+| `modules/users/users.routes.ts` | Thêm `schoolId` vào paginationSchema |
+| `main.ts` | Register geoRoutes tại `/api/geo` |
+
+### Frontend (thêm mới)
+
+| File/Folder | Mô tả |
+|-------------|-------|
+| `core/services/geo.service.ts` | getNations/getProvinces/getDistricts() |
+| `core/services/subjects.service.ts` | CRUD + suggest() |
+| `core/services/blog.service.ts` | Mở rộng: create/update/publish/delete admin methods |
+| `shared/components/geo-tree/` | GeoTreeComponent (3 file, OnPush, lazy-load, RBAC scoping) |
+| `features/admin/schools/` | schools-admin-list: thêm geo-tree sidebar + districtId filter |
+| `features/admin/classes/` | classes-admin-detail: school picker + HOMEROOM_TEACHER picker |
+| `features/admin/subjects/` | SubjectsAdminComponent + routes (grid view, modal CRUD, AI suggest) |
+| `features/admin/blog/` | BlogAdminListComponent + BlogAdminEditorComponent + routes |
+| `app.routes.ts` | Thêm lazy routes: /admin/subjects, /admin/blog |
+| `app.config.ts` | provideQuillConfig |
+| `layout/main-layout.component.html` | Thêm nav links: Môn học, Blog (quản trị) |
+| `angular.json` | Thêm quill.snow.css vào styles |
+| `apps/frontend/package.json` | Thêm ngx-quill@^27.0.0, quill@^2.0.3, @types/quill |
+
+### Cần chạy sau session này
+
+```bash
+pnpm install   # cài ngx-quill + quill + @types/quill
+```

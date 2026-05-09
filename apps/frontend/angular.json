@@ -57,7 +57,8 @@
             "styles": [
               "src/styles.scss",
               "node_modules/katex/dist/katex.min.css",
-              "node_modules/highlight.js/styles/atom-one-light.css"
+              "node_modules/highlight.js/styles/atom-one-light.css",
+              "node_modules/quill/dist/quill.snow.css"
             ],
             "scripts": [
               "node_modules/marked/lib/marked.umd.js",
