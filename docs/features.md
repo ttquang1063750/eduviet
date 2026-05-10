@@ -1,15 +1,20 @@
 # EduViet — Các tính năng chính
 
-## 1. Quản lý bài học (Lesson Management) ✅
+## 1. Quản lý bài học (Lesson Management) 🚧 (đang mở rộng)
 - Tạo bài thủ công hoặc tự động theo cấp độ (dễ/trung bình/khó)
-- Hỗ trợ nhiều loại câu hỏi: trắc nghiệm (`MULTIPLE_CHOICE`), điền vào chỗ trống (`FILL_IN_BLANK`), tự luận (`SHORT_ANSWER`, `ESSAY`), vẽ hình (`DRAWING`)
+- Hỗ trợ nhiều loại câu hỏi: `SINGLE_CHOICE`, `MULTIPLE_CHOICE`, `FILL_IN_BLANK`, `SHORT_ANSWER`, `ESSAY`, `DRAWING`
 - Canvas tương tác (Konva.js) cho bài tập hình học — freehand, line, rect, ellipse, eraser, undo/redo
 - LaTeX rendering cho công thức toán (KaTeX) — inline `$...$` và block `$$...$$`
 - Review trước khi publish theo content workflow
+- **[Planned]** Ngân hàng câu hỏi (`Question`) scoped theo môn học — tái sử dụng câu hỏi qua nhiều bài học
+- **[Planned]** Toggle "Hiển thị ngẫu nhiên" per lesson (`randomizeQuestions`)
+- **[Planned]** Admin editor `/admin/lessons/:id/exercises` — giao diện nhập liệu câu hỏi (split panel, drag-drop reorder)
 
-## 2. Quản lý người dùng & Phân quyền ✅
-- Đăng nhập theo role, chỉ hiển thị nội dung phù hợp quyền
+## 2. Quản lý người dùng & Phân quyền 🚧 (đang mở rộng)
+- **Đa vai trò:** Mỗi user có thể có nhiều roles đồng thời (`roles: UserRole[]`)
+- **Chức danh tự do:** field `title` text, chỉ hiển thị, không ảnh hưởng phân quyền
 - JWT Access Token (15 phút) + Refresh Token (7 ngày, httpOnly cookie)
+- `authorize()` dùng OR logic trên `roles[]` — callsite không đổi
 - Row-Level Security trong PostgreSQL
 - Audit log mọi hành động nhạy cảm
 

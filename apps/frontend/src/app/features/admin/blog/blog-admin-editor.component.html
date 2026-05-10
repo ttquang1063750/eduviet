@@ -94,7 +94,7 @@
         </mat-chip-grid>
         <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectedTag($event)">
           @for (tag of filteredTags | async; track tag) {
-            <mat-autocomplete-option [value]="tag">{{ tag }}</mat-autocomplete-option>
+            <mat-option [value]="tag">{{ tag }}</mat-option>
           }
         </mat-autocomplete>
       </div>

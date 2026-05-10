@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { AsyncPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { QuillModule } from 'ngx-quill';
 import { BlogService, BlogStatus } from '../../../core/services/blog.service';
@@ -43,6 +44,7 @@ const QUILL_MODULES = {
   imports: [
     RouterLink,
     ReactiveFormsModule,
+    AsyncPipe,
     QuillModule,
     MatAutocompleteModule,
     MatChipsModule,

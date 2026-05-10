@@ -63,11 +63,13 @@ eduviet/
 │   │       │   ├── chat/    # (đang implement)
 │   │       │   ├── blog/
 │   │       │   ├── admin/
-│   │       │   └── reports/ # (chưa implement)
+│   │       │   │   ├── exercises/   # exercise-editor (split panel)
+│   │       │   │   └── questions/   # question-bank CRUD
+│   │       │   └── reports/
 │   │       └── layout/      # MainLayoutComponent
 │   └── backend/
 │       └── src/
-│           ├── modules/     # auth, users, lessons, schools, classes, blog, notifications, chat
+│           ├── modules/     # auth, users, lessons, questions, schools, classes, blog, notifications, chat
 │           ├── plugins/     # prisma.plugin, redis.plugin, socket.plugin (đang implement)
 │           └── shared/
 │               ├── middleware/  # authenticate, authorize

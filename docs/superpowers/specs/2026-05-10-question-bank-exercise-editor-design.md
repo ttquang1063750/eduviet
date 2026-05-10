@@ -1,7 +1,7 @@
-# EduViet — Question Bank & Exercise Editor
+# EduViet — Question Bank & Exercise Editor + Multi-Role RBAC
 
 **Ngày:** 2026-05-10
-**Scope:** Admin UI nhập liệu câu hỏi/đáp án + ngân hàng câu hỏi per-subject
+**Scope:** Admin UI nhập liệu câu hỏi/đáp án + ngân hàng câu hỏi per-subject + hỗ trợ đa vai trò người dùng
 **Người dùng chính:** CONTENT_CREATOR, SUPER_ADMIN
 
 ---
@@ -341,20 +341,128 @@ export interface LessonQuestion {
 
 ---
 
-## 6. Thứ tự implement (micro-steps)
+## 6. Multi-Role RBAC
 
-1. `[DB]` Prisma schema — xoá Exercise, thêm Question + LessonQuestion + randomizeQuestions + SINGLE_CHOICE enum
-2. `[DB]` Migration: `replace_exercise_with_question_bank`
-3. `[BE]` `shared-types` — thêm `question.types.ts`
-4. `[BE]` `questions.routes.ts` + `questions.schema.ts` (Zod)
-5. `[BE]` `questions.repository.ts`
-6. `[BE]` `questions.service.ts`
-7. `[BE]` Lesson routes — thêm sub-routes `/:lessonId/questions` + `/settings`
-8. `[FE]` `questions.service.ts` (Angular)
-9. `[FE]` `exercise-editor-state.service.ts`
-10. `[FE]` `lesson-question-list-panel` component
-11. `[FE]` `exercise-form-panel` component (form + type selector)
-12. `[FE]` `question-bank-picker` component
-13. `[FE]` `exercise-editor` shell component + routes
-14. `[FE]` `question-bank` admin page (CRUD độc lập)
+### 6.1 Mục tiêu
+
+Một user có thể có **nhiều roles đồng thời** (VD: vừa là `SUBJECT_TEACHER` vừa là `CONTENT_CREATOR`). Ngoài ra user có thể có **chức danh** tự do (text) chỉ dùng để hiển thị profile, không ảnh hưởng phân quyền.
+
+### 6.2 Schema thay đổi trên User
+
+```prisma
+model User {
+  // Xoá:  role  UserRole
+  // Thêm:
+  roles  Json    @default("[\"STUDENT\"]")  // UserRole[]
+  title  String? // Chức danh tự do: "Tổ trưởng Toán", "Phó hiệu trưởng"...
+}
+```
+
+Migration tên: `user_multi_roles`
+
+Steps migration:
+1. Thêm column `roles Json DEFAULT '["STUDENT"]'`
+2. Backfill: `UPDATE users SET roles = json_build_array(role)`
+3. Thêm column `title VARCHAR`
+4. Drop column `role`
+
+### 6.3 JWT & type augmentation
+
+```typescript
+// TRƯỚC
+declare module '@fastify/jwt' {
+  interface FastifyJWT {
+    user: { id: string; email: string; role: UserRole; };
+  }
+}
+
+// SAU
+declare module '@fastify/jwt' {
+  interface FastifyJWT {
+    user: { id: string; email: string; roles: UserRole[]; };
+  }
+}
+```
+
+Access token payload cập nhật tương ứng: `roles: UserRole[]` thay `role: UserRole`.
+
+### 6.4 authorize() middleware
+
+```typescript
+// Logic cũ: request.user.role === role
+// Logic mới: OR — pass nếu user có ÍT NHẤT 1 role khớp
+
+export function authorize(...allowedRoles: UserRole[]) {
+  return async (request: FastifyRequest, reply: FastifyReply) => {
+    const userRoles: UserRole[] = request.user.roles ?? [];
+    const hasRole = allowedRoles.some((r) => userRoles.includes(r));
+    if (!hasRole) {
+      throw new AppError('FORBIDDEN', 403, 'Bạn không có quyền truy cập');
+    }
+  };
+}
+```
+
+Tất cả callsite `authorize('ROLE1', 'ROLE2')` hiện tại **không đổi** — chỉ internal logic thay đổi.
+
+### 6.5 Frontend — AuthService
+
+```typescript
+// TRƯỚC
+hasRole(...roles: UserRole[]): boolean {
+  return roles.includes(this.currentUser()?.role);
+}
+
+// SAU
+hasRole(...roles: UserRole[]): boolean {
+  const userRoles = this.currentUser()?.roles ?? [];
+  return roles.some((r) => userRoles.includes(r));
+}
+```
+
+### 6.6 Files cần cập nhật (multi-role)
+
+| File | Thay đổi |
+|------|----------|
+| `libs/prisma/schema.prisma` | `role` → `roles Json`, thêm `title String?` |
+| `libs/prisma/migrations/` | Migration `user_multi_roles` |
+| `packages/shared-types/src/user.types.ts` | `role: UserRole` → `roles: UserRole[]`, thêm `title?: string` |
+| `apps/backend/src/shared/middleware/authenticate.ts` | `authorize()` dùng OR logic trên `roles[]` |
+| `apps/backend/src/modules/auth/auth.service.ts` | JWT sign payload: `roles` thay `role` |
+| `apps/backend/src/modules/users/users.service.ts` | CRUD: xử lý `roles` array thay `role` |
+| `apps/backend/src/modules/users/users.repository.ts` | Query/update `roles` JSON |
+| `apps/frontend/src/app/core/services/auth.service.ts` | `hasRole()` check `roles[]` |
+| `apps/frontend/src/app/features/admin/users/` | UI assign multiple roles (multi-select) thay dropdown đơn |
+
+---
+
+## 7. Thứ tự implement (micro-steps)
+
+### Phase 0 — Multi-Role RBAC (làm trước, nền tảng cho toàn bộ)
+
+0. `[DB]` Schema: `User.role` → `User.roles Json` + `User.title String?`
+1. `[DB]` Migration: `user_multi_roles` (backfill role → roles)
+2. `[BE]` `shared-types/user.types.ts` — cập nhật `roles: UserRole[]`, `title?: string`
+3. `[BE]` `authenticate.ts` — `authorize()` OR logic trên `roles[]`
+4. `[BE]` `auth.service.ts` — JWT payload `roles` thay `role`
+5. `[BE]` `users.repository.ts` + `users.service.ts` — CRUD với `roles` array
+6. `[FE]` `auth.service.ts` — `hasRole()` check `roles[]`
+7. `[FE]` `admin/users/` — multi-select roles thay dropdown đơn
+
+### Phase 1 — Question Bank & Exercise Editor
+
+8. `[DB]` Prisma schema — xoá Exercise, thêm Question + LessonQuestion + randomizeQuestions + SINGLE_CHOICE enum
+9. `[DB]` Migration: `replace_exercise_with_question_bank`
+10. `[BE]` `shared-types` — thêm `question.types.ts`
+11. `[BE]` `questions.routes.ts` + `questions.schema.ts` (Zod)
+12. `[BE]` `questions.repository.ts`
+13. `[BE]` `questions.service.ts`
+14. `[BE]` Lesson routes — thêm sub-routes `/:lessonId/questions` + `/settings`
+15. `[FE]` `questions.service.ts` (Angular)
+16. `[FE]` `exercise-editor-state.service.ts`
+17. `[FE]` `lesson-question-list-panel` component
+18. `[FE]` `exercise-form-panel` component (form + type selector)
+19. `[FE]` `question-bank-picker` component
+20. `[FE]` `exercise-editor` shell component + routes
+21. `[FE]` `question-bank` admin page (CRUD độc lập)
 15. `[FE]` Sidebar link + cập nhật lesson-detail để dùng `LessonQuestion` thay `Exercise`

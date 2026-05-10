@@ -1,5 +1,12 @@
 # EduViet — Phân quyền RBAC
 
+## Mô hình đa vai trò (Multi-Role)
+
+Mỗi user có thể có **nhiều roles đồng thời** — lưu dưới dạng `roles: Json` (mảng) trên model `User`.
+Ngoài ra mỗi user có thể có **chức danh** (`title: String?`) là text tự do, chỉ dùng để hiển thị profile, không ảnh hưởng phân quyền.
+
+Ví dụ hợp lệ: một người vừa là `SUBJECT_TEACHER` vừa là `CONTENT_CREATOR`.
+
 ## Roles hệ thống
 
 | Role | Mô tả |
@@ -50,12 +57,37 @@ DRAFT → REVIEW → APPROVED → PUBLISHED
 
 ## Implementation
 
+### Backend — authorize() middleware (OR logic)
+
 ```typescript
-// Backend — middleware
 import { authorize } from '../../shared/middleware/authorize';
 
-// Trong route definition
+// Trong route definition — pass nếu user có ÍT NHẤT 1 role khớp
 preHandler: [authenticate, authorize('STUDENT', 'SUBJECT_TEACHER')]
+```
+
+Logic nội bộ:
+```typescript
+// request.user.roles là UserRole[]
+const hasRole = allowedRoles.some((r) => request.user.roles.includes(r));
+```
+
+### Frontend — AuthService
+
+```typescript
+// Pass nếu user có ít nhất 1 role khớp
+this.authService.hasRole('CONTENT_APPROVER', 'SUPER_ADMIN')
+```
+
+### JWT payload
+
+```typescript
+// user.roles là mảng — không còn user.role đơn
+declare module '@fastify/jwt' {
+  interface FastifyJWT {
+    user: { id: string; email: string; roles: UserRole[]; };
+  }
+}
 ```
 
 ```typescript

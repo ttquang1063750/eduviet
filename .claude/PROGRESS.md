@@ -1,6 +1,6 @@
 # EduViet — Progress Tracker
 
-> Cập nhật lần cuối: 2026-05-10 (session 8 — SMS removal + Bug fixes)
+> Cập nhật lần cuối: 2026-05-10 (session 9 — Multi-Role RBAC + Question Bank design)
 > Workflow: `/plan-task` → `/execute-step` (lặp) → `/check-point` → `/resume` → tiếp tục
 
 ---
@@ -103,17 +103,17 @@
 
 ---
 
-## 🚧 Backlog (theo độ ưu tiên)
+## 🚧 Backlog (theo độ ưu tiên — cập nhật session 9)
 
-### P1 — pgcrypto cho PII fields
-Mã hóa `email`, `phone` at-rest trong PostgreSQL bằng pgcrypto. Cần migration + update Prisma queries.
+### P1 — Multi-Role RBAC ← NEXT
+User.roles Json[] + title, migrate authorize(), JWT payload, Admin UI multi-select.
+Spec: docs/superpowers/specs/2026-05-10-question-bank-exercise-editor-design.md (Phase 0, steps 0-7)
 
-### P2 — Dependabot
-Tạo `.github/dependabot.yml` để tự động quét dependency vulnerabilities.
+### P2 — Question Bank & Exercise Editor
+Model Question + LessonQuestion, SINGLE_CHOICE enum, /admin/lessons/:id/exercises split panel.
+Spec: docs/superpowers/specs/2026-05-10-question-bank-exercise-editor-design.md (Phase 1, steps 8-21)
 
 ### P3 — Export reports PDF cải thiện font
-PDFKit mặc định không hỗ trợ tiếng Việt. Cần nhúng font (VD: Roboto) hoặc dùng Puppeteer để render HTML → PDF.
-
 ---
 
 ## 🐛 Known Issues / Tech Debt
@@ -144,6 +144,10 @@ PDFKit mặc định không hỗ trợ tiếng Việt. Cần nhúng font (VD: Ro
 | ESLint flat config (v9) | Enforce Angular rules tự động — không phụ thuộc AI nhớ rules |
 | `getApiErrorMessage()` util | Xử lý `catch (error: unknown)` an toàn, tái sử dụng |
 | `getInputValue()` helper | Thay `$any($event.target).value` trong template — type-safe |
+| `User.roles Json[]` thay `role` đơn | Multi-role — một user có thể có nhiều vai trò đồng thời |
+| `title String?` tách khỏi roles | Chức danh chỉ để hiển thị, không ảnh hưởng authorize() |
+| `Question` + `LessonQuestion` thay `Exercise` | Tái sử dụng câu hỏi qua nhiều bài học (question bank per subject) |
+| `Lesson.randomizeQuestions` toggle | Creator kiểm soát thứ tự câu hỏi per lesson — hỗ trợ bài có logic phụ thuộc |
 
 ### Hotfixes (2026-05-09)
 - `docker-compose.yml` — MinIO tag `RELEASE.2024-05-01T01-10-10Z` → `RELEASE.2025-04-22T22-12-26Z`
@@ -260,3 +264,54 @@ Mã hóa `email`, `phone` at-rest trong PostgreSQL bằng pgcrypto.
 |------|-----------|
 | P1 — pgcrypto PII fields | ✅ DONE — schema `Bytes`, migration `encrypt_pii_fields`, `pii-crypto.ts`, `users.repository.ts` dùng `pgp_sym_encrypt/decrypt` + `hashPII` |
 | P2 — Dependabot | ✅ DONE — `.github/dependabot.yml` có npm + github-actions + docker |
+
+---
+
+## Session 9 — Multi-Role RBAC + Question Bank Design (2026-05-10)
+
+### Spec đã viết
+
+| File | Nội dung |
+|------|---------|
+| `docs/superpowers/specs/2026-05-10-question-bank-exercise-editor-design.md` | Question Bank + Exercise Editor split panel + Multi-Role RBAC |
+
+### Thay đổi kiến trúc quan trọng
+
+#### Multi-Role RBAC
+- `User.role: UserRole` → `User.roles: Json` (mảng `UserRole[]`)
+- `User.title: String?` — chức danh tự do, chỉ hiển thị, không ảnh hưởng phân quyền
+- `authorize()` dùng OR logic — pass nếu user có ít nhất 1 role khớp
+- JWT payload: `user.roles: UserRole[]` thay `user.role: UserRole`
+- Callsite `authorize('ROLE1', 'ROLE2')` **không đổi**
+
+#### Question Bank
+- Model `Exercise` bị xoá — thay bằng `Question` + `LessonQuestion`
+- `Question` scoped theo `subjectId` — tái sử dụng qua nhiều bài học
+- `LessonQuestion` junction table — `orderIndex` cho fixed-order mode
+- `Lesson.randomizeQuestions: Boolean @default(true)` — toggle per lesson
+- `ExerciseType` thêm `SINGLE_CHOICE`
+
+### Backlog cập nhật (theo độ ưu tiên)
+
+**P1 — Multi-Role RBAC** ← NEXT
+- Phase 0, steps 0–7 trong spec
+- Schema migration `user_multi_roles`
+- Update `authenticate.ts`, `auth.service.ts`, `users` module, Admin UI
+
+**P2 — Question Bank & Exercise Editor**
+- Phase 1, steps 8–21 trong spec
+- Schema migration `replace_exercise_with_question_bank`
+- Module `questions/`, `/admin/lessons/:id/exercises` split panel, `/admin/questions` CRUD
+
+**P3 — Export reports PDF cải thiện font**
+- PDFKit + font Inter/Roboto hỗ trợ tiếng Việt đầy đủ
+
+### Docs cập nhật trong session 9
+
+| File | Thay đổi |
+|------|---------|
+| `docs/rbac.md` | Thêm mục multi-role, cập nhật authorize() + JWT snippet |
+| `docs/features.md` | Cập nhật tính năng 1 (Question Bank) + tính năng 2 (multi-role) |
+| `docs/architecture.md` | Thêm module `questions/` + feature `exercises/`, `questions/` |
+| `docs/coding-standards.md` | JWT snippet: `role` → `roles[]` |
+| `CLAUDE.md` | JWT pattern, trạng thái còn lại, session 9 |

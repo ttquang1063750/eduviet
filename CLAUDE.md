@@ -18,7 +18,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-10 — session 8)
+## Trạng thái hiện tại (cập nhật 2026-05-10 — session 9)
 
 ### ✅ Đã hoàn thành
 
@@ -92,7 +92,9 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ Admin UI (Users/Schools/Classes/Content CRUD)
 
 ### 🚧 Còn lại (theo độ ưu tiên)
-1. **Export reports PDF cải thiện font**: PDFKit tiếng Việt (P3)
+1. **Multi-Role RBAC** — `User.roles Json[]` + `title`, migrate `authorize()`, JWT payload, Admin UI multi-select
+2. **Question Bank & Exercise Editor** — model `Question` + `LessonQuestion`, `/admin/lessons/:id/exercises` split panel
+3. **Export reports PDF cải thiện font**: PDFKit tiếng Việt (P3)
 
 #### Blog UX & Cleanup session 8 ✅ COMPLETED (2026-05-10)
 - ✅ **Blog UX**: Tag autocomplete (Material Chips), Slug auto-gen, Slug preview.
@@ -128,10 +130,11 @@ Route handler → Service → Repository → Prisma
 
 ```typescript
 // ĐÚNG — augment @fastify/jwt, KHÔNG augment fastify
+// user.roles là MẢNG — KHÔNG dùng user.role (multi-role)
 declare module '@fastify/jwt' {
   interface FastifyJWT {
     payload: AccessTokenPayload | RefreshTokenPayload;
-    user: { id: string; email: string; role: UserRole; };
+    user: { id: string; email: string; roles: UserRole[]; };
   }
 }
 ```

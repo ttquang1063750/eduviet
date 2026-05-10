@@ -82,10 +82,11 @@ export const lessonRoutes: FastifyPluginAsyncZod = async (app) => {
 
 ```typescript
 // ĐÚNG — augment @fastify/jwt, KHÔNG augment fastify
+// user.roles là MẢNG — không còn user.role đơn (multi-role)
 declare module '@fastify/jwt' {
   interface FastifyJWT {
     payload: AccessTokenPayload | RefreshTokenPayload;
-    user: { id: string; email: string; role: UserRole; };
+    user: { id: string; email: string; roles: UserRole[]; };
   }
 }
 ```
