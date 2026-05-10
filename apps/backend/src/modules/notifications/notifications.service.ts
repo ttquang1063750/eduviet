@@ -50,7 +50,7 @@ export class NotificationsService {
     userId: string;
     title: string;
     body: string;
-    channel: 'IN_APP' | 'EMAIL' | 'SMS';
+    channel: 'IN_APP' | 'EMAIL';
     notifData?: Record<string, unknown>;
   }) {
     await notificationQueue.add('send-notification', {

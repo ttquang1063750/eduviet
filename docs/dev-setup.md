@@ -103,11 +103,6 @@ SMTP_USER=
 SMTP_PASS=
 EMAIL_FROM=no-reply@eduviet.vn
 
-# SMS (ESMS.vn)
-ESMS_API_KEY=
-ESMS_SECRET_KEY=
-ESMS_BRANDNAME=EduViet
-
 # App
 NODE_ENV=development
 API_PORT=3000

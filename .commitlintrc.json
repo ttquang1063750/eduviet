@@ -6,7 +6,7 @@
       "always",
       [
         "auth", "users", "schools", "classes", "lessons", "content",
-        "chat", "blog", "news", "notifications", "email", "sms",
+        "chat", "blog", "news", "notifications", "email",
         "storage", "rbac", "reports", "deps", "docker", "ci", "db"
       ]
     ]

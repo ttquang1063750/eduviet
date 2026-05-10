@@ -16,7 +16,7 @@
   - Fastify (type-safe, nhanh hơn Express)
   - Prisma ORM (type-safe, migrations, seeding)
   - Socket.io v4 (WebSocket server cho live chat)
-  - BullMQ + Redis (job queues: email, SMS, notification)
+  - BullMQ + Redis (job queues: email, notification)
   - JWT (`@fastify/jwt`) — Access Token 15m + Refresh Token 7d
   - Zod (validation schema cho mọi request/response)
 

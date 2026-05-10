@@ -33,4 +33,4 @@ Hoàn thành: 2026-05-10
 - `libs/storage/src/storage.service.ts`
 
 ## Bước tiếp theo
-P4 — SMS notifications (ESMS.vn)
+P4 — Blog UX: tag autocomplete, slug auto-gen

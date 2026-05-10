@@ -69,7 +69,6 @@ enum ExerciseType {
 enum NotificationChannel {
   IN_APP
   EMAIL
-  SMS
 }
 
 enum ChatRoomType {

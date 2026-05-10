@@ -32,12 +32,11 @@
 - Moderator có thể ẩn/xóa comment
 - Phân quyền: CONTENT_CREATOR viết, CONTENT_APPROVER duyệt
 
-## 6. Thông báo ✅ (in-app + email) / 🚧 (SMS)
+## 6. Thông báo ✅ (in-app + email)
 - In-app notifications với unread count
 - Email: Nodemailer + React Email templates (welcome, verify-email, reset-password) — ✅ hoàn thành
 - Queue bất đồng bộ với BullMQ (email.queue + notification.queue + workers) — ✅ hoàn thành
 - Email tự động khi register: welcome email + verify-email — ✅ hoàn thành
-- SMS (ESMS.vn) — chưa implement
 
 ## 7. Báo cáo & Phân tích ✅ (hoàn thành 2026-05-08)
 - Dashboard analytics: thống kê users, lessons, classes, blog posts

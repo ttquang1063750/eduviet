@@ -1,6 +1,6 @@
 # EduViet — Progress Tracker
 
-> Cập nhật lần cuối: 2026-05-10 (session 8 — Bug fixes: Quill, blog, storage, classes)
+> Cập nhật lần cuối: 2026-05-10 (session 8 — SMS removal + Bug fixes)
 > Workflow: `/plan-task` → `/execute-step` (lặp) → `/check-point` → `/resume` → tiếp tục
 
 ---
@@ -111,8 +111,8 @@ Mã hóa `email`, `phone` at-rest trong PostgreSQL bằng pgcrypto. Cần migrat
 ### P2 — Dependabot
 Tạo `.github/dependabot.yml` để tự động quét dependency vulnerabilities.
 
-### P3 — SMS notifications (ESMS.vn)
-Tích hợp ESMS.vn vào notification queue. Pattern tương tự email.queue.ts.
+### P3 — Blog UX: tag autocomplete, slug auto-gen
+Cải thiện trải nghiệm người dùng khi viết blog.
 
 ### P4 — Export reports PDF cải thiện font
 PDFKit mặc định không hỗ trợ tiếng Việt. Cần nhúng font (VD: Roboto) hoặc dùng Puppeteer để render HTML → PDF.
