@@ -7,6 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { QuillModule } from 'ngx-quill';
 import { BlogService, BlogStatus } from '../../../core/services/blog.service';
@@ -46,6 +47,10 @@ export class BlogAdminEditorComponent implements OnInit {
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmService);
   private authService = inject(AuthService);
+  private http = inject(HttpClient);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private quillInstance: any = null;
 
   postForm = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(300)]],
@@ -99,8 +104,42 @@ export class BlogAdminEditorComponent implements OnInit {
       .subscribe();
   }
 
-  onContentChange(event: { html: string | null }): void {
-    this.postForm.patchValue({ content: event.html ?? '' });
+
+
+  // ─── Quill image upload ───────────────────────────────────────────────────
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onEditorCreated(quill: any): void {
+    this.quillInstance = quill;
+    // Override nút image trong toolbar — upload lên MinIO thay vì nhúng base64
+    const toolbar = quill.getModule('toolbar') as { addHandler(name: string, fn: () => void): void };
+    toolbar.addHandler('image', () => this.imageUploadHandler());
+  }
+
+  private imageUploadHandler(): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/jpeg,image/png,image/gif,image/webp';
+    input.click();
+
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (!file || !this.quillInstance) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      this.http
+        .post<{ data: { url: string } }>('/api/storage/upload', formData)
+        .subscribe({
+          next: ({ data }) => {
+            const range = this.quillInstance.getSelection(true) as { index: number };
+            this.quillInstance.insertEmbed(range.index, 'image', data.url, 'user');
+            this.quillInstance.setSelection(range.index + 1);
+          },
+          error: () => this.toastService.error('Upload ảnh thất bại'),
+        });
+    };
   }
 
   private parseTags(raw: string): string[] {
@@ -187,14 +226,37 @@ export class BlogAdminEditorComponent implements OnInit {
     });
     if (!confirmed) return;
 
-    this.blogService.publish(id).subscribe({
+    // Auto-save nội dung hiện tại trước khi publish
+    if (this.postForm.invalid) {
+      this.toastService.error('Nội dung chưa hợp lệ, vui lòng kiểm tra lại.');
+      return;
+    }
+    this.saving.set(true);
+    const val = this.postForm.value;
+    const payload = {
+      title: val.title!,
+      content: val.content!,
+      coverImage: val.coverImage || undefined,
+      tags: this.parseTags(val.tags ?? ''),
+    };
+
+    this.blogService.update(id, payload).subscribe({
       next: () => {
-        this.postStatus.set('PUBLISHED');
-        this.toastService.success('Đã xuất bản bài viết!');
-        this.router.navigate(['/admin/blog']);
+        this.saving.set(false);
+        this.blogService.publish(id).subscribe({
+          next: () => {
+            this.postStatus.set('PUBLISHED');
+            this.toastService.success('Đã xuất bản bài viết!');
+            this.router.navigate(['/admin/blog']);
+          },
+          error: (err: unknown) => {
+            this.toastService.error(getApiErrorMessage(err, 'Xuất bản thất bại'));
+          },
+        });
       },
       error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err, 'Xuất bản thất bại'));
+        this.toastService.error(getApiErrorMessage(err, 'Lưu thất bại trước khi xuất bản'));
+        this.saving.set(false);
       },
     });
   }

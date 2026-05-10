@@ -21,6 +21,7 @@ const storagePlugin: FastifyPluginAsync = fp(async (app) => {
 
   // Đảm bảo bucket tồn tại khi app khởi động
   await storage.ensureBucket();
+  await storage.ensurePublicReadPolicy('public');
 
   app.decorate('storage', storage);
 

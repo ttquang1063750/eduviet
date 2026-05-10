@@ -73,4 +73,23 @@ export class StorageService {
       await this.client.makeBucket(this.bucket);
     }
   }
+
+  /**
+   * Set S3 bucket policy: anonymous GET cho prefix (mặc định "public").
+   * Gọi khi app khởi động để đảm bảo ảnh upload vào public/ accessible mà không cần auth.
+   */
+  async ensurePublicReadPolicy(prefix = 'public'): Promise<void> {
+    const policy = JSON.stringify({
+      Version: '2012-10-17',
+      Statement: [
+        {
+          Effect: 'Allow',
+          Principal: { AWS: ['*'] },
+          Action: ['s3:GetObject'],
+          Resource: [`arn:aws:s3:::${this.bucket}/${prefix}/*`],
+        },
+      ],
+    });
+    await this.client.setBucketPolicy(this.bucket, policy);
+  }
 }

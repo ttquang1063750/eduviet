@@ -5,6 +5,7 @@ import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import jwt from '@fastify/jwt';
 import csrf from '@fastify/csrf-protection';
+import multipart from '@fastify/multipart';
 
 import prismaPlugin from './plugins/prisma.plugin.js';
 import redisPlugin from './plugins/redis.plugin.js';
@@ -71,6 +72,11 @@ async function bootstrap() {
   await app.register(csrf, {
     cookieOpts: { httpOnly: true, path: '/', sameSite: 'strict' },
     sessionPlugin: '@fastify/cookie',
+  });
+
+  // Multipart (file upload)
+  await app.register(multipart, {
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
   });
 
   // Plugins

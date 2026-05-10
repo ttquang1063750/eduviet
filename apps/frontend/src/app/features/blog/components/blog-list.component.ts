@@ -35,7 +35,7 @@ export class BlogListComponent implements OnInit {
   loadPosts() {
     this.loading.set(true);
     const { search, tag } = this.filterForm.getRawValue();
-    this.blogService.getAll({ page: this.page(), perPage: 9, search: search || undefined, tag: tag || undefined }).subscribe({
+    this.blogService.getAll({ page: this.page(), perPage: 9, status: 'PUBLISHED', search: search || undefined, tag: tag || undefined }).subscribe({
       next: (res) => {
         this.posts.set(res.data);
         this.totalPages.set(res.meta.totalPages);

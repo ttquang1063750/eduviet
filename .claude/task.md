@@ -1,37 +1,36 @@
-# Active Task: PDF Export — Font tiếng Việt
+# Active Task: Bug Fixes Session 8
 
 ## Mục tiêu
-PDFKit mặc định dùng font Helvetica không hỗ trợ Unicode — kết quả xuất PDF bỏ hết dấu tiếng Việt.
-Fix bằng cách nhúng font Roboto (có sẵn trên Google Fonts, hỗ trợ đầy đủ tiếng Việt) vào PDFKit.
-Không cần thêm dependency mới — PDFKit đã hỗ trợ `.registerFont()`.
+Sửa các lỗi runtime phát sinh trong quá trình sử dụng.
 
 ## Trạng thái: COMPLETED
 Bắt đầu: 2026-05-10
 Hoàn thành: 2026-05-10
 
 ## Steps
-
-### Chuẩn bị font
-- [x] 1. **Tải font Roboto** — download `Roboto-Regular.ttf` + `Roboto-Bold.ttf` vào `apps/backend/src/assets/fonts/`
-
-### Cập nhật PDF export
-- [x] 2. **Cập nhật `reports.service.ts`** — register font + dùng tiếng Việt đầy đủ (bỏ ASCII fallback)
-
-### Kiểm tra
-- [x] 3. **Verify** — đọc lại file đã sửa, kiểm tra logic đúng chuẩn
-
-## Context quan trọng
-- PDFKit API: `doc.registerFont('Roboto', '/path/to/Roboto-Regular.ttf')` rồi `doc.font('Roboto')`
-- Font path: dùng `path.join()` từ `import.meta.url` (ES Modules) hoặc `__dirname` (CommonJS)
-- Backend dùng ES Modules (`.js` extension, `"type": "module"` trong package.json) — dùng `fileURLToPath(import.meta.url)`
-- Không cần thay đổi route hay repository
-- Font Roboto Regular (~70KB) — nhúng vào PDF buffer, không ảnh hưởng performance đáng kể
-- Sau khi nhúng font: thay tất cả text ASCII fallback → tiếng Việt có dấu đầy đủ
+- [x] 1. Xóa `[katex]="true"` khỏi lesson-detail template (markedKatex đã xử lý)
+- [x] 2. Xóa scripts CommonJS thừa khỏi angular.json (marked.umd.js, highlight.js/lib/index.js, katex.min.js)
+- [x] 3. `[value]` → `[ngValue]` trên grade select trong classes-admin-detail
+- [x] 4. Bỏ `(onContentChanged)` + `onContentChange()` trong blog editor (cursor fix)
+- [x] 5. `getBySlug()` BE fallback UUID → `findById()` (blog editor load content)
+- [x] 6. `getAll()` FE hardcode `status: 'PUBLISHED'` trên public blog list
+- [x] 7. Quill image handler → upload MinIO (fix 413 base64 body too large)
+- [x] 8. Register `@fastify/multipart` trong main.ts (fix 415)
+- [x] 9. `ensurePublicReadPolicy('public')` trong storage plugin; key `public/uploads/` (fix ảnh broken)
+- [x] 10. `onPublish()` auto-save trước khi đổi status
 
 ## Files đã tạo/sửa
-- `apps/backend/src/assets/fonts/LiberationSans-Regular.ttf` — font nhúng PDF
-- `apps/backend/src/assets/fonts/LiberationSans-Bold.ttf` — font nhúng PDF
-- `apps/backend/src/modules/reports/reports.service.ts` — registerFont + full Vietnamese text
+- `apps/frontend/src/app/features/lessons/components/lesson-detail.component.html`
+- `apps/frontend/angular.json` — scripts[] cleaned
+- `apps/frontend/src/app/features/admin/classes/classes-admin-detail.component.html`
+- `apps/frontend/src/app/features/admin/blog/blog-admin-editor.component.ts`
+- `apps/frontend/src/app/features/admin/blog/blog-admin-editor.component.html`
+- `apps/frontend/src/app/features/blog/components/blog-list.component.ts`
+- `apps/backend/src/modules/blog/blog.service.ts`
+- `apps/backend/src/modules/storage/storage.routes.ts`
+- `apps/backend/src/main.ts`
+- `apps/backend/src/plugins/storage.plugin.ts`
+- `libs/storage/src/storage.service.ts`
 
-## Bước tiếp theo sau task này
-P4 — SMS notifications (ESMS.vn): tích hợp vào notification queue
+## Bước tiếp theo
+P4 — SMS notifications (ESMS.vn)

@@ -41,7 +41,7 @@
               - Block:  $$...$$ →  e.g. "$$x = \frac{-b \pm \sqrt{\Delta}}{2a}$$"
               SecurityContext.NONE được đặt trong app.config.ts để KaTeX HTML không bị Angular sanitizer cắt.
             -->
-            <markdown [data]="lesson()!.theory" [katex]="true"></markdown>
+            <markdown [data]="lesson()!.theory"></markdown>
           </div>
         </div>
 
@@ -55,7 +55,7 @@
             <div class="exercise-card">
               <div class="exercise-number">Câu {{ i + 1 }}</div>
               <div class="exercise-question">
-                <markdown [data]="exercise.question" [inline]="true" [katex]="true"></markdown>
+                <markdown [data]="exercise.question" [inline]="true"></markdown>
               </div>
 
               @if (exercise.type === 'MULTIPLE_CHOICE' && exercise.options) {
@@ -70,7 +70,7 @@
                       />
                       <span class="option-label">{{ 'ABCD'[j] }}</span>
                       <span class="option-text">
-                        <markdown [data]="opt" [inline]="true" [katex]="true"></markdown>
+                        <markdown [data]="opt" [inline]="true"></markdown>
                       </span>
                     </label>
                   }
@@ -125,7 +125,7 @@
 
               @if (showHints()[exercise.id] && exercise.hints.length > 0) {
                 <div class="hint-box">
-                  <markdown [data]="exercise.hints[0]" [inline]="true" [katex]="true"></markdown>
+                  <markdown [data]="exercise.hints[0]" [inline]="true"></markdown>
                 </div>
               }
             </div>

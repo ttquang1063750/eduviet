@@ -57,7 +57,7 @@ export const storageRoutes: FastifyPluginAsync = async (app) => {
 
       // Tạo key unique: uploads/userId/uuid.ext
       const ext = path.extname(data.filename) || `.${mimeType.split('/')[1]}`;
-      const key = `uploads/${request.user.id}/${crypto.randomUUID()}${ext}`;
+      const key = `public/uploads/${request.user.id}/${crypto.randomUUID()}${ext}`;
 
       const url = await app.storage.upload(buffer, key, mimeType);
 

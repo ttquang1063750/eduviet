@@ -60,11 +60,7 @@
               "node_modules/highlight.js/styles/atom-one-light.css",
               "node_modules/quill/dist/quill.snow.css"
             ],
-            "scripts": [
-              "node_modules/marked/lib/marked.umd.js",
-              "node_modules/highlight.js/lib/index.js",
-              "node_modules/katex/dist/katex.min.js"
-            ]
+            "scripts": []
           },
           "configurations": {
             "production": {

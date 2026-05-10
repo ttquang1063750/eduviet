@@ -1,6 +1,6 @@
 # EduViet — Progress Tracker
 
-> Cập nhật lần cuối: 2026-05-10 (session 7 — PDF Font tiếng Việt)
+> Cập nhật lần cuối: 2026-05-10 (session 8 — Bug fixes: Quill, blog, storage, classes)
 > Workflow: `/plan-task` → `/execute-step` (lặp) → `/check-point` → `/resume` → tiếp tục
 
 ---
@@ -53,7 +53,11 @@
 | `modules/chat/` | routes + service + repository + gateway + spec |
 | `modules/storage/storage.routes.ts` | POST /api/storage/upload |
 | `assets/fonts/LiberationSans-*.ttf` | Font TTF nhúng PDF — 17/17 ký tự tiếng Việt |
+| `plugins/storage.plugin.ts` | + `ensurePublicReadPolicy('public')` — tự set bucket policy khi start |
+| `main.ts` | + `@fastify/multipart` register (file upload) |
 | `modules/reports/` | routes + service + repository + **export Excel/PDF + font tiếng Việt (LiberationSans)** |
+| `modules/blog/blog.service.ts` | `getBySlug()` fallback UUID → `findById()` |
+| `modules/storage/storage.routes.ts` | key prefix `public/uploads/` (MinIO public read) |
 
 ### Frontend (`apps/frontend/src/app/`)
 

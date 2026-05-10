@@ -80,7 +80,7 @@
       <quill-editor
         formControlName="content"
         [modules]="quillModules"
-        (onContentChanged)="onContentChange($event)"
+        (onEditorCreated)="onEditorCreated($event)"
         placeholder="Bắt đầu viết nội dung bài học..."
         class="quill-editor"
       ></quill-editor>

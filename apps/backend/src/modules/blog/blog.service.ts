@@ -37,7 +37,10 @@ export class BlogService {
   }
 
   async getBySlug(slug: string, userRole?: UserRole) {
-    const post = await this.repo.findBySlug(slug);
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const post = UUID_RE.test(slug)
+      ? await this.repo.findById(slug)
+      : await this.repo.findBySlug(slug);
     if (!post) throw AppError.notFound('Bài viết');
 
     const isAdmin = userRole && CONTENT_ADMIN_ROLES.includes(userRole);

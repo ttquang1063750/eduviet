@@ -18,7 +18,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-10 — session 7)
+## Trạng thái hiện tại (cập nhật 2026-05-10 — session 8)
 
 ### ✅ Đã hoàn thành
 
@@ -94,6 +94,18 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 ### 🚧 Còn lại (theo độ ưu tiên)
 1. **SMS notifications** (ESMS.vn) — tích hợp ESMS vào notification queue ← NEXT
 2. **Blog UX**: tag autocomplete, slug auto-gen từ title
+
+#### Bug fixes session 8 ✅ COMPLETED (2026-05-10)
+- ✅ `[ngx-markdown] katex warning` — bỏ `[katex]="true"` (markedKatex extension đã xử lý)
+- ✅ `global:scripts.js require is not defined` — xóa scripts CommonJS thừa khỏi angular.json (đã import qua main.ts)
+- ✅ `classes/new` không tạo được — `[value]="g"` → `[ngValue]="g"` trên grade select (giữ kiểu number)
+- ✅ Blog editor cursor nhảy về đầu — bỏ `(onContentChanged)` + `onContentChange()` (formControlName CVA đã tự sync)
+- ✅ Blog editor không hiện content khi edit — `getBySlug()` BE fallback UUID → `findById()`
+- ✅ Blog public hiện post chưa publish — `getAll()` FE hardcode `status: 'PUBLISHED'`
+- ✅ Blog image upload 413 Payload Too Large — Quill image handler → upload MinIO thay vì base64
+- ✅ Blog image upload 415 Unsupported Media Type — register `@fastify/multipart` trong main.ts
+- ✅ Blog image không hiển thị — `ensurePublicReadPolicy('public')` tự set bucket policy khi app start; key prefix `public/uploads/`
+- ✅ Blog publish không lưu ảnh mới — `onPublish()` auto-save content trước khi đổi status
 
 > ✅ pgcrypto PII fields — DONE (schema Bytes + migration + pii-crypto.ts)
 > ✅ Dependabot — DONE (.github/dependabot.yml)
