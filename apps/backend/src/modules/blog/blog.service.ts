@@ -73,6 +73,24 @@ export class BlogService {
     return post;
   }
 
+  async submitForReview(id: string, actorId: string) {
+    const post = await this.repo.findById(id);
+    if (!post) throw AppError.notFound('Bài viết');
+    if (post.authorId !== actorId) throw AppError.forbidden('Bạn không có quyền gửi duyệt bài viết này');
+    if (post.status !== 'DRAFT') throw AppError.badRequest('Chỉ bài viết ở trạng thái Nháp mới được gửi duyệt');
+
+    const updated = await this.repo.update(id, { status: 'REVIEW' });
+
+    await writeAuditLog(this.prisma, {
+      userId: actorId,
+      action: 'BLOG_SUBMITTED_FOR_REVIEW',
+      resourceType: 'CONTENT',
+      resourceId: id,
+    });
+
+    return updated;
+  }
+
   async publish(id: string, actorId: string) {
     const post = await this.repo.findById(id);
     if (!post) throw AppError.notFound('Bài viết');

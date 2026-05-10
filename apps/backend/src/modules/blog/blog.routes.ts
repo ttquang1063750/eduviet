@@ -82,6 +82,17 @@ export const blogRoutes: FastifyPluginAsync = async (app) => {
     }
   );
 
+  // POST /blog/:id/submit-review — CONTENT_CREATOR gửi bài lên REVIEW
+  app.post(
+    '/:id/submit-review',
+    { preHandler: [authenticate] },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const post = await service.submitForReview(id, request.user.id);
+      return reply.send({ data: post });
+    }
+  );
+
   // POST /blog/:id/publish
   app.post(
     '/:id/publish',

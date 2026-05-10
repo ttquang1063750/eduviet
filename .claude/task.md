@@ -3,9 +3,9 @@
 ## Mục tiêu
 Implement 3 subsystems theo spec: `docs/superpowers/specs/2026-05-09-admin-ui-tree-subjects-blog-design.md`
 
-## Trạng thái: IN_PROGRESS
+## Trạng thái: COMPLETED
 Bắt đầu: 2026-05-09
-Step hiện tại: 4
+Step hiện tại: DONE
 
 ## Steps
 
@@ -15,17 +15,17 @@ Step hiện tại: 4
 - [x] 3. **Users schoolId filter** — thêm query param `schoolId` vào `GET /api/users`
 
 ### Frontend Shared
-- [ ] 4. **`<app-geo-tree>` component** — 3 file, OnPush, signals, lazy-load children, RBAC scoping
+- [x] 4. **`<app-geo-tree>` component** — 3 file, OnPush, signals, lazy-load children, RBAC scoping
 
 ### Frontend Feature Enhancements
-- [ ] 5. **Schools admin sidebar** — tích hợp geo-tree vào `/admin/schools`
-- [ ] 6. **Classes admin pickers** — school picker + HOMEROOM_TEACHER picker filtered by school
-- [ ] 7. **Subjects admin** — list + modal CRUD + auto-suggest button
-- [ ] 8. **Blog admin list** — `/admin/blog` list view với filter status
-- [ ] 9. **Blog admin editor** — Quill.js WYSIWYG + metadata panel + Draft/Review workflow
+- [x] 5. **Schools admin sidebar** — tích hợp geo-tree vào `/admin/schools`
+- [x] 6. **Classes admin pickers** — school picker + HOMEROOM_TEACHER picker filtered by school
+- [x] 7. **Subjects admin** — list + modal CRUD + auto-suggest button
+- [x] 8. **Blog admin list** — `/admin/blog` list view với filter status
+- [x] 9. **Blog admin editor** — Quill.js WYSIWYG + metadata panel + Draft/Review workflow
 
 ### Wiring
-- [ ] 10. **Routes + Sidebar** — thêm lazy routes + 2 link sidebar trong MainLayout
+- [x] 10. **Routes + Sidebar** — thêm lazy routes + 2 link sidebar trong MainLayout
 
 ## Context quan trọng
 - Spec: `docs/superpowers/specs/2026-05-09-admin-ui-tree-subjects-blog-design.md`
@@ -35,3 +35,6 @@ Step hiện tại: 4
 - RBAC geo-tree: SUPER_ADMIN=Nation, PROVINCE_ADMIN=Province, DISTRICT_ADMIN=District, SCHOOL_ADMIN=skip
 
 ## Files đã tạo/sửa
+- `shared/components/geo-tree/geo-tree.component.ts`
+- `shared/components/geo-tree/geo-tree.component.html`
+- `shared/components/geo-tree/geo-tree.component.scss`

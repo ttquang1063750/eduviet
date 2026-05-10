@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   OnInit,
   signal,
@@ -10,6 +11,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { QuillModule } from 'ngx-quill';
 import { BlogService, BlogStatus } from '../../../core/services/blog.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ConfirmService } from '../../../core/services/confirm.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { getApiErrorMessage } from '../../../core/utils/http-error';
 import { switchMap, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -41,6 +44,8 @@ export class BlogAdminEditorComponent implements OnInit {
   private router = inject(Router);
   private blogService = inject(BlogService);
   private toastService = inject(ToastService);
+  private confirmService = inject(ConfirmService);
+  private authService = inject(AuthService);
 
   postForm = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(300)]],
@@ -52,9 +57,20 @@ export class BlogAdminEditorComponent implements OnInit {
   postId = signal<string | null>(null);
   isEditMode = signal(false);
   saving = signal(false);
+  submitting = signal(false);
   postStatus = signal<BlogStatus>('DRAFT');
 
   readonly quillModules = QUILL_MODULES;
+
+  /** Chỉ CONTENT_APPROVER / SUPER_ADMIN / SCHOOL_ADMIN mới thấy nút Xuất bản */
+  readonly canPublish = computed(() =>
+    this.authService.hasRole('CONTENT_APPROVER', 'SUPER_ADMIN', 'SCHOOL_ADMIN'),
+  );
+
+  /** Nút Gửi duyệt chỉ hiện khi bài ở DRAFT và user là tác giả (chưa có APPROVER role) */
+  readonly canSubmitReview = computed(() =>
+    this.postStatus() === 'DRAFT' && !this.canPublish(),
+  );
 
   ngOnInit(): void {
     this.route.paramMap
@@ -129,13 +145,48 @@ export class BlogAdminEditorComponent implements OnInit {
     });
   }
 
-  onPublish(): void {
+  async onSubmitForReview(): Promise<void> {
+    const id = this.postId();
+    if (!id) {
+      this.toastService.error('Hãy lưu bài viết trước khi gửi duyệt.');
+      return;
+    }
+    const confirmed = await this.confirmService.confirm({
+      title: 'Gửi bài để duyệt',
+      message: 'Gửi bài viết này lên để CONTENT_REVIEWER/APPROVER xem xét?',
+      confirmText: 'Gửi duyệt',
+      type: 'primary',
+    });
+    if (!confirmed) return;
+
+    this.submitting.set(true);
+    this.blogService.submitForReview(id).subscribe({
+      next: () => {
+        this.postStatus.set('REVIEW');
+        this.toastService.success('Đã gửi bài viết lên duyệt!');
+        this.submitting.set(false);
+      },
+      error: (err: unknown) => {
+        this.toastService.error(getApiErrorMessage(err, 'Gửi duyệt thất bại'));
+        this.submitting.set(false);
+      },
+    });
+  }
+
+  async onPublish(): Promise<void> {
     const id = this.postId();
     if (!id) {
       this.toastService.error('Hãy lưu bài viết trước khi xuất bản.');
       return;
     }
-    if (!confirm('Xuất bản bài viết này?')) return;
+    const confirmed = await this.confirmService.confirm({
+      title: 'Xuất bản bài viết',
+      message: 'Bài viết sẽ hiển thị công khai ngay lập tức. Tiếp tục?',
+      confirmText: 'Xuất bản',
+      type: 'primary',
+    });
+    if (!confirmed) return;
+
     this.blogService.publish(id).subscribe({
       next: () => {
         this.postStatus.set('PUBLISHED');

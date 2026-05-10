@@ -99,6 +99,12 @@ export class BlogService {
       .pipe(map((res) => res.data));
   }
 
+  submitForReview(id: string): Observable<BlogListItem> {
+    return this.http
+      .post<ApiResponse<BlogListItem>>(`${this.API}/${id}/submit-review`, {})
+      .pipe(map((res) => res.data));
+  }
+
   publish(id: string): Observable<BlogListItem> {
     return this.http
       .post<ApiResponse<BlogListItem>>(`${this.API}/${id}/publish`, {})

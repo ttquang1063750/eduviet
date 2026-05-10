@@ -11,6 +11,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { BlogService, BlogListItem, BlogStatus } from '../../../core/services/blog.service';
 import { getApiErrorMessage } from '../../../core/utils/http-error';
 import { ToastService } from '../../../core/services/toast.service';
+import { ConfirmService } from '../../../core/services/confirm.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { DatePipe } from '@angular/common';
 
@@ -34,6 +35,7 @@ const STATUS_LABELS: Record<BlogStatus, string> = {
 export class BlogAdminListComponent implements OnInit {
   private blogService = inject(BlogService);
   private toastService = inject(ToastService);
+  private confirmService = inject(ConfirmService);
 
   posts = signal<BlogListItem[]>([]);
   total = signal(0);
@@ -93,8 +95,14 @@ export class BlogAdminListComponent implements OnInit {
     this.loadPosts();
   }
 
-  onPublish(post: BlogListItem): void {
-    if (!confirm(`Xuất bản bài viết "${post.title}"?`)) return;
+  async onPublish(post: BlogListItem): Promise<void> {
+    const confirmed = await this.confirmService.confirm({
+      title: 'Xuất bản bài viết',
+      message: `Xuất bản bài viết "${post.title}"? Bài sẽ hiển thị công khai ngay lập tức.`,
+      confirmText: 'Xuất bản',
+      type: 'primary',
+    });
+    if (!confirmed) return;
     this.blogService.publish(post.id).subscribe({
       next: (updated) => {
         this.posts.update((list) => list.map((p) => (p.id === updated.id ? updated : p)));
@@ -106,8 +114,14 @@ export class BlogAdminListComponent implements OnInit {
     });
   }
 
-  onDelete(post: BlogListItem): void {
-    if (!confirm(`Xóa bài viết "${post.title}"? Thao tác không thể hoàn tác.`)) return;
+  async onDelete(post: BlogListItem): Promise<void> {
+    const confirmed = await this.confirmService.confirm({
+      title: 'Xóa bài viết',
+      message: `Xóa bài viết "${post.title}"? Thao tác này không thể hoàn tác.`,
+      confirmText: 'Xóa',
+      type: 'danger',
+    });
+    if (!confirmed) return;
     this.blogService.delete(post.id).subscribe({
       next: () => {
         this.posts.update((list) => list.filter((p) => p.id !== post.id));

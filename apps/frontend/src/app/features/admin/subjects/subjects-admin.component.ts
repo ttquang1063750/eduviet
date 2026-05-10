@@ -10,6 +10,7 @@ import { SubjectsService } from '../../../core/services/subjects.service';
 import { Subject, SubjectCode } from '@eduviet/shared-types';
 import { getApiErrorMessage } from '../../../core/utils/http-error';
 import { ToastService } from '../../../core/services/toast.service';
+import { ConfirmService } from '../../../core/services/confirm.service';
 
 const SUBJECT_CODE_LABELS: Record<SubjectCode, string> = {
   MATH: 'Toán học',
@@ -38,6 +39,7 @@ export class SubjectsAdminComponent implements OnInit {
   private fb = inject(FormBuilder);
   private subjectsService = inject(SubjectsService);
   private toastService = inject(ToastService);
+  private confirmService = inject(ConfirmService);
 
   subjects = signal<Subject[]>([]);
   loading = signal(false);
@@ -182,8 +184,14 @@ export class SubjectsAdminComponent implements OnInit {
     }
   }
 
-  onDelete(subject: Subject): void {
-    if (!confirm(`Xóa môn học "${subject.name}"? Thao tác này không thể hoàn tác.`)) return;
+  async onDelete(subject: Subject): Promise<void> {
+    const confirmed = await this.confirmService.confirm({
+      title: 'Xóa môn học',
+      message: `Bạn có chắc muốn xóa môn học "${subject.name}"? Thao tác này không thể hoàn tác.`,
+      confirmText: 'Xóa',
+      type: 'danger',
+    });
+    if (!confirmed) return;
 
     this.subjectsService.delete(subject.id).subscribe({
       next: () => {

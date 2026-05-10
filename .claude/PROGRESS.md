@@ -208,3 +208,46 @@ PDFKit mặc định không hỗ trợ tiếng Việt. Cần nhúng font (VD: Ro
 ```bash
 pnpm install   # cài ngx-quill + quill + @types/quill
 ```
+
+---
+
+## Session 6 — Admin UI: Verify + Fix + Blog Review Flow (2026-05-10)
+
+> Task "Admin UI — Geo Tree + Subjects + Blog Editor" — **COMPLETED**
+
+### Verified (đã tồn tại từ session 5, verified đúng chuẩn)
+
+| File/Folder | Kết quả |
+|-------------|---------|
+| `shared/components/geo-tree/` | ✅ 3 file, OnPush, signals, lazy-load, RBAC |
+| `features/admin/schools/schools-admin-list.*` | ✅ geo-tree sidebar, districtId filter |
+| `features/admin/classes/classes-admin-detail.*` | ✅ school picker + HOMEROOM_TEACHER picker |
+| `features/admin/subjects/subjects-admin.*` | ✅ grid + modal CRUD + AI suggest |
+| `features/admin/blog/blog-admin-list.*` | ✅ list + filter status |
+| `features/admin/blog/blog-admin-editor.*` | ✅ Quill.js WYSIWYG |
+| `app.routes.ts` | ✅ /admin/subjects + /admin/blog routes |
+| `layout/main-layout.component.html` | ✅ sidebar links Môn học + Blog quản trị |
+
+### Thêm mới trong session 6
+
+| File | Mô tả |
+|------|-------|
+| `apps/backend/src/modules/blog/blog.routes.ts` | Thêm `POST /:id/submit-review` |
+| `apps/backend/src/modules/blog/blog.service.ts` | Thêm `submitForReview()` + audit log |
+| `apps/frontend/src/app/core/services/blog.service.ts` | Thêm `submitForReview()` |
+| `features/admin/blog/blog-admin-editor.component.ts` | `onSubmitForReview()`, `canPublish`/`canSubmitReview` computed, ConfirmService |
+| `features/admin/blog/blog-admin-editor.component.html` | Nút "Gửi duyệt" + gate "Xuất bản" theo role |
+| `features/admin/blog/blog-admin-editor.component.scss` | `.btn-review` style |
+
+### Bugfixes (vi phạm rules phát hiện khi review)
+
+| File | Fix |
+|------|-----|
+| `subjects-admin.component.ts` | `confirm()` → `ConfirmService.confirm()` (onDelete) |
+| `blog-admin-list.component.ts` | `confirm()` → `ConfirmService.confirm()` (onPublish + onDelete) |
+| `blog-admin-editor.component.ts` | `confirm()` → `ConfirmService.confirm()` (onPublish) |
+
+### Backlog tiếp theo (P1 ← NEXT)
+
+**P1 — pgcrypto cho PII fields**
+Mã hóa `email`, `phone` at-rest trong PostgreSQL bằng pgcrypto.

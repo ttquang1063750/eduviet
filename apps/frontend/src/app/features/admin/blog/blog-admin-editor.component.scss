@@ -225,6 +225,15 @@
     }
   }
 
+  &-review {
+    background: #f59e0b;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: #d97706;
+    }
+  }
+
   &-publish {
     background: linear-gradient(135deg, #3b82f6, #7c3aed);
     color: white;

@@ -18,9 +18,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-09 — session 5)
-
-> ⚠️ Cần chạy `pnpm install` sau session 5: thêm `ngx-quill`, `quill`, `@types/quill` (Quill.js editor cho Blog admin).
+## Trạng thái hiện tại (cập nhật 2026-05-10 — session 6)
 
 ### ✅ Đã hoàn thành
 
@@ -34,7 +32,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 | `geo` | ✅ | ✅ | — | — |
 | `schools` | ✅ | ✅ | ✅ | — |
 | `classes` | ✅ | ✅ | ✅ | — |
-| `blog` | ✅ | ✅ | ✅ | — |
+| `blog` | ✅ + submit-review | ✅ + submitForReview() | ✅ | — |
 | `notifications` | ✅ | ✅ (BullMQ) | — | — |
 | `chat` | ✅ | ✅ | ✅ | ✅ |
 | `storage` | ✅ | — | — | — |
@@ -52,8 +50,8 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 | `admin/schools` | ✅ | ✅ | — | ✅ |
 | `admin/classes` | ✅ | ✅ | — | ✅ |
 | `admin/content` | ✅ | — | — | ✅ |
-| `admin/subjects` | ✅ | — | — | — |
-| `admin/blog` | ✅ list + editor | — | — | — |
+| `admin/subjects` | ✅ grid + modal CRUD + AI suggest | — | ✅ | ✅ |
+| `admin/blog` | ✅ list + filter | ✅ Quill WYSIWYG + Draft/Review | ✅ | ✅ |
 | `reports` | ✅ + Xuất Excel/PDF | — | ✅ | ✅ |
 | `chat` | ✅ widget (FAB) | ✅ room-list + message-thread | ✅ | — |
 
@@ -63,6 +61,15 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ `shared/pipes/safe-html.pipe.ts` — DOMPurify + bypassSecurityTrustHtml
 - ✅ `shared/components/geo-tree/` — GeoTreeComponent: lazy-load Nations→Provinces→Districts, RBAC scoping, emits nodeSelected
 - ✅ `core/utils/http-error.ts` — `getApiErrorMessage()` cho catch blocks
+
+#### Admin UI Session 6 ✅ COMPLETED (2026-05-10)
+- ✅ `shared/components/geo-tree/` — GeoTreeComponent: lazy-load Nations→Provinces→Districts, RBAC scoping, emits GeoNodeSelected
+- ✅ `admin/schools/` sidebar — geo-tree filter theo districtId
+- ✅ `admin/classes/` detail — school picker + HOMEROOM_TEACHER picker (filtered by schoolId)
+- ✅ `admin/subjects/` — grid CRUD + modal + AI suggest + ConfirmService
+- ✅ `admin/blog/` list + editor — Quill.js WYSIWYG, Draft→Review→Publish workflow
+- ✅ `blog.service.ts` (BE+FE) — thêm `submitForReview()` + `POST /:id/submit-review`
+- 🐛 **Fix**: 4 chỗ dùng `confirm()` browser → `ConfirmService.confirm()` (subjects, blog-list, blog-editor)
 
 #### ESLint ✅ COMPLETED (2026-05-09)
 - ✅ `apps/frontend/eslint.config.js` — ESLint 9 flat config, 0 lỗi trên toàn bộ src/
@@ -85,11 +92,11 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ Admin UI (Users/Schools/Classes/Content CRUD)
 
 ### 🚧 Còn lại (theo độ ưu tiên)
-1. **pgcrypto** cho PII fields (email, phone) trong DB
+1. **pgcrypto** cho PII fields (email, phone) trong DB ← NEXT
 2. **Dependabot** `.github/dependabot.yml`
 3. **PDF font tiếng Việt** — PDFKit không hỗ trợ dấu, cần nhúng font hoặc dùng Puppeteer
 4. **SMS notifications** (ESMS.vn)
-5. **Blog**: Thêm tag autocomplete, slug auto-gen từ title
+5. **Blog UX**: tag autocomplete, slug auto-gen từ title
 
 ---
 

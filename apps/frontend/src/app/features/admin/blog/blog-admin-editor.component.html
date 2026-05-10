@@ -20,7 +20,17 @@
       >
         @if (saving()) { Đang lưu... } @else { 💾 Lưu nháp }
       </button>
-      @if (postId()) {
+      @if (postId() && canSubmitReview()) {
+        <button
+          type="button"
+          class="btn btn-review"
+          [disabled]="submitting()"
+          (click)="onSubmitForReview()"
+        >
+          @if (submitting()) { Đang gửi... } @else { 📤 Gửi duyệt }
+        </button>
+      }
+      @if (postId() && canPublish()) {
         <button
           type="button"
           class="btn btn-publish"
