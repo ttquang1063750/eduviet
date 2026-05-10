@@ -2,6 +2,13 @@ import { PrismaClient } from '@prisma/client';
 import { ReportsRepository } from './reports.repository.js';
 import ExcelJS from 'exceljs';
 import PDFDocument from 'pdfkit';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const FONTS_DIR = path.join(__dirname, '../../assets/fonts');
+const FONT_REGULAR = path.join(FONTS_DIR, 'LiberationSans-Regular.ttf');
+const FONT_BOLD    = path.join(FONTS_DIR, 'LiberationSans-Bold.ttf');
 
 export class ReportsService {
   private readonly repo: ReportsRepository;
@@ -88,49 +95,107 @@ export class ReportsService {
 
   async exportSummaryPdf(): Promise<Buffer> {
     const data = await this.getSummary();
-    
+
     return new Promise((resolve, reject) => {
       const chunks: Buffer[] = [];
-      const doc = new PDFDocument({ margin: 50 });
+      const doc = new PDFDocument({ margin: 50, size: 'A4' });
+
+      // Đăng ký font hỗ trợ tiếng Việt
+      doc.registerFont('Regular', FONT_REGULAR);
+      doc.registerFont('Bold', FONT_BOLD);
 
       doc.on('data', (chunk) => chunks.push(chunk));
       doc.on('end', () => resolve(Buffer.concat(chunks)));
       doc.on('error', reject);
 
-      // --- Header ---
-      doc.fontSize(20).text('BAO CAO HE THONG EDUVIET', { align: 'center' });
-      doc.fontSize(10).text(`Ngay xuat: ${new Date().toLocaleString()}`, { align: 'center' });
-      doc.moveDown();
-      doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+      const pageWidth = doc.page.width - 100; // trừ margin 2 bên
+      const now = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+
+      // ── Header ────────────────────────────────────────────────────────────────
+      doc.font('Bold').fontSize(22).fillColor('#1d4ed8')
+        .text('BÁO CÁO HỆ THỐNG EDUVIET', { align: 'center' });
+
+      doc.font('Regular').fontSize(10).fillColor('#6b7280')
+        .text(`Ngày xuất: ${now}`, { align: 'center' });
+
+      doc.moveDown(0.5);
+      doc.moveTo(50, doc.y).lineTo(doc.page.width - 50, doc.y)
+        .strokeColor('#e5e7eb').lineWidth(1).stroke();
       doc.moveDown();
 
-      // --- Section 1: User Counts ---
-      doc.fontSize(16).text('1. Thong ke nguoi dung', { underline: true });
-      doc.moveDown(0.5);
-      doc.fontSize(12);
+      // ── Section 1: Thống kê người dùng ───────────────────────────────────────
+      doc.font('Bold').fontSize(14).fillColor('#111827')
+        .text('1. Thống kê người dùng', { underline: false });
+      doc.moveDown(0.4);
+
+      const userRoleLabels: Record<string, string> = {
+        SUPER_ADMIN: 'Quản trị viên toàn quốc',
+        PROVINCE_ADMIN: 'Quản trị cấp tỉnh',
+        DISTRICT_ADMIN: 'Quản trị cấp huyện',
+        SCHOOL_ADMIN: 'Quản trị trường',
+        CONTENT_CREATOR: 'Biên soạn nội dung',
+        CONTENT_REVIEWER: 'Kiểm duyệt nội dung',
+        CONTENT_APPROVER: 'Phê duyệt nội dung',
+        HOMEROOM_TEACHER: 'Giáo viên chủ nhiệm',
+        SUBJECT_TEACHER: 'Giáo viên bộ môn',
+        STUDENT: 'Học sinh',
+        PARENT: 'Phụ huynh',
+      };
+
+      doc.font('Regular').fontSize(11).fillColor('#374151');
       Object.entries(data.userCounts).forEach(([role, count]) => {
-        doc.text(`${role}: ${count}`);
+        const label = userRoleLabels[role] ?? role;
+        doc.text(`  • ${label}: `, { continued: true })
+           .font('Bold').text(String(count));
+        doc.font('Regular');
       });
       doc.moveDown();
 
-      // --- Section 2: Content Counts ---
-      doc.fontSize(16).text('2. Thong ke noi dung', { underline: true });
-      doc.moveDown(0.5);
-      doc.fontSize(12);
-      doc.text(`Bai hoc: ${data.contentCounts.lessons}`);
-      doc.text(`Lop hoc: ${data.contentCounts.classes}`);
-      doc.text(`Bai viet Blog: ${data.contentCounts.blogPosts}`);
+      // ── Section 2: Thống kê nội dung ─────────────────────────────────────────
+      doc.font('Bold').fontSize(14).fillColor('#111827')
+        .text('2. Thống kê nội dung');
+      doc.moveDown(0.4);
+
+      doc.font('Regular').fontSize(11).fillColor('#374151');
+      const contentRows: [string, number][] = [
+        ['Bài học', data.contentCounts.lessons],
+        ['Lớp học', data.contentCounts.classes],
+        ['Bài viết Blog', data.contentCounts.blogPosts],
+      ];
+      contentRows.forEach(([label, count]) => {
+        doc.text(`  • ${label}: `, { continued: true })
+           .font('Bold').text(String(count));
+        doc.font('Regular');
+      });
       doc.moveDown();
 
-      // --- Section 3: Activities ---
-      doc.fontSize(16).text('3. Hoat dong dang nhap (7 ngay qua)', { underline: true });
-      doc.moveDown(0.5);
-      doc.fontSize(12);
-      Object.entries(data.loginActivities)
-        .sort((a, b) => a[0].localeCompare(b[0]))
-        .forEach(([date, count]) => {
-          doc.text(`${date}: ${count} luot`);
+      // ── Section 3: Hoạt động đăng nhập ───────────────────────────────────────
+      doc.font('Bold').fontSize(14).fillColor('#111827')
+        .text('3. Hoạt động đăng nhập (7 ngày qua)');
+      doc.moveDown(0.4);
+
+      const activities = Object.entries(data.loginActivities)
+        .sort((a, b) => a[0].localeCompare(b[0]));
+
+      if (activities.length === 0) {
+        doc.font('Regular').fontSize(11).fillColor('#9ca3af')
+          .text('  Không có dữ liệu.');
+      } else {
+        doc.font('Regular').fontSize(11).fillColor('#374151');
+        activities.forEach(([date, count]) => {
+          doc.text(`  • ${date}: `, { continued: true })
+             .font('Bold').text(`${count} lượt`);
+          doc.font('Regular');
         });
+      }
+
+      // ── Footer ────────────────────────────────────────────────────────────────
+      doc.moveDown(2);
+      doc.moveTo(50, doc.y).lineTo(doc.page.width - 50, doc.y)
+        .strokeColor('#e5e7eb').lineWidth(1).stroke();
+      doc.moveDown(0.5);
+      doc.font('Regular').fontSize(9).fillColor('#9ca3af')
+        .text('EduViet — Nền tảng ôn tập học thuật trực tuyến', { align: 'center' });
 
       doc.end();
     });

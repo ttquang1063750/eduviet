@@ -1,6 +1,6 @@
 # EduViet — Progress Tracker
 
-> Cập nhật lần cuối: 2026-05-09 (session 5 — Admin UI: Geo Tree + Subjects + Blog)
+> Cập nhật lần cuối: 2026-05-10 (session 7 — PDF Font tiếng Việt)
 > Workflow: `/plan-task` → `/execute-step` (lặp) → `/check-point` → `/resume` → tiếp tục
 
 ---
@@ -52,7 +52,8 @@
 | `modules/notifications/` | routes + service (BullMQ) |
 | `modules/chat/` | routes + service + repository + gateway + spec |
 | `modules/storage/storage.routes.ts` | POST /api/storage/upload |
-| `modules/reports/` | routes + service + repository + **export Excel/PDF** |
+| `assets/fonts/LiberationSans-*.ttf` | Font TTF nhúng PDF — 17/17 ký tự tiếng Việt |
+| `modules/reports/` | routes + service + repository + **export Excel/PDF + font tiếng Việt (LiberationSans)** |
 
 ### Frontend (`apps/frontend/src/app/`)
 
@@ -251,3 +252,10 @@ pnpm install   # cài ngx-quill + quill + @types/quill
 
 **P1 — pgcrypto cho PII fields**
 Mã hóa `email`, `phone` at-rest trong PostgreSQL bằng pgcrypto.
+
+### ✅ Discovered completed (session 6 audit)
+
+| Item | Trạng thái |
+|------|-----------|
+| P1 — pgcrypto PII fields | ✅ DONE — schema `Bytes`, migration `encrypt_pii_fields`, `pii-crypto.ts`, `users.repository.ts` dùng `pgp_sym_encrypt/decrypt` + `hashPII` |
+| P2 — Dependabot | ✅ DONE — `.github/dependabot.yml` có npm + github-actions + docker |

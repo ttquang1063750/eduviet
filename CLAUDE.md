@@ -18,7 +18,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-10 — session 6)
+## Trạng thái hiện tại (cập nhật 2026-05-10 — session 7)
 
 ### ✅ Đã hoàn thành
 
@@ -92,11 +92,11 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ Admin UI (Users/Schools/Classes/Content CRUD)
 
 ### 🚧 Còn lại (theo độ ưu tiên)
-1. **pgcrypto** cho PII fields (email, phone) trong DB ← NEXT
-2. **Dependabot** `.github/dependabot.yml`
-3. **PDF font tiếng Việt** — PDFKit không hỗ trợ dấu, cần nhúng font hoặc dùng Puppeteer
-4. **SMS notifications** (ESMS.vn)
-5. **Blog UX**: tag autocomplete, slug auto-gen từ title
+1. **SMS notifications** (ESMS.vn) — tích hợp ESMS vào notification queue ← NEXT
+2. **Blog UX**: tag autocomplete, slug auto-gen từ title
+
+> ✅ pgcrypto PII fields — DONE (schema Bytes + migration + pii-crypto.ts)
+> ✅ Dependabot — DONE (.github/dependabot.yml)
 
 ---
 
