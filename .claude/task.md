@@ -1,36 +1,41 @@
-# Active Task: Bug Fixes Session 8
+# Active Task: Blog UX Improvements
 
 ## Mục tiêu
-Sửa các lỗi runtime phát sinh trong quá trình sử dụng.
+Cải thiện trải nghiệm người dùng trong trình soạn thảo Blog:
+- Tự động gợi ý tags (autocomplete) dựa trên các tags đã có trong hệ thống.
+- Tự động sinh slug từ tiêu đề bài viết (Slug auto-gen).
+- Hiển thị preview slug để người dùng biết link bài viết.
 
 ## Trạng thái: COMPLETED
 Bắt đầu: 2026-05-10
 Hoàn thành: 2026-05-10
 
 ## Steps
-- [x] 1. Xóa `[katex]="true"` khỏi lesson-detail template (markedKatex đã xử lý)
-- [x] 2. Xóa scripts CommonJS thừa khỏi angular.json (marked.umd.js, highlight.js/lib/index.js, katex.min.js)
-- [x] 3. `[value]` → `[ngValue]` trên grade select trong classes-admin-detail
-- [x] 4. Bỏ `(onContentChanged)` + `onContentChange()` trong blog editor (cursor fix)
-- [x] 5. `getBySlug()` BE fallback UUID → `findById()` (blog editor load content)
-- [x] 6. `getAll()` FE hardcode `status: 'PUBLISHED'` trên public blog list
-- [x] 7. Quill image handler → upload MinIO (fix 413 base64 body too large)
-- [x] 8. Register `@fastify/multipart` trong main.ts (fix 415)
-- [x] 9. `ensurePublicReadPolicy('public')` trong storage plugin; key `public/uploads/` (fix ảnh broken)
-- [x] 10. `onPublish()` auto-save trước khi đổi status
+- [x] 1. [BE] Thêm phương thức `getPopularTags` vào `BlogRepository`
+- [x] 2. [BE] Thêm phương thức `getTags` vào `BlogService`
+- [x] 3. [BE] Thêm route `GET /api/blog/tags` vào `blog.routes.ts`
+- [x] 4. [FE] Thêm phương thức `getTags()` vào `core/services/blog.service.ts`
+- [x] 5. [FE] Cài đặt `MatAutocompleteModule` và `MatChipsModule` (nếu chưa có)
+- [x] 6. [FE] BlogAdminEditor: Implement Slug auto-generation logic
+- [x] 7. [FE] BlogAdminEditor: Implement Tag Autocomplete với MatAutocomplete & MatChips
+- [x] 8. [FE] BlogAdminEditor: Thêm Slug Preview vào template
+
+## Context quan trọng
+- Backend dùng `unnest` trong raw SQL để đếm tags phổ biến.
+- Frontend dùng `MatChips` cho tags và `debounceTime` cho slug generation.
+- Tích hợp `@angular/material` prebuilt theme.
 
 ## Files đã tạo/sửa
-- `apps/frontend/src/app/features/lessons/components/lesson-detail.component.html`
-- `apps/frontend/angular.json` — scripts[] cleaned
-- `apps/frontend/src/app/features/admin/classes/classes-admin-detail.component.html`
+- `apps/backend/src/modules/blog/blog.repository.ts`
+- `apps/backend/src/modules/blog/blog.service.ts`
+- `apps/backend/src/modules/blog/blog.routes.ts`
+- `apps/frontend/src/app/core/services/blog.service.ts`
+- `apps/frontend/package.json`
+- `apps/frontend/angular.json`
 - `apps/frontend/src/app/features/admin/blog/blog-admin-editor.component.ts`
 - `apps/frontend/src/app/features/admin/blog/blog-admin-editor.component.html`
-- `apps/frontend/src/app/features/blog/components/blog-list.component.ts`
-- `apps/backend/src/modules/blog/blog.service.ts`
-- `apps/backend/src/modules/storage/storage.routes.ts`
-- `apps/backend/src/main.ts`
-- `apps/backend/src/plugins/storage.plugin.ts`
-- `libs/storage/src/storage.service.ts`
+- `apps/frontend/src/app/features/admin/blog/blog-admin-editor.component.scss`
 
-## Bước tiếp theo
-P4 — Blog UX: tag autocomplete, slug auto-gen
+## Bước tiếp theo sau task này
+P4 — Export reports PDF cải thiện font
+

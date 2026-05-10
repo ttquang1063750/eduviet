@@ -46,12 +46,19 @@
   <div class="editor-body" [formGroup]="postForm">
 
     <!-- Title -->
-    <input
-      type="text"
-      formControlName="title"
-      class="title-input"
-      placeholder="Tiêu đề bài viết..."
-    />
+    <div class="title-container">
+      <input
+        type="text"
+        formControlName="title"
+        class="title-input"
+        placeholder="Tiêu đề bài viết..."
+      />
+      @if (slugPreview()) {
+        <div class="slug-preview">
+          URL: <code>/blog/{{ slugPreview() }}</code>
+        </div>
+      }
+    </div>
 
     <!-- Cover image URL -->
     <div class="meta-row">
@@ -65,13 +72,31 @@
         />
       </div>
       <div class="meta-field">
-        <label class="meta-label">Tags (phân cách bằng dấu phẩy)</label>
-        <input
-          type="text"
-          formControlName="tags"
-          class="form-control"
-          placeholder="học toán, lớp 10, đại số"
-        />
+        <label class="meta-label">Tags</label>
+        <mat-chip-grid #chipGrid aria-label="Tag selection">
+          @for (tag of selectedTags(); track tag) {
+            <mat-chip-row (removed)="removeTag(tag)">
+              {{ tag }}
+              <button matChipRemove [attr.aria-label]="'remove ' + tag">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </mat-chip-row>
+          }
+          <input
+            placeholder="Thêm tag..."
+            #tagInput
+            [formControl]="tagCtrl"
+            [matChipInputFor]="chipGrid"
+            [matAutocomplete]="auto"
+            [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+            (matChipInputTokenEnd)="addTag($event)"
+          />
+        </mat-chip-grid>
+        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectedTag($event)">
+          @for (tag of filteredTags | async; track tag) {
+            <mat-autocomplete-option [value]="tag">{{ tag }}</mat-autocomplete-option>
+          }
+        </mat-autocomplete>
       </div>
     </div>
 

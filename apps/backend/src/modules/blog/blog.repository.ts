@@ -118,4 +118,16 @@ export class BlogRepository {
   async findCommentById(id: string) {
     return this.prisma.comment.findUnique({ where: { id } });
   }
+
+  async getPopularTags(limit = 20): Promise<string[]> {
+    const result = await this.prisma.$queryRaw<{ tag: string }[]>`
+      SELECT unnest(tags) as tag, COUNT(*)::int as count
+      FROM blog_posts
+      WHERE deleted_at IS NULL
+      GROUP BY tag
+      ORDER BY count DESC
+      LIMIT ${limit}
+    `;
+    return result.map((r) => r.tag);
+  }
 }

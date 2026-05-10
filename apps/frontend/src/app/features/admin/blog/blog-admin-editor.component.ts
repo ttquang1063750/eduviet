@@ -5,18 +5,24 @@ import {
   inject,
   OnInit,
   signal,
+  viewChild,
+  ElementRef,
 } from '@angular/core';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { QuillModule } from 'ngx-quill';
 import { BlogService, BlogStatus } from '../../../core/services/blog.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { getApiErrorMessage } from '../../../core/utils/http-error';
-import { switchMap, tap } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { switchMap, tap, startWith, map, debounceTime } from 'rxjs/operators';
+import { of, Observable } from 'rxjs';
+import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { MatChipsModule, MatChipInputEvent } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
+import { COMMA, ENTER } from '@angular/cdk/keycodes';
 
 const QUILL_MODULES = {
   toolbar: [
@@ -34,7 +40,14 @@ const QUILL_MODULES = {
 @Component({
   selector: 'app-blog-admin-editor',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule, QuillModule],
+  imports: [
+    RouterLink,
+    ReactiveFormsModule,
+    QuillModule,
+    MatAutocompleteModule,
+    MatChipsModule,
+    MatIconModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './blog-admin-editor.component.html',
   styleUrl: './blog-admin-editor.component.scss',
@@ -52,20 +65,46 @@ export class BlogAdminEditorComponent implements OnInit {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private quillInstance: any = null;
 
+  tagInput = viewChild<ElementRef<HTMLInputElement>>('tagInput');
+  readonly separatorKeysCodes: number[] = [ENTER, COMMA];
+
   postForm = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(300)]],
     content: ['', [Validators.required, Validators.minLength(20)]],
     coverImage: [''],
-    tags: [''],
   });
+
+  tagCtrl = new FormControl('');
+  selectedTags = signal<string[]>([]);
+  allTags = signal<string[]>([]);
+  filteredTags: Observable<string[]>;
 
   postId = signal<string | null>(null);
   isEditMode = signal(false);
   saving = signal(false);
   submitting = signal(false);
   postStatus = signal<BlogStatus>('DRAFT');
+  slugPreview = signal('');
 
   readonly quillModules = QUILL_MODULES;
+
+  constructor() {
+    this.filteredTags = this.tagCtrl.valueChanges.pipe(
+      startWith(null),
+      map((tag: string | null) => (tag ? this._filter(tag) : this.allTags().slice())),
+    );
+
+    // Slug auto-gen
+    this.postForm.controls.title.valueChanges
+      .pipe(debounceTime(300))
+      .subscribe((title) => {
+        if (title) {
+          this.slugPreview.set(this._buildSlug(title));
+        } else {
+          this.slugPreview.set('');
+        }
+      });
+  }
 
   /** Chỉ CONTENT_APPROVER / SUPER_ADMIN / SCHOOL_ADMIN mới thấy nút Xuất bản */
   readonly canPublish = computed(() =>
@@ -78,6 +117,9 @@ export class BlogAdminEditorComponent implements OnInit {
   );
 
   ngOnInit(): void {
+    // Load popular tags
+    this.blogService.getTags().subscribe((tags) => this.allTags.set(tags));
+
     this.route.paramMap
       .pipe(
         switchMap((params) => {
@@ -95,16 +137,54 @@ export class BlogAdminEditorComponent implements OnInit {
               title: post.title,
               content: post.content,
               coverImage: post.coverImage ?? '',
-              tags: post.tags.join(', '),
             });
+            this.selectedTags.set(post.tags);
             this.postStatus.set(post.status);
+            this.slugPreview.set(post.slug);
           }
         }),
       )
       .subscribe();
   }
 
+  // ─── Tags Logic ───────────────────────────────────────────────────────────
 
+  addTag(event: MatChipInputEvent): void {
+    const value = (event.value || '').trim();
+    if (value) {
+      this.selectedTags.update((tags) => [...new Set([...tags, value])]);
+    }
+    event.chipInput!.clear();
+    this.tagCtrl.setValue(null);
+  }
+
+  removeTag(tag: string): void {
+    this.selectedTags.update((tags) => tags.filter((t) => t !== tag));
+  }
+
+  selectedTag(event: MatAutocompleteSelectedEvent): void {
+    this.selectedTags.update((tags) => [...new Set([...tags, event.option.viewValue])]);
+    this.tagInput()!.nativeElement.value = '';
+    this.tagCtrl.setValue(null);
+  }
+
+  private _filter(value: string): string[] {
+    const filterValue = value.toLowerCase();
+    return this.allTags().filter((tag) => tag.toLowerCase().includes(filterValue));
+  }
+
+  // ─── Slug Logic ───────────────────────────────────────────────────────────
+
+  private _buildSlug(title: string): string {
+    return title
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/\s+/g, '-')
+      .substring(0, 100);
+  }
 
   // ─── Quill image upload ───────────────────────────────────────────────────
 
@@ -142,13 +222,6 @@ export class BlogAdminEditorComponent implements OnInit {
     };
   }
 
-  private parseTags(raw: string): string[] {
-    return raw
-      .split(',')
-      .map((t) => t.trim())
-      .filter((t) => t.length > 0);
-  }
-
   onSave(): void {
     if (this.postForm.invalid) return;
     this.saving.set(true);
@@ -158,7 +231,7 @@ export class BlogAdminEditorComponent implements OnInit {
       title: val.title!,
       content: val.content!,
       coverImage: val.coverImage || undefined,
-      tags: this.parseTags(val.tags ?? ''),
+      tags: this.selectedTags(),
     };
 
     const id = this.postId();
@@ -172,6 +245,7 @@ export class BlogAdminEditorComponent implements OnInit {
         this.postId.set(post.id);
         this.isEditMode.set(true);
         this.postStatus.set(post.status);
+        this.slugPreview.set(post.slug);
         this.toastService.success(
           this.isEditMode() ? 'Đã lưu bài viết' : 'Đã tạo bài viết',
         );
@@ -237,7 +311,7 @@ export class BlogAdminEditorComponent implements OnInit {
       title: val.title!,
       content: val.content!,
       coverImage: val.coverImage || undefined,
-      tags: this.parseTags(val.tags ?? ''),
+      tags: this.selectedTags(),
     };
 
     this.blogService.update(id, payload).subscribe({

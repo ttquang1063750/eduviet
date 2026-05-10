@@ -42,6 +42,14 @@ export const blogRoutes: FastifyPluginAsync = async (app) => {
     return reply.send(result);
   });
 
+  // GET /blog/tags — lấy danh sách tags phổ biến
+  app.get('/tags', async (request, reply) => {
+    const query = z.object({ limit: z.coerce.number().min(1).max(100).default(20) }).safeParse(request.query);
+    const limit = query.success ? query.data.limit : 20;
+    const tags = await service.getTags(limit);
+    return reply.send({ data: tags });
+  });
+
   // GET /blog/:slug — public, nhưng role quyết định có xem DRAFT/REVIEW không
   app.get('/:slug', { preHandler: [optionalAuthenticate] }, async (request, reply) => {
     const { slug } = request.params as { slug: string };

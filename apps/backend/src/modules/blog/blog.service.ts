@@ -36,6 +36,10 @@ export class BlogService {
     };
   }
 
+  async getTags(limit = 20) {
+    return this.repo.getPopularTags(limit);
+  }
+
   async getBySlug(slug: string, userRole?: UserRole) {
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     const post = UUID_RE.test(slug)

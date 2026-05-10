@@ -92,9 +92,10 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ Admin UI (Users/Schools/Classes/Content CRUD)
 
 ### 🚧 Còn lại (theo độ ưu tiên)
-1. **Blog UX**: tag autocomplete, slug auto-gen từ title
+1. **Export reports PDF cải thiện font**: PDFKit tiếng Việt (P3)
 
-#### Bug fixes & Cleanup session 8 ✅ COMPLETED (2026-05-10)
+#### Blog UX & Cleanup session 8 ✅ COMPLETED (2026-05-10)
+- ✅ **Blog UX**: Tag autocomplete (Material Chips), Slug auto-gen, Slug preview.
 - ✅ **Feature Removal**: SMS notifications (ESMS.vn) — removed from BE, schema, and docs.
 - ✅ `[ngx-markdown] katex warning` — bỏ `[katex]="true"` (markedKatex extension đã xử lý)
 - ✅ `global:scripts.js require is not defined` — xóa scripts CommonJS thừa khỏi angular.json (đã import qua main.ts)

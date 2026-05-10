@@ -76,6 +76,12 @@ export class BlogService {
     return this.http.get<PaginatedResponse<BlogListItem>>(this.API, { params });
   }
 
+  getTags(limit = 20): Observable<string[]> {
+    return this.http
+      .get<ApiResponse<string[]>>(`${this.API}/tags`, { params: { limit: String(limit) } })
+      .pipe(map((res) => res.data));
+  }
+
   getBySlug(slug: string): Observable<ApiResponse<BlogPost>> {
     return this.http.get<ApiResponse<BlogPost>>(`${this.API}/${slug}`);
   }

@@ -111,10 +111,7 @@ Mã hóa `email`, `phone` at-rest trong PostgreSQL bằng pgcrypto. Cần migrat
 ### P2 — Dependabot
 Tạo `.github/dependabot.yml` để tự động quét dependency vulnerabilities.
 
-### P3 — Blog UX: tag autocomplete, slug auto-gen
-Cải thiện trải nghiệm người dùng khi viết blog.
-
-### P4 — Export reports PDF cải thiện font
+### P3 — Export reports PDF cải thiện font
 PDFKit mặc định không hỗ trợ tiếng Việt. Cần nhúng font (VD: Roboto) hoặc dùng Puppeteer để render HTML → PDF.
 
 ---
