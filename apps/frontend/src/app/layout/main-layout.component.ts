@@ -49,6 +49,10 @@ export class MainLayoutComponent {
   });
 
   readonly roleLabel = computed(() => {
+    const u = this.user();
+    // Ưu tiên hiển thị chức danh tự do nếu có
+    if (u?.title) return u.title;
+    // Fallback: nhãn của role đầu tiên
     const labels: Record<string, string> = {
       SUPER_ADMIN: 'Super Admin',
       PROVINCE_ADMIN: 'Quản trị tỉnh',
@@ -63,7 +67,8 @@ export class MainLayoutComponent {
       STUDENT: 'Học sinh',
       PARENT: 'Phụ huynh',
     };
-    return labels[this.user()?.role ?? ''] ?? '';
+    const primaryRole = u?.roles?.[0] ?? '';
+    return labels[primaryRole] ?? '';
   });
 
   logout() {

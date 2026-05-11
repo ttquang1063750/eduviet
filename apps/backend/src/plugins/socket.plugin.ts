@@ -11,7 +11,7 @@ import { AccessTokenPayload } from '../shared/middleware/authenticate.js';
 export interface SocketUser {
   id: string;
   email: string;
-  role: UserRole;
+  roles: UserRole[];
 }
 
 // ─── Type augmentations ───────────────────────────────────────────────────────
@@ -59,7 +59,7 @@ const socketPlugin: FastifyPluginAsync = fp(async (app) => {
       socket.user = {
         id: payload.sub,
         email: payload.email,
-        role: payload.role,
+        roles: Array.isArray(payload.roles) ? payload.roles : [],
       };
       next();
     } catch {

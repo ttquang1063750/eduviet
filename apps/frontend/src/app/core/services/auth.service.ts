@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap, catchError, EMPTY, of, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import type { AuthUser, LoginRequest, LoginResponse } from '@eduviet/shared-types';
+import type { AuthUser, LoginRequest, LoginResponse, UserRole } from '@eduviet/shared-types';
 
 interface ApiResponse<T> {
   data: T;
@@ -22,7 +22,10 @@ export class AuthService {
   readonly user = this._user.asReadonly();
   readonly isLoading = this._isLoading.asReadonly();
   readonly isAuthenticated = computed(() => this._user() !== null);
-  readonly currentRole = computed(() => this._user()?.role ?? null);
+  /** Mảng roles của user hiện tại */
+  readonly currentRoles = computed(() => this._user()?.roles ?? []);
+  /** Role đầu tiên — dùng cho display label, không dùng cho RBAC checks */
+  readonly currentRole = computed(() => this._user()?.roles?.[0] ?? null);
 
   constructor() {}
 
@@ -93,8 +96,9 @@ export class AuthService {
     this._user.set(null);
   }
 
-  hasRole(...roles: string[]): boolean {
-    const role = this.currentRole();
-    return role !== null && roles.includes(role);
+  /** OR logic — pass nếu user có ít nhất 1 role trong danh sách */
+  hasRole(...roles: UserRole[]): boolean {
+    const userRoles = this.currentRoles();
+    return userRoles.some((r) => roles.includes(r));
   }
 }

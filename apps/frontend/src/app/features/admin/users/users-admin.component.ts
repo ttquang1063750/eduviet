@@ -50,12 +50,12 @@ export class UsersAdminComponent {
     email: '',
     fullName: '',
     password: '',
-    role: 'STUDENT',
+    roles: ['STUDENT'],
   });
 
   // Derived states
   readonly totalPages = computed(() => Math.ceil(this.total() / this.perPage()));
-  readonly currentUserRole = this.authService.currentRole;
+  readonly isSuperAdmin = computed(() => this.authService.hasRole('SUPER_ADMIN'));
 
   constructor() {
     // Automatically fetch users when filters change
@@ -113,11 +113,11 @@ export class UsersAdminComponent {
       email: '',
       fullName: '',
       password: '',
-      role: 'STUDENT',
+      roles: ['STUDENT'],
       schoolId: undefined,
     });
 
-    if (this.currentUserRole() === 'SUPER_ADMIN') {
+    if (this.isSuperAdmin()) {
       try {
         const res = await this.schoolsService.find({ perPage: 100 }).toPromise();
         if (res) this.schools.set(res.data);
@@ -135,7 +135,7 @@ export class UsersAdminComponent {
 
   async saveUser() {
     const data = this.newUser();
-    if (!data.email || !data.fullName || !data.password || !data.role) {
+    if (!data.email || !data.fullName || !data.password || !data.roles?.length) {
       this.toastService.warning('Vui lòng điền đầy đủ thông tin bắt buộc');
       return;
     }

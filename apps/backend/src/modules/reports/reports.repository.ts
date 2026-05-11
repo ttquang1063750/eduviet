@@ -1,22 +1,21 @@
-import { PrismaClient, UserRole } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 export class ReportsRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   async countUsersByRole() {
-    const counts = await this.prisma.user.groupBy({
-      by: ['role'],
-      _count: {
-        id: true,
-      },
-      where: {
-        deletedAt: null,
-      },
-    });
+    // `roles` là JSON array — không thể dùng groupBy.
+    // Dùng $queryRaw để unnest và đếm từng role.
+    const rows = await this.prisma.$queryRaw<Array<{ role: string; count: bigint }>>`
+      SELECT role, COUNT(*) AS count
+      FROM users, jsonb_array_elements_text(roles::jsonb) AS role
+      WHERE deleted_at IS NULL
+      GROUP BY role
+    `;
 
-    const result: { [key in UserRole]?: number } = {};
-    for (const item of counts) {
-      result[item.role] = item._count.id;
+    const result: Record<string, number> = {};
+    for (const row of rows) {
+      result[row.role] = Number(row.count);
     }
     return result;
   }

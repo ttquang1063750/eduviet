@@ -16,7 +16,7 @@ export interface ClassItem {
 export interface ClassDetail extends ClassItem {
   enrollments: Array<{
     id: string;
-    user: { id: string; fullName: string; email: string; avatarUrl: string | null; role: string };
+    user: { id: string; fullName: string; email: string; avatarUrl: string | null; roles: string[] };
     createdAt: string;
   }>;
 }

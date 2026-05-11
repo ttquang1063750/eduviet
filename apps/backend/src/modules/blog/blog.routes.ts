@@ -37,8 +37,8 @@ export const blogRoutes: FastifyPluginAsync = async (app) => {
     if (!query.success) {
       return reply.status(400).send({ error: { code: 'VALIDATION_ERROR', message: 'Query không hợp lệ' } });
     }
-    const userRole = (request.user as { role?: UserRole } | undefined)?.role;
-    const result = await service.list(query.data, userRole);
+    const userRoles = (request.user as { roles?: UserRole[] } | undefined)?.roles;
+    const result = await service.list(query.data, userRoles);
     return reply.send(result);
   });
 
@@ -53,8 +53,8 @@ export const blogRoutes: FastifyPluginAsync = async (app) => {
   // GET /blog/:slug — public, nhưng role quyết định có xem DRAFT/REVIEW không
   app.get('/:slug', { preHandler: [optionalAuthenticate] }, async (request, reply) => {
     const { slug } = request.params as { slug: string };
-    const userRole = (request.user as { role?: UserRole } | undefined)?.role;
-    const post = await service.getBySlug(slug, userRole);
+    const userRoles = (request.user as { roles?: UserRole[] } | undefined)?.roles;
+    const post = await service.getBySlug(slug, userRoles);
     return reply.send({ data: post });
   });
 
@@ -144,7 +144,7 @@ export const blogRoutes: FastifyPluginAsync = async (app) => {
     { preHandler: [authenticate, authorize('SUPER_ADMIN', 'SCHOOL_ADMIN', 'CONTENT_REVIEWER', 'CONTENT_APPROVER')] },
     async (request, reply) => {
       const { commentId } = request.params as { commentId: string };
-      const comment = await service.hideComment(commentId, request.user.role as UserRole);
+      const comment = await service.hideComment(commentId, request.user.roles);
       return reply.send({ data: comment });
     }
   );
@@ -155,7 +155,7 @@ export const blogRoutes: FastifyPluginAsync = async (app) => {
     { preHandler: [authenticate] },
     async (request, reply) => {
       const { commentId } = request.params as { commentId: string };
-      await service.deleteComment(commentId, request.user.id, request.user.role as UserRole);
+      await service.deleteComment(commentId, request.user.id, request.user.roles);
       return reply.send({ data: { message: 'Bình luận đã được xóa' } });
     }
   );

@@ -1,0 +1,123 @@
+<div class="modal-backdrop" (click)="close()">
+  <div class="picker-dialog" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="picker-header">
+      <div>
+        <h2>Ngân hàng câu hỏi</h2>
+        <p class="picker-subtitle">{{ totalCount() }} câu hỏi · Môn này</p>
+      </div>
+      <button class="btn-close" (click)="close()">×</button>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <input
+        type="text"
+        class="form-control search-input"
+        placeholder="Tìm nội dung, tag..."
+        [value]="searchQuery()"
+        (input)="searchQuery.set(getInputValue($event))"
+        (keydown.enter)="applyFilter()"
+      />
+      <select
+        class="form-control"
+        [value]="filterType()"
+        (change)="filterType.set(getInputValue($event)); applyFilter()"
+      >
+        @for (t of questionTypes; track t.value) {
+          <option [value]="t.value">{{ t.label }}</option>
+        }
+      </select>
+      <select
+        class="form-control"
+        [value]="filterDifficulty()"
+        (change)="filterDifficulty.set(getInputValue($event)); applyFilter()"
+      >
+        @for (d of difficultyOptions; track d.value) {
+          <option [value]="d.value">{{ d.label }}</option>
+        }
+      </select>
+      <button class="btn btn-secondary" (click)="applyFilter()">Lọc</button>
+    </div>
+
+    <!-- Bulk select -->
+    <div class="bulk-bar">
+      <span class="selected-count">Đã chọn: {{ selectedIds().size }}</span>
+      <button class="btn-link" (click)="selectAll()">Chọn tất cả trang</button>
+      <button class="btn-link" (click)="clearSelection()">Bỏ chọn</button>
+    </div>
+
+    <!-- Question List -->
+    <div class="picker-body">
+      @if (loading()) {
+        <div class="loading-state">Đang tải...</div>
+      } @else if (questions().length === 0) {
+        <div class="empty-state">Không tìm thấy câu hỏi phù hợp.</div>
+      } @else {
+        <ul class="bank-list">
+          @for (q of questions(); track q.id) {
+            <li
+              class="bank-item"
+              [class.selected]="isSelected(q.id)"
+              [class.already-added]="isAlreadyAdded(q.id)"
+              (click)="toggleSelect(q.id)"
+            >
+              <div class="bank-check">
+                <input
+                  type="checkbox"
+                  [checked]="isSelected(q.id)"
+                  [disabled]="isAlreadyAdded(q.id)"
+                  (change)="toggleSelect(q.id)"
+                  (click)="$event.stopPropagation()"
+                />
+              </div>
+              <div class="bank-info">
+                <div class="bank-meta">
+                  <span class="type-badge">{{ questionTypeLabels[q.type] }}</span>
+                  @if (q.difficulty) {
+                    <span class="diff-badge diff-{{ q.difficulty.toLowerCase() }}">
+                      {{ difficultyLabels[q.difficulty] }}
+                    </span>
+                  }
+                  <span class="points-badge">{{ q.points }}đ</span>
+                  @if (isAlreadyAdded(q.id)) {
+                    <span class="added-badge">Đã thêm</span>
+                  }
+                </div>
+                <p class="bank-content">{{ q.content }}</p>
+                @if (q.tags.length > 0) {
+                  <div class="bank-tags">
+                    @for (tag of q.tags.slice(0, 4); track tag) {
+                      <span class="tag">{{ tag }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages() > 1) {
+      <div class="picker-pagination">
+        <button class="btn btn-secondary" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">←</button>
+        <span>Trang {{ currentPage() }} / {{ totalPages() }}</span>
+        <button class="btn btn-secondary" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)">→</button>
+      </div>
+    }
+
+    <!-- Footer -->
+    <div class="picker-footer">
+      <button class="btn btn-secondary" (click)="close()">Huỷ</button>
+      <button
+        class="btn btn-primary"
+        [disabled]="selectedIds().size === 0"
+        (click)="confirmAdd()"
+      >
+        Thêm {{ selectedIds().size }} câu hỏi vào bài
+      </button>
+    </div>
+  </div>
+</div>

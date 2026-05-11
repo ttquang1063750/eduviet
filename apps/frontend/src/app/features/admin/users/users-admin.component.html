@@ -50,7 +50,13 @@
                 </div>
               </td>
               <td class="text-muted">{{ user.email }}</td>
-              <td><span class="role-badge">{{ roleLabel(user.role) }}</span></td>
+              <td>
+                <div class="role-badges">
+                  @for (role of user.roles; track role) {
+                    <span class="role-badge">{{ roleLabel(role) }}</span>
+                  }
+                </div>
+              </td>
               <td>
                 <span class="status-badge" [class.active]="user.isActive">
                   {{ user.isActive ? 'Hoạt động' : 'Bị khóa' }}
@@ -103,16 +109,30 @@
           </div>
           <div class="form-group">
             <label>Vai trò <span class="required">*</span></label>
-            <select [(ngModel)]="newUser().role" name="role" required>
+            <select
+              [ngModel]="newUser().roles"
+              (ngModelChange)="newUser.update(u => ({ ...u, roles: $event }))"
+              name="roles"
+              multiple
+              size="6"
+              class="multi-select"
+            >
               <option value="STUDENT">Học sinh</option>
               <option value="PARENT">Phụ huynh</option>
-              <option value="SUBJECT_TEACHER">Giáo viên</option>
+              <option value="SUBJECT_TEACHER">Giáo viên bộ môn</option>
               <option value="HOMEROOM_TEACHER">GV Chủ nhiệm</option>
               <option value="CONTENT_CREATOR">Soạn thảo</option>
+              <option value="CONTENT_REVIEWER">Reviewer</option>
+              <option value="CONTENT_APPROVER">Phê duyệt</option>
+              <option value="GRADER">Chấm điểm</option>
               <option value="SCHOOL_ADMIN">Admin Trường</option>
+              <option value="DISTRICT_ADMIN">Admin Huyện</option>
+              <option value="PROVINCE_ADMIN">Admin Tỉnh</option>
+              <option value="SUPER_ADMIN">Super Admin</option>
             </select>
+            <span class="field-hint">Giữ Ctrl / Cmd để chọn nhiều vai trò</span>
           </div>
-          @if (currentUserRole() === 'SUPER_ADMIN') {
+          @if (isSuperAdmin()) {
             <div class="form-group full-width">
               <label>Trường học</label>
               <select [(ngModel)]="newUser().schoolId" name="schoolId">

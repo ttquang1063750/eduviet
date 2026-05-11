@@ -8,7 +8,8 @@ const mockUser = {
   id: 'user-uuid-1',
   email: 'student@test.com',
   fullName: 'Nguyễn Văn A',
-  role: 'STUDENT' as const,
+  roles: ['STUDENT'] as const,
+  title: null,
   avatarUrl: null,
   isActive: true,
   isVerified: true,
@@ -16,13 +17,14 @@ const mockUser = {
   createdAt: new Date(),
 };
 
-// Raw mapping used in QueryRaw
+// Raw mapping used in QueryRaw — roles stored as JSONB string
 const mockUserRaw = {
   id: mockUser.id,
   email: mockUser.email,
   phone: '0123456789',
   full_name: mockUser.fullName,
-  role: mockUser.role,
+  roles: JSON.stringify(mockUser.roles),
+  title: null,
   avatar_url: mockUser.avatarUrl,
   is_active: mockUser.isActive,
   is_verified: mockUser.isVerified,
@@ -75,7 +77,7 @@ describe('UsersService', () => {
     it('throw NotFound khi user không tồn tại', async () => {
       mockPrisma.$queryRaw.mockResolvedValue([]);
 
-      await expect(service.getById('bad-id', 'req-id', 'SUPER_ADMIN')).rejects.toMatchObject({
+      await expect(service.getById('bad-id', 'req-id', ['SUPER_ADMIN'])).rejects.toMatchObject({
         statusCode: 404,
         code: 'NOT_FOUND',
       });
@@ -83,14 +85,14 @@ describe('UsersService', () => {
 
     it('throw Forbidden khi STUDENT xem profile người khác', async () => {
       await expect(
-        service.getById('other-user-id', 'my-id', 'STUDENT')
+        service.getById('other-user-id', 'my-id', ['STUDENT'])
       ).rejects.toMatchObject({ statusCode: 403 });
     });
 
     it('STUDENT có thể xem profile của chính mình', async () => {
       mockPrisma.$queryRaw.mockResolvedValue([mockUserRaw]);
 
-      const result = await service.getById('user-uuid-1', 'user-uuid-1', 'STUDENT');
+      const result = await service.getById('user-uuid-1', 'user-uuid-1', ['STUDENT']);
       expect(result.id).toBe(mockUser.id);
       expect(result.email).toBe(mockUser.email);
     });
@@ -98,7 +100,7 @@ describe('UsersService', () => {
     it('SUPER_ADMIN có thể xem bất kỳ profile', async () => {
       mockPrisma.$queryRaw.mockResolvedValue([mockUserRaw]);
 
-      const result = await service.getById('user-uuid-1', 'admin-id', 'SUPER_ADMIN');
+      const result = await service.getById('user-uuid-1', 'admin-id', ['SUPER_ADMIN']);
       expect(result.id).toBe(mockUser.id);
     });
   });
@@ -108,7 +110,7 @@ describe('UsersService', () => {
   describe('update()', () => {
     it('throw Forbidden khi STUDENT cập nhật profile người khác', async () => {
       await expect(
-        service.update('other-id', { fullName: 'Mới' }, 'my-id', 'STUDENT')
+        service.update('other-id', { fullName: 'Mới' }, 'my-id', ['STUDENT'])
       ).rejects.toMatchObject({ statusCode: 403 });
     });
 
@@ -116,7 +118,7 @@ describe('UsersService', () => {
       mockPrisma.$queryRaw.mockResolvedValue([mockUserRaw]);
       mockPrisma.$executeRaw.mockResolvedValue(1);
 
-      await service.update('user-uuid-1', { fullName: 'Tên mới', isActive: false }, 'user-uuid-1', 'STUDENT');
+      await service.update('user-uuid-1', { fullName: 'Tên mới', isActive: false }, 'user-uuid-1', ['STUDENT']);
 
       expect(mockPrisma.$executeRaw).toHaveBeenCalled();
     });
@@ -125,7 +127,7 @@ describe('UsersService', () => {
       mockPrisma.$queryRaw.mockResolvedValue([mockUserRaw]);
       mockPrisma.$executeRaw.mockResolvedValue(1);
 
-      await service.update('user-uuid-1', { isActive: false }, 'admin-id', 'SCHOOL_ADMIN');
+      await service.update('user-uuid-1', { isActive: false }, 'admin-id', ['SCHOOL_ADMIN']);
 
       expect(mockPrisma.$executeRaw).toHaveBeenCalled();
     });
@@ -134,7 +136,7 @@ describe('UsersService', () => {
       mockPrisma.$queryRaw.mockResolvedValue([mockUserRaw]);
       mockPrisma.$executeRaw.mockResolvedValue(1);
 
-      await service.update('user-uuid-1', { fullName: 'Tên mới' }, 'user-uuid-1', 'STUDENT');
+      await service.update('user-uuid-1', { fullName: 'Tên mới' }, 'user-uuid-1', ['STUDENT']);
 
       expect(mockPrisma.auditLog.create).toHaveBeenCalledWith(
         expect.objectContaining({ data: expect.objectContaining({ action: 'USER_UPDATED' }) })

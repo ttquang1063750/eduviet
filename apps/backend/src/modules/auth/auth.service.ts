@@ -2,10 +2,9 @@ import { FastifyInstance } from 'fastify';
 import bcrypt from 'bcryptjs';
 import { AppError } from '../../shared/errors/app-error.js';
 import { LoginInput, RegisterInput } from './auth.schema.js';
-import { AuthUser } from '@eduviet/shared-types';
+import { AuthUser, UserRole } from '@eduviet/shared-types';
 import { emailQueue } from '@eduviet/redis';
 import { UsersRepository } from '../users/users.repository.js';
-import { Role } from '@prisma/client';
 
 const REFRESH_TOKEN_COOKIE = 'refresh_token';
 
@@ -31,7 +30,7 @@ export class AuthService {
       passwordHash,
       fullName: input.fullName,
       phone: input.phone,
-      role: 'STUDENT' as Role, // Default role for public registration
+      roles: ['STUDENT'], // Default role for public registration
     });
 
     await this.app.prisma.auditLog.create({
@@ -80,17 +79,19 @@ export class AuthService {
       throw AppError.unauthorized('Email hoặc mật khẩu không đúng');
     }
 
+    const userRoles = (user.roles ?? ['STUDENT']) as UserRole[];
     const authUser: AuthUser = {
       id: user.id,
       email: user.email,
       fullName: user.fullName,
-      role: user.role,
+      roles: userRoles,
+      title: (user as { title?: string | null }).title ?? null,
       avatarUrl: user.avatarUrl,
       schoolId: user.schoolId,
     };
 
     const accessToken = this.app.jwt.sign(
-      { sub: user.id, email: user.email, role: user.role },
+      { sub: user.id, email: user.email, roles: userRoles },
       { expiresIn: process.env['JWT_ACCESS_EXPIRES_IN'] ?? '15m' }
     );
 
@@ -156,7 +157,7 @@ export class AuthService {
     });
 
     const accessToken = this.app.jwt.sign(
-      { sub: user.id, email: user.email, role: user.role },
+      { sub: user.id, email: user.email, roles: (user.roles ?? ['STUDENT']) as UserRole[] },
       { expiresIn: process.env['JWT_ACCESS_EXPIRES_IN'] ?? '15m' }
     );
 

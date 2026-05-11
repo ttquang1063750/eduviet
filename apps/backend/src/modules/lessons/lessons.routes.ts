@@ -3,6 +3,14 @@ import { z } from 'zod';
 import { authorize, authenticate } from '../../shared/middleware/authenticate.js';
 import { LessonsService } from './lessons.service.js';
 
+const WRITER_ROLES = [
+  'SUPER_ADMIN',
+  'SCHOOL_ADMIN',
+  'CONTENT_CREATOR',
+  'SUBJECT_TEACHER',
+  'HOMEROOM_TEACHER',
+] as const;
+
 const lessonQuerySchema = z.object({
   page: z.coerce.number().min(1).default(1),
   perPage: z.coerce.number().min(1).max(50).default(12),
@@ -43,15 +51,15 @@ export const lessonsRoutes: FastifyPluginAsync = async (app) => {
     }
 
     // Xác định quyền (không bắt buộc đăng nhập)
-    let userRole: string | undefined;
+    let userRoles: string[] | undefined;
     try {
       await request.jwtVerify();
-      userRole = (request.user as { role: string }).role;
+      userRoles = (request.user as { roles?: string[] }).roles;
     } catch {
       // unauthenticated — chỉ thấy PUBLISHED
     }
 
-    const result = await service.list(query.data, userRole as never);
+    const result = await service.list(query.data, userRoles as never);
     return reply.send(result);
   });
 
@@ -59,15 +67,15 @@ export const lessonsRoutes: FastifyPluginAsync = async (app) => {
   app.get('/:slug', async (request, reply) => {
     const { slug } = request.params as { slug: string };
 
-    let userRole: string | undefined;
+    let userRoles: string[] | undefined;
     try {
       await request.jwtVerify();
-      userRole = (request.user as { role: string }).role;
+      userRoles = (request.user as { roles?: string[] }).roles;
     } catch {
       // unauthenticated
     }
 
-    const lesson = await service.getBySlug(slug, userRole as never);
+    const lesson = await service.getBySlug(slug, userRoles as never);
     return reply.send({ data: lesson });
   });
 
@@ -152,6 +160,87 @@ export const lessonsRoutes: FastifyPluginAsync = async (app) => {
     async (request, reply) => {
       const { id } = request.params as { id: string };
       const updated = await service.publish(id, request.user.id);
+      return reply.send({ data: updated });
+    }
+  );
+
+  // ─── Lesson Questions (nested) ─────────────────────────────────────────────
+
+  // GET /lessons/:id/questions — danh sách câu hỏi gắn với bài học
+  app.get(
+    '/:id/questions',
+    { preHandler: [authenticate, authorize(...WRITER_ROLES)] },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const questions = await service.getLessonQuestions(id, request.user.roles);
+      return reply.send({ data: questions });
+    }
+  );
+
+  // POST /lessons/:id/questions — gắn câu hỏi vào bài học
+  app.post(
+    '/:id/questions',
+    { preHandler: [authenticate, authorize(...WRITER_ROLES)] },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const body = z
+        .object({ questionId: z.string().uuid() })
+        .safeParse(request.body);
+      if (!body.success) {
+        return reply.status(400).send({
+          error: { code: 'VALIDATION_ERROR', message: 'questionId không hợp lệ' },
+        });
+      }
+      const result = await service.addQuestionToLesson(id, body.data.questionId, request.user.id, request.user.roles);
+      return reply.status(201).send({ data: result });
+    }
+  );
+
+  // DELETE /lessons/:id/questions/:questionId — gỡ câu hỏi khỏi bài học
+  app.delete(
+    '/:id/questions/:questionId',
+    { preHandler: [authenticate, authorize(...WRITER_ROLES)] },
+    async (request, reply) => {
+      const { id, questionId } = request.params as { id: string; questionId: string };
+      await service.removeQuestionFromLesson(id, questionId, request.user.id, request.user.roles);
+      return reply.send({ data: { message: 'Đã gỡ câu hỏi khỏi bài học' } });
+    }
+  );
+
+  // PATCH /lessons/:id/questions/reorder — sắp xếp thứ tự câu hỏi
+  app.patch(
+    '/:id/questions/reorder',
+    { preHandler: [authenticate, authorize(...WRITER_ROLES)] },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const body = z
+        .object({ orderedIds: z.array(z.string().uuid()).min(1) })
+        .safeParse(request.body);
+      if (!body.success) {
+        return reply.status(400).send({
+          error: { code: 'VALIDATION_ERROR', message: 'orderedIds không hợp lệ' },
+        });
+      }
+      await service.reorderLessonQuestions(id, body.data.orderedIds, request.user.id, request.user.roles);
+      return reply.send({ data: { message: 'Đã cập nhật thứ tự câu hỏi' } });
+    }
+  );
+
+  // PATCH /lessons/:id/randomize — bật/tắt randomize
+  app.patch(
+    '/:id/randomize',
+    { preHandler: [authenticate, authorize(...WRITER_ROLES)] },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const body = z
+        .object({ randomize: z.boolean() })
+        .safeParse(request.body);
+      if (!body.success) {
+        return reply.status(400).send({
+          error: { code: 'VALIDATION_ERROR', message: 'randomize phải là boolean' },
+        });
+      }
+      const updated = await service.setRandomize(id, body.data.randomize, request.user.id, request.user.roles);
       return reply.send({ data: updated });
     }
   );

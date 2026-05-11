@@ -15,10 +15,10 @@ export async function optionalAuthenticate(request: FastifyRequest, _reply: Fast
     await request.jwtVerify();
     // Chúng ta cast sang bất kỳ vì augmentation nằm ở authenticate.ts
     const raw = request.user as unknown as AccessTokenPayload;
-    (request as unknown as { user: { id: string; email: string; role: UserRole } }).user = {
+    (request as unknown as { user: { id: string; email: string; roles: UserRole[] } }).user = {
       id: raw.sub,
       email: raw.email,
-      role: raw.role,
+      roles: Array.isArray(raw.roles) ? raw.roles : [],
     };
   } catch {
     // Token vắng mặt hoặc không hợp lệ — tiếp tục như guest, không throw

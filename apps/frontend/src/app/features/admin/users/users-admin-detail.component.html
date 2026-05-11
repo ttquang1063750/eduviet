@@ -7,7 +7,7 @@
       <h1>👤 Chi tiết người dùng</h1>
     </div>
     <div class="header-actions">
-      @if (currentUserRole() === 'SUPER_ADMIN' && user()?.id !== currentUserId) {
+      @if (isSuperAdmin() && user()?.id !== currentUserId) {
         <button class="btn-danger-outline" (click)="onDelete()">Xóa tài khoản</button>
       }
     </div>
@@ -28,9 +28,14 @@
           </div>
           <div class="profile-info">
             <h2>{{ user()?.fullName }}</h2>
+            @if (user()?.title) {
+              <p class="user-title">{{ user()?.title }}</p>
+            }
             <p class="email">{{ user()?.email }}</p>
             <div class="badges">
-              <span class="role-badge">{{ roleLabel(user()!.role) }}</span>
+              @for (role of user()!.roles; track role) {
+                <span class="role-badge">{{ roleLabel(role) }}</span>
+              }
               <span class="status-badge" [class.active]="user()?.isActive">
                 {{ user()?.isActive ? 'Hoạt động' : 'Bị khóa' }}
               </span>
@@ -59,6 +64,11 @@
               <input type="text" formControlName="phone" placeholder="09xxxxxxxx" />
             </div>
             <div class="form-group full-width">
+              <label>Chức danh hiển thị</label>
+              <input type="text" formControlName="title" placeholder="Ví dụ: Trưởng bộ môn Toán" />
+              <span class="field-hint">Chức danh tự do, hiển thị thay thế tên vai trò nếu có</span>
+            </div>
+            <div class="form-group full-width">
               <label class="checkbox-label">
                 <input type="checkbox" formControlName="isActive" />
                 <span>Kích hoạt tài khoản</span>
@@ -71,27 +81,28 @@
       <!-- Cột phải: Quản lý quyền/trường -->
       <div class="side-column">
         <!-- Đổi vai trò (Chỉ Super Admin) -->
-        @if (currentUserRole() === 'SUPER_ADMIN') {
+        @if (isSuperAdmin()) {
           <div class="card section-card">
             <div class="card-header">
               <h3>🔑 Phân quyền</h3>
-              <button class="btn-secondary-sm" (click)="onChangeRole()" [disabled]="isSaving() || user()?.id === currentUserId">
+              <button
+                class="btn-secondary-sm"
+                (click)="onChangeRoles()"
+                [disabled]="isSaving() || user()?.id === currentUserId"
+              >
                 Lưu
               </button>
             </div>
-            <p class="section-desc">Thay đổi cấp độ truy cập của người dùng trong hệ thống.</p>
+            <p class="section-desc">Thay đổi vai trò hệ thống của người dùng. Có thể chọn nhiều vai trò.</p>
             <form [formGroup]="form">
               <div class="form-group">
                 <label>Vai trò hệ thống</label>
-                <select formControlName="role">
-                  <option value="SUPER_ADMIN">Super Admin</option>
-                  <option value="SCHOOL_ADMIN">Admin Trường</option>
-                  <option value="CONTENT_CREATOR">Soạn thảo</option>
-                  <option value="SUBJECT_TEACHER">Giáo viên</option>
-                  <option value="HOMEROOM_TEACHER">GV Chủ nhiệm</option>
-                  <option value="STUDENT">Học sinh</option>
-                  <option value="PARENT">Phụ huynh</option>
+                <select formControlName="roles" multiple size="8" class="multi-select">
+                  @for (r of allRoles; track r.value) {
+                    <option [value]="r.value">{{ r.label }}</option>
+                  }
                 </select>
+                <span class="field-hint">Giữ Ctrl (Windows) / Cmd (Mac) để chọn nhiều vai trò</span>
               </div>
             </form>
             @if (user()?.id === currentUserId) {
@@ -101,7 +112,7 @@
         }
 
         <!-- Gán trường học -->
-        @if (currentUserRole() === 'SUPER_ADMIN' || (currentUserRole() === 'SCHOOL_ADMIN' && user()?.role !== 'SUPER_ADMIN')) {
+        @if (canAssignSchool()) {
           <div class="card section-card">
             <div class="card-header">
               <h3>🏫 Đơn vị công tác</h3>
@@ -113,7 +124,7 @@
             <form [formGroup]="form">
               <div class="form-group">
                 <label>Trường học</label>
-                @if (currentUserRole() === 'SUPER_ADMIN') {
+                @if (isSuperAdmin()) {
                   <select formControlName="schoolId">
                     <option value="">Không thuộc trường nào</option>
                     @for (school of schools(); track school.id) {

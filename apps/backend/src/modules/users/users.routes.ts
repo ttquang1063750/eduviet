@@ -1,14 +1,25 @@
 import { FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
-import { Role } from '@prisma/client';
 import { authenticate, authorize } from '../../shared/middleware/authenticate.js';
 import { UsersService } from './users.service.js';
+import type { UserRole } from '@eduviet/shared-types';
+
+const USER_ROLES = [
+  'SUPER_ADMIN', 'PROVINCE_ADMIN', 'DISTRICT_ADMIN', 'SCHOOL_ADMIN',
+  'CONTENT_CREATOR', 'CONTENT_REVIEWER', 'CONTENT_APPROVER',
+  'GRADER', 'HOMEROOM_TEACHER', 'SUBJECT_TEACHER', 'STUDENT', 'PARENT',
+] as const;
+
+const rolesSchema = z
+  .array(z.enum(USER_ROLES))
+  .min(1, 'Phải có ít nhất 1 vai trò');
 
 const createUserSchema = z.object({
   email: z.string().email('Email không hợp lệ'),
   fullName: z.string().min(2, 'Họ tên tối thiểu 2 ký tự').max(100).trim(),
   password: z.string().min(8, 'Mật khẩu tối thiểu 8 ký tự'),
-  role: z.nativeEnum(Role),
+  roles: rolesSchema,
+  title: z.string().max(100).optional(),
   phone: z
     .string()
     .regex(/^(\+84|0)[0-9]{9}$/, 'Số điện thoại không hợp lệ')
@@ -23,6 +34,8 @@ const updateUserSchema = z.object({
     .regex(/^(\+84|0)[0-9]{9}$/)
     .optional(),
   isActive: z.boolean().optional(),
+  roles: rolesSchema.optional(),
+  title: z.string().max(100).nullable().optional(),
 });
 
 const paginationSchema = z.object({
@@ -58,7 +71,7 @@ export const usersRoutes: FastifyPluginAsync = async (app) => {
         });
       }
 
-      const user = await service.create(body.data, request.user.id, request.user.role);
+      const user = await service.create(body.data, request.user.id, request.user.roles);
       return reply.status(201).send({ data: user });
     }
   );
@@ -83,7 +96,7 @@ export const usersRoutes: FastifyPluginAsync = async (app) => {
   // GET /users/:id
   app.get('/:id', { preHandler: [authenticate] }, async (request, reply) => {
     const { id } = request.params as { id: string };
-    const user = await service.getById(id, request.user.id, request.user.role);
+    const user = await service.getById(id, request.user.id, request.user.roles);
     return reply.send({ data: user });
   });
 
@@ -93,7 +106,7 @@ export const usersRoutes: FastifyPluginAsync = async (app) => {
     { preHandler: [authorize('SUPER_ADMIN')] },
     async (request, reply) => {
       const { id } = request.params as { id: string };
-      await service.delete(id, request.user.id, request.user.role);
+      await service.delete(id, request.user.id, request.user.roles);
       return reply.status(204).send();
     }
   );
@@ -115,19 +128,17 @@ export const usersRoutes: FastifyPluginAsync = async (app) => {
       });
     }
 
-    const user = await service.update(id, body.data, request.user.id, request.user.role);
+    const user = await service.update(id, body.data, request.user.id, request.user.roles);
     return reply.send({ data: user });
   });
 
-  // PATCH /users/:id/role — đổi role, chỉ SUPER_ADMIN
+  // PATCH /users/:id/roles — đổi roles, chỉ SUPER_ADMIN
   app.patch(
-    '/:id/role',
-    {
-      preHandler: [authorize('SUPER_ADMIN')],
-    },
+    '/:id/roles',
+    { preHandler: [authorize('SUPER_ADMIN')] },
     async (request, reply) => {
       const { id } = request.params as { id: string };
-      const body = z.object({ role: z.nativeEnum(Role) }).safeParse(request.body);
+      const body = z.object({ roles: rolesSchema }).safeParse(request.body);
 
       if (!body.success) {
         return reply.status(400).send({
@@ -142,11 +153,11 @@ export const usersRoutes: FastifyPluginAsync = async (app) => {
         });
       }
 
-      const user = await service.changeRole(
+      const user = await service.changeRoles(
         id,
-        body.data.role as never,
+        body.data.roles as UserRole[],
         request.user.id,
-        request.user.role
+        request.user.roles
       );
       return reply.send({ data: user });
     }
@@ -181,7 +192,7 @@ export const usersRoutes: FastifyPluginAsync = async (app) => {
         id,
         body.data.schoolId,
         request.user.id,
-        request.user.role
+        request.user.roles
       );
       return reply.send({ data: user });
     }

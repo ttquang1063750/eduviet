@@ -167,6 +167,28 @@ export const routes: Routes = [
                 (m) => m.blogAdminRoutes
               ),
           },
+          {
+            path: 'questions',
+            data: { breadcrumb: 'Ngân hàng câu hỏi' },
+            loadComponent: () =>
+              import('./features/admin/questions/questions-admin.component').then(
+                (m) => m.QuestionsAdminComponent
+              ),
+          },
+          {
+            path: 'lessons',
+            data: { breadcrumb: 'Câu hỏi bài học' },
+            children: [
+              {
+                path: ':id/exercises',
+                data: { breadcrumb: 'Trình biên soạn câu hỏi' },
+                loadComponent: () =>
+                  import(
+                    './features/admin/lessons/exercise-editor/exercise-editor.component'
+                  ).then((m) => m.ExerciseEditorComponent),
+              },
+            ],
+          },
         ],
       },
     ],

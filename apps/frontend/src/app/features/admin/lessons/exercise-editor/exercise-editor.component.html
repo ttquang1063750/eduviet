@@ -1,0 +1,193 @@
+@if (loading()) {
+  <div class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Đang tải...</p>
+  </div>
+} @else {
+  <div class="editor-shell">
+    <!-- Header -->
+    <header class="editor-header">
+      <button class="btn-back" (click)="goBack()">← Quay lại</button>
+      <div class="header-info">
+        <h1 class="lesson-title">{{ lesson()?.title ?? 'Bài học' }}</h1>
+        <span class="question-count">{{ lessonQuestions().length }} câu hỏi</span>
+      </div>
+      <div class="header-actions">
+        <label class="randomize-toggle">
+          <input
+            type="checkbox"
+            [checked]="randomizeQuestions()"
+            (change)="toggleRandomize()"
+          />
+          Câu hỏi ngẫu nhiên
+        </label>
+      </div>
+    </header>
+
+    <!-- Split Panel -->
+    <div class="split-panel">
+      <!-- LEFT: Question list (40%) -->
+      <aside class="panel-left">
+        <div class="panel-actions">
+          <button class="btn btn-primary" (click)="openCreateForm()">+ Tạo mới</button>
+          <button class="btn btn-secondary" (click)="openPicker()">Từ ngân hàng</button>
+          <button class="btn btn-secondary" (click)="openGenerate()">Tự động tạo</button>
+        </div>
+
+        @if (lessonQuestions().length === 0) {
+          <div class="empty-list">
+            <p>Chưa có câu hỏi nào.</p>
+            <p>Hãy tạo mới hoặc chọn từ ngân hàng câu hỏi.</p>
+          </div>
+        } @else {
+          <ul
+            cdkDropList
+            [cdkDropListData]="lessonQuestions()"
+            [cdkDropListDisabled]="randomizeQuestions()"
+            (cdkDropListDropped)="onDrop($event)"
+            class="question-list"
+          >
+            @for (lq of lessonQuestions(); track lq.id; let i = $index) {
+              <li
+                cdkDrag
+                class="question-item"
+                [class.selected]="selectedQuestion()?.id === lq.question.id"
+                [class.drag-disabled]="randomizeQuestions()"
+                (click)="openEditForm(lq.question)"
+              >
+                <span class="q-index">{{ i + 1 }}</span>
+                <div class="q-info">
+                  <span class="q-type-badge">{{ questionTypeLabels[lq.question.type] }}</span>
+                  <p class="q-content">{{ lq.question.content }}</p>
+                </div>
+                <button
+                  class="btn-remove"
+                  (click)="$event.stopPropagation(); removeQuestion(lq.questionId)"
+                  title="Gỡ khỏi bài"
+                >×</button>
+              </li>
+            }
+          </ul>
+        }
+      </aside>
+
+      <!-- RIGHT: Form / Detail (60%) -->
+      <main class="panel-right">
+        @if (panelMode() === 'list') {
+          <div class="empty-panel">
+            <p>Chọn câu hỏi để chỉnh sửa,</p>
+            <p>hoặc nhấn <strong>Tạo mới</strong> để thêm câu hỏi.</p>
+          </div>
+        }
+
+        @if (panelMode() === 'create' || panelMode() === 'edit') {
+          <app-question-form
+            [question]="selectedQuestion()"
+            [subjectId]="lesson()?.subject?.id ?? ''"
+            [isSaving]="isSaving()"
+            (saved)="onQuestionSaved($event)"
+            (cancelled)="closePanel()"
+          />
+        }
+      </main>
+    </div>
+  </div>
+
+  <!-- Question Bank Picker Modal -->
+  @if (showPicker()) {
+    <app-question-bank-picker
+      [subjectId]="lesson()?.subject?.id ?? ''"
+      [existingIds]="existingQuestionIds()"
+      (added)="onQuestionsAdded($event)"
+      (closed)="closePicker()"
+    />
+  }
+
+  <!-- AI Generate Dialog -->
+  @if (showGenerate()) {
+    <div class="modal-backdrop" (click)="closeGenerate()">
+      <div class="modal-dialog generate-dialog" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>Tự động tạo câu hỏi</h2>
+          <button class="btn-close" (click)="closeGenerate()">×</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Từ khóa / chủ đề</label>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="VD: Phương trình bậc 2, Chiến tranh thế giới..."
+              [value]="generateKeyword()"
+              (input)="generateKeyword.set(getInputValue($event))"
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Số câu (1–10)</label>
+              <input
+                type="number"
+                class="form-control"
+                min="1"
+                max="10"
+                [value]="generateCount()"
+                (input)="generateCount.set(+getInputValue($event))"
+              />
+            </div>
+            <div class="form-group">
+              <label>Loại câu hỏi</label>
+              <select
+                class="form-control"
+                [value]="generateType()"
+                (change)="generateType.set(getInputValue($event))"
+              >
+                @for (t of questionTypes; track t.value) {
+                  <option [value]="t.value">{{ t.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <button
+            class="btn btn-primary"
+            [disabled]="isGenerating()"
+            (click)="runGenerate()"
+          >
+            @if (isGenerating()) {
+              Đang tạo...
+            } @else {
+              Tạo câu hỏi
+            }
+          </button>
+
+          @if (generatedDrafts().length > 0) {
+            <div class="draft-list">
+              <p class="draft-header">Chọn câu hỏi muốn thêm vào bài:</p>
+              @for (draft of generatedDrafts(); track $index; let i = $index) {
+                <label class="draft-item">
+                  <input
+                    type="checkbox"
+                    [checked]="isDraftSelected(i)"
+                    (change)="toggleDraftSelection(i)"
+                  />
+                  <span class="draft-type">{{ questionTypeLabels[draft.type] }}</span>
+                  <span class="draft-content">{{ draft.content }}</span>
+                </label>
+              }
+
+              <button
+                class="btn btn-success"
+                [disabled]="isSaving()"
+                (click)="addSelectedDrafts()"
+              >
+                Thêm {{ selectedDraftIds().size }} câu đã chọn vào bài
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+}

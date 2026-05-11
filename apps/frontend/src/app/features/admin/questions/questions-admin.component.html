@@ -1,0 +1,139 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Ngân hàng câu hỏi</h1>
+    <p class="page-subtitle">Quản lý toàn bộ câu hỏi — {{ total() }} câu hỏi</p>
+  </div>
+  <button class="btn btn-primary" (click)="openCreate()">
+    <span>＋</span> Tạo câu hỏi
+  </button>
+</div>
+
+<!-- Bộ lọc -->
+<div class="filter-bar">
+  <input
+    class="filter-input"
+    type="text"
+    placeholder="Tìm kiếm câu hỏi..."
+    [value]="filterSearch()"
+    (input)="filterSearch.set(getInputValue($event))"
+    (keydown.enter)="applyFilters()"
+  />
+
+  <select class="filter-select" [value]="filterSubject()" (change)="filterSubject.set(getInputValue($event)); applyFilters()">
+    <option value="">Tất cả môn học</option>
+    @for (s of subjects(); track s.id) {
+      <option [value]="s.id">{{ s.name }}</option>
+    }
+  </select>
+
+  <select class="filter-select" [value]="filterType()" (change)="filterType.set(getInputValue($event)); applyFilters()">
+    <option value="">Tất cả loại</option>
+    <option value="SINGLE_CHOICE">Một đáp án</option>
+    <option value="MULTIPLE_CHOICE">Nhiều đáp án</option>
+    <option value="FILL_IN_BLANK">Điền chỗ trống</option>
+    <option value="SHORT_ANSWER">Trả lời ngắn</option>
+    <option value="ESSAY">Tự luận</option>
+    <option value="DRAWING">Vẽ / Sơ đồ</option>
+  </select>
+
+  <select class="filter-select" [value]="filterDifficulty()" (change)="filterDifficulty.set(getInputValue($event)); applyFilters()">
+    <option value="">Tất cả độ khó</option>
+    <option value="EASY">Dễ</option>
+    <option value="MEDIUM">Trung bình</option>
+    <option value="HARD">Khó</option>
+  </select>
+
+  <button class="btn btn-secondary" (click)="applyFilters()">Tìm</button>
+</div>
+
+<!-- Bảng câu hỏi -->
+@if (loading()) {
+  <div class="loading-state">Đang tải...</div>
+} @else if (questions().length === 0) {
+  <div class="empty-state">
+    <span class="empty-icon">🗂️</span>
+    <p>Chưa có câu hỏi nào.</p>
+    <button class="btn btn-primary" (click)="openCreate()">Tạo câu hỏi đầu tiên</button>
+  </div>
+} @else {
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th class="col-content">Nội dung câu hỏi</th>
+          <th class="col-type">Loại</th>
+          <th class="col-difficulty">Độ khó</th>
+          <th class="col-subject">Môn học</th>
+          <th class="col-actions">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (q of questions(); track q.id) {
+          <tr>
+            <td class="col-content">
+              <span class="question-content">{{ q.content }}</span>
+            </td>
+            <td class="col-type">
+              <span class="badge badge-type">{{ questionTypeLabels[q.type] ?? q.type }}</span>
+            </td>
+            <td class="col-difficulty">
+              @if (q.difficulty) {
+                <span class="badge" [class]="'badge-difficulty-' + q.difficulty.toLowerCase()">
+                  {{ difficultyLabels[q.difficulty] ?? q.difficulty }}
+                </span>
+              } @else {
+                <span class="text-muted">—</span>
+              }
+            </td>
+            <td class="col-subject">{{ subjectMap()[q.subjectId] ?? '—' }}</td>
+            <td class="col-actions">
+              <button class="btn-icon" title="Chỉnh sửa" (click)="openEdit(q)">✏️</button>
+              <button class="btn-icon btn-icon-danger" title="Xoá" (click)="deleteQuestion(q)">🗑️</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Phân trang -->
+  @if (totalPages() > 1) {
+    <div class="pagination">
+      <button class="page-btn" [disabled]="page() === 1" (click)="goToPage(page() - 1)">‹</button>
+      <span class="page-info">{{ page() }} / {{ totalPages() }}</span>
+      <button class="page-btn" [disabled]="page() === totalPages()" (click)="goToPage(page() + 1)">›</button>
+    </div>
+  }
+}
+
+<!-- Modal tạo / chỉnh sửa -->
+@if (showModal()) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-panel" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ editingQuestion() ? 'Chỉnh sửa câu hỏi' : 'Tạo câu hỏi mới' }}</h2>
+        <button class="modal-close" (click)="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        @if (!editingQuestion()) {
+          <div class="subject-picker">
+            <label class="field-label">Môn học <span class="required">*</span></label>
+            <select class="filter-select" [value]="modalSubjectId()" (change)="modalSubjectId.set(getInputValue($event))">
+              <option value="">-- Chọn môn học --</option>
+              @for (s of subjects(); track s.id) {
+                <option [value]="s.id">{{ s.name }}</option>
+              }
+            </select>
+          </div>
+        }
+        <app-question-form
+          [question]="editingQuestion()"
+          [subjectId]="modalSubjectId()"
+          [isSaving]="isSaving()"
+          (saved)="onQuestionSaved($event)"
+          (cancelled)="closeModal()"
+        />
+      </div>
+    </div>
+  </div>
+}

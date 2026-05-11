@@ -18,7 +18,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-10 — session 9)
+## Trạng thái hiện tại (cập nhật 2026-05-11 — session 12)
 
 ### ✅ Đã hoàn thành
 
@@ -27,7 +27,8 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 |--------|--------|---------|------------|-------|
 | `auth` | ✅ | ✅ | — | — |
 | `users` | ✅ | ✅ | ✅ | ✅ |
-| `lessons` | ✅ | ✅ | ✅ | ✅ |
+| `lessons` | ✅ + question routes | ✅ + LessonQuestion methods | ✅ + LessonQuestion CRUD | ✅ |
+| `questions` | ✅ | ✅ + AI generate | ✅ | — |
 | `subjects` | ✅ | ✅ (CRUD + AI suggest) | — | — |
 | `geo` | ✅ | ✅ | — | — |
 | `schools` | ✅ | ✅ | ✅ | — |
@@ -52,6 +53,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 | `admin/content` | ✅ | — | — | ✅ |
 | `admin/subjects` | ✅ grid + modal CRUD + AI suggest | — | ✅ | ✅ |
 | `admin/blog` | ✅ list + filter | ✅ Quill WYSIWYG + Draft/Review | ✅ | ✅ |
+| `admin/questions` | ✅ list + filter + CRUD modal | — | ✅ | ✅ |
 | `reports` | ✅ + Xuất Excel/PDF | — | ✅ | ✅ |
 | `chat` | ✅ widget (FAB) | ✅ room-list + message-thread | ✅ | — |
 
@@ -91,10 +93,44 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ CSRF Protection + XSS Defense in depth
 - ✅ Admin UI (Users/Schools/Classes/Content CRUD)
 
+#### Multi-Role RBAC ✅ COMPLETED (2026-05-10 session 10)
+- ✅ `libs/prisma/schema.prisma` — `role Role enum` → `roles Json @default("[\"STUDENT\"]")` + `title String?`
+- ✅ Migration `20260510000001_user_multi_roles` — backfill + drop old enum
+- ✅ `packages/shared-types` — `User.roles`, `AuthUser.roles`, `JwtPayload.roles`, `CreateUserRequest.roles`
+- ✅ `authenticate.ts` + `optional-authenticate.ts` — OR logic, `request.user.roles[]`
+- ✅ `auth.service.ts` (BE) — sign JWT với `roles[]`, register default `['STUDENT']`
+- ✅ `users.repository.ts` — `parseRoles()`, JSONB `@>` filter, SELECT/INSERT/UPDATE roles
+- ✅ `users.service.ts` + `users.routes.ts` — multi-role params, `PATCH /:id/roles`
+- ✅ `blog.service.ts` + `blog.routes.ts` — `userRoles[]` cho list/getBySlug/hideComment/deleteComment
+- ✅ `lessons.service.ts` + `lessons.routes.ts` — `userRoles[]` cho list/getBySlug
+- ✅ `socket.plugin.ts` — `SocketUser.roles[]`
+- ✅ `users.service.spec.ts` — test calls updated to roles arrays
+- ✅ `auth.service.ts` (FE) — `currentRoles`, `hasRole()` OR logic, `currentRole` kept for display
+- ✅ `users.service.ts` (FE) — `changeRoles()` → `PATCH /:id/roles`
+- ✅ `users-admin-detail.component` — multi-select `<select multiple>` + `title` field, `isSuperAdmin` computed
+- ✅ `users-admin.component` — multi-select roles in create modal, table shows multiple badges
+- ✅ `class-detail.component` — `e.user.roles?.includes('STUDENT')`
+- ✅ `main-layout.component` — `roleLabel` prioritizes `user.title` over `roles[0]`
+
+#### Question Bank & Exercise Editor ✅ COMPLETED (2026-05-11 session 11)
+- ✅ `libs/prisma/schema.prisma` — `QuestionType` enum (6 values), `Question` model, `LessonQuestion` junction, `Lesson.randomizeQuestions`
+- ✅ Migration `20260510000002_question_bank` — CREATE tables, migrate from exercises, DROP exercises
+- ✅ `packages/shared-types/src/question.types.ts` — `Question`, `LessonQuestion`, `CreateQuestionRequest`, `GenerateQuestionsRequest`, `QuestionFilter`
+- ✅ `apps/backend/src/modules/questions/` — repository + service (RBAC + AI generate) + routes (6 endpoints)
+- ✅ `apps/backend/src/modules/lessons/` — nested routes (5 endpoints) + service methods + repository LessonQuestion CRUD
+- ✅ `shared/utils/audit.ts` — extended `AuditAction` + `AuditResourceType` for QUESTION/SUBJECT/FILE/USER roles
+- ✅ `apps/frontend/src/app/core/services/questions.service.ts` — full API client
+- ✅ `exercise-editor/` — split panel 40/60, CDK DragDrop, randomize toggle, AI generate dialog
+- ✅ `exercise-editor/question-form/` — dynamic form per QuestionType (6 types), all fields
+- ✅ `exercise-editor/question-bank-picker/` — modal, filter, pagination, multi-select
+- ✅ `/admin/lessons/:id/exercises` route added (lazy loaded)
+- ✅ `lesson-detail.component.html` — updated to use `lessonQuestions[].question`
+- ✅ `main-layout.component.html` — thêm "🗂️ Ngân hàng câu hỏi" link (isAdmin || isContentRole)
+- ✅ `features/admin/questions/questions-admin.component` — Question Bank admin page (filter, paginate, CRUD modal)
+- ✅ `chat.types.ts` — `role` → `roles` (multi-role fix)
+
 ### 🚧 Còn lại (theo độ ưu tiên)
-1. **Multi-Role RBAC** — `User.roles Json[]` + `title`, migrate `authorize()`, JWT payload, Admin UI multi-select
-2. **Question Bank & Exercise Editor** — model `Question` + `LessonQuestion`, `/admin/lessons/:id/exercises` split panel
-3. **Export reports PDF cải thiện font**: PDFKit tiếng Việt (P3)
+1. **Export reports PDF cải thiện font**: PDFKit tiếng Việt (P3)
 
 #### Blog UX & Cleanup session 8 ✅ COMPLETED (2026-05-10)
 - ✅ **Blog UX**: Tag autocomplete (Material Chips), Slug auto-gen, Slug preview.

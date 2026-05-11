@@ -1,6 +1,6 @@
 # EduViet — Progress Tracker
 
-> Cập nhật lần cuối: 2026-05-10 (session 9 — Multi-Role RBAC + Question Bank design)
+> Cập nhật lần cuối: 2026-05-11 (session 12 — Sidebar + Question Bank Admin Page)
 > Workflow: `/plan-task` → `/execute-step` (lặp) → `/check-point` → `/resume` → tiếp tục
 
 ---
@@ -315,3 +315,47 @@ Mã hóa `email`, `phone` at-rest trong PostgreSQL bằng pgcrypto.
 | `docs/architecture.md` | Thêm module `questions/` + feature `exercises/`, `questions/` |
 | `docs/coding-standards.md` | JWT snippet: `role` → `roles[]` |
 | `CLAUDE.md` | JWT pattern, trạng thái còn lại, session 9 |
+
+---
+
+## Session 11+12 — Question Bank & Exercise Editor + Sidebar (2026-05-11)
+
+> Task "Question Bank & Exercise Editor" — **COMPLETED**
+
+### Backend (thêm mới)
+
+| File | Mô tả |
+|------|-------|
+| `modules/questions/questions.repository.ts` | findMany (filter/paginate), findById, create, update, softDelete |
+| `modules/questions/questions.service.ts` | RBAC + CRUD + AI generate (claude-haiku-4-5) |
+| `modules/questions/questions.routes.ts` | GET/ POST/ GET/:id PATCH/:id DELETE/:id POST/generate |
+| `modules/lessons/lessons.routes.ts` | + 5 nested routes: GET/POST /:id/questions, DELETE/:id/questions/:qId, PATCH reorder, PATCH randomize |
+| `modules/lessons/lessons.service.ts` | + getLessonQuestions, addQuestion, removeQuestion, reorder, setRandomize, shuffle student response |
+| `modules/lessons/lessons.repository.ts` | + findLessonQuestions, addQuestionToLesson, removeQuestionFromLesson, reorderLessonQuestions, setRandomize |
+| `shared/utils/audit.ts` | + QUESTION_*/LESSON_QUESTION_*/SUBJECT_*/USER_ROLES_*/FILE_* audit actions |
+| `modules/reports/reports.repository.ts` | Fix: countUsersByRole() dùng $queryRaw jsonb_array_elements_text (hỗ trợ multi-role) |
+
+### Frontend (thêm mới)
+
+| File/Folder | Mô tả |
+|-------------|-------|
+| `core/services/questions.service.ts` | 10 methods: getBank, create, update, delete, generate, getLessonQuestions, addToLesson, removeFromLesson, reorder, setRandomize |
+| `features/admin/lessons/exercise-editor/` | Split panel 40/60, CDK DragDrop, randomize toggle, AI generate dialog |
+| `features/admin/lessons/exercise-editor/question-form/` | Dynamic form per QuestionType (6 types) |
+| `features/admin/lessons/exercise-editor/question-bank-picker/` | Modal, filter, pagination, multi-select |
+| `features/admin/questions/questions-admin.component.*` | Ngân hàng câu hỏi admin page: filter/paginate, CRUD modal, subject picker |
+| `app.routes.ts` | + /admin/lessons/:id/exercises + /admin/questions |
+| `layout/main-layout.component.html` | + "🗂️ Ngân hàng câu hỏi" link (isAdmin || isContentRole) |
+
+### Bugfixes trong session
+
+| File | Fix |
+|------|-----|
+| `start-dev.sh` | migrate dev → migrate deploy (non-interactive); thêm prisma generate step |
+| `users.repository.ts` | `\|\|` + `??` operator precedence (esbuild stricter than tsc) |
+| `reports.service.ts` | absolute URL → relative `/api/reports` (bypass proxy fix) |
+| `packages/shared-types/chat.types.ts` | `role` → `roles` (multi-role fix) |
+| `features/lessons/lesson-detail.component.html` | `exercises` → `lessonQuestions[].question.*` |
+
+### Còn lại
+- **P3** — Export reports PDF cải thiện font tiếng Việt (PDFKit + NotoSans)

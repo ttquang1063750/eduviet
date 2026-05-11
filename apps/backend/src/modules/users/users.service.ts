@@ -1,4 +1,4 @@
-import { PrismaClient, Role } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { UserRole } from '@eduviet/shared-types';
 import { AppError } from '../../shared/errors/app-error.js';
@@ -7,11 +7,14 @@ import { UsersRepository, UserFilters } from './users.repository.js';
 
 const ADMIN_ROLES: UserRole[] = ['SUPER_ADMIN', 'PROVINCE_ADMIN', 'DISTRICT_ADMIN', 'SCHOOL_ADMIN'];
 
+const hasAdminRole = (roles: UserRole[]) => ADMIN_ROLES.some((r) => roles.includes(r));
+
 export interface CreateUserInput {
   email: string;
   fullName: string;
   password: string;
-  role: UserRole;
+  roles: UserRole[];
+  title?: string;
   phone?: string;
   schoolId?: string;
 }
@@ -20,6 +23,8 @@ export interface UpdateUserData {
   fullName?: string;
   phone?: string;
   isActive?: boolean;
+  roles?: UserRole[];
+  title?: string;
 }
 
 export class UsersService {
@@ -44,8 +49,8 @@ export class UsersService {
   }
 
   /** Lấy thông tin user theo id — user chỉ xem được chính mình, admin xem được tất cả */
-  async getById(id: string, requesterId: string, requesterRole: UserRole) {
-    const isAdmin = ADMIN_ROLES.includes(requesterRole);
+  async getById(id: string, requesterId: string, requesterRoles: UserRole[]) {
+    const isAdmin = hasAdminRole(requesterRoles);
     if (!isAdmin && requesterId !== id) {
       throw AppError.forbidden('Bạn không có quyền xem thông tin này');
     }
@@ -57,14 +62,14 @@ export class UsersService {
   }
 
   /** Tạo user mới — chỉ SUPER_ADMIN và SCHOOL_ADMIN */
-  async create(input: CreateUserInput, requesterId: string, requesterRole: UserRole) {
-    if (!['SUPER_ADMIN', 'SCHOOL_ADMIN'].includes(requesterRole)) {
+  async create(input: CreateUserInput, requesterId: string, requesterRoles: UserRole[]) {
+    if (!requesterRoles.some((r) => ['SUPER_ADMIN', 'SCHOOL_ADMIN'].includes(r))) {
       throw AppError.forbidden();
     }
 
     // SCHOOL_ADMIN chỉ được tạo user trong trường của mình
     let schoolId = input.schoolId;
-    if (requesterRole === 'SCHOOL_ADMIN') {
+    if (requesterRoles.includes('SCHOOL_ADMIN') && !requesterRoles.includes('SUPER_ADMIN')) {
       const requester = await this.repo.findById(requesterId);
       if (!requester?.schoolId) {
         throw AppError.forbidden('Tài khoản admin chưa được gán trường');
@@ -88,7 +93,8 @@ export class UsersService {
         passwordHash,
         fullName: input.fullName,
         phone: input.phone,
-        role: input.role as Role,
+        roles: input.roles,
+        title: input.title,
         schoolId,
       });
 
@@ -97,7 +103,7 @@ export class UsersService {
         action: 'USER_CREATED',
         resourceType: 'USER',
         resourceId: user.id,
-        details: { email: input.email, role: input.role },
+        details: { email: input.email, roles: input.roles },
       });
 
       return user;
@@ -111,8 +117,8 @@ export class UsersService {
   }
 
   /** Xoá mềm user — chỉ SUPER_ADMIN, không tự xoá chính mình */
-  async delete(id: string, requesterId: string, requesterRole: UserRole) {
-    if (requesterRole !== 'SUPER_ADMIN') {
+  async delete(id: string, requesterId: string, requesterRoles: UserRole[]) {
+    if (!requesterRoles.includes('SUPER_ADMIN')) {
       throw AppError.forbidden('Chỉ Super Admin mới có thể xoá người dùng');
     }
     if (id === requesterId) {
@@ -129,23 +135,23 @@ export class UsersService {
       action: 'USER_DELETED',
       resourceType: 'USER',
       resourceId: id,
-      details: { email: user.email, role: user.role },
+      details: { email: user.email, roles: user.roles },
     });
   }
 
-  /** Cập nhật user — user chỉ sửa được chính mình (không sửa isActive), admin sửa được tất cả */
+  /** Cập nhật user — user chỉ sửa được chính mình (không sửa isActive/roles), admin sửa được tất cả */
   async update(
     id: string,
     data: UpdateUserData,
     requesterId: string,
-    requesterRole: UserRole
+    requesterRoles: UserRole[]
   ) {
-    const isAdmin = ['SUPER_ADMIN', 'SCHOOL_ADMIN'].includes(requesterRole);
+    const isAdmin = requesterRoles.some((r) => ['SUPER_ADMIN', 'SCHOOL_ADMIN'].includes(r));
     if (!isAdmin && requesterId !== id) {
       throw AppError.forbidden('Bạn không có quyền cập nhật thông tin này');
     }
 
-    // Chỉ admin mới được đổi isActive
+    // Chỉ admin mới được đổi isActive/roles/title
     const safeData = isAdmin
       ? data
       : { fullName: data.fullName, phone: data.phone };
@@ -167,14 +173,14 @@ export class UsersService {
     return user;
   }
 
-  /** Đổi role user — chỉ SUPER_ADMIN, không tự đổi của mình */
-  async changeRole(
+  /** Đổi roles user — chỉ SUPER_ADMIN, không tự đổi của mình */
+  async changeRoles(
     id: string,
-    newRole: UserRole,
+    newRoles: UserRole[],
     requesterId: string,
-    requesterRole: UserRole
+    requesterRoles: UserRole[]
   ) {
-    if (requesterRole !== 'SUPER_ADMIN') {
+    if (!requesterRoles.includes('SUPER_ADMIN')) {
       throw AppError.forbidden('Chỉ Super Admin mới có thể thay đổi vai trò');
     }
     if (id === requesterId) {
@@ -184,17 +190,17 @@ export class UsersService {
     const user = await this.repo.findById(id);
     if (!user) throw AppError.notFound('Người dùng');
 
-    const updatedUser = await this.repo.update(id, { role: newRole as Role });
+    const updatedUser = await this.repo.update(id, { roles: newRoles });
 
     await writeAuditLog(this.prisma, {
       userId: requesterId,
-      action: 'USER_ROLE_CHANGED',
+      action: 'USER_ROLES_CHANGED',
       resourceType: 'USER',
       resourceId: id,
       details: {
         email: user.email,
-        oldRole: user.role,
-        newRole,
+        oldRoles: user.roles,
+        newRoles,
       },
     });
 
@@ -206,13 +212,13 @@ export class UsersService {
     id: string,
     schoolId: string | null,
     requesterId: string,
-    requesterRole: UserRole
+    requesterRoles: UserRole[]
   ) {
-    if (!['SUPER_ADMIN', 'SCHOOL_ADMIN'].includes(requesterRole)) {
+    if (!requesterRoles.some((r) => ['SUPER_ADMIN', 'SCHOOL_ADMIN'].includes(r))) {
       throw AppError.forbidden();
     }
 
-    if (requesterRole === 'SCHOOL_ADMIN') {
+    if (requesterRoles.includes('SCHOOL_ADMIN') && !requesterRoles.includes('SUPER_ADMIN')) {
       const requester = await this.repo.findById(requesterId);
       if (!requester?.schoolId) {
         throw AppError.forbidden('Tài khoản admin chưa được gán trường');

@@ -1,6 +1,6 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UsersService } from '../../../core/services/users.service';
 import { SchoolsService } from '../../../core/services/schools.service';
@@ -14,7 +14,7 @@ import type { User, School, UserRole } from '@eduviet/shared-types';
 @Component({
   selector: 'app-users-admin-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  imports: [RouterLink, ReactiveFormsModule, DatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './users-admin-detail.component.html',
   styleUrl: './users-admin-detail.component.scss',
@@ -39,13 +39,33 @@ export class UsersAdminDetailComponent implements OnInit {
     email: [{ value: '', disabled: true }],
     fullName: ['', [Validators.required, Validators.minLength(2)]],
     phone: ['', [Validators.pattern(/^(\+84|0)[0-9]{9}$/)]],
-    role: ['', [Validators.required]],
+    roles: [[] as UserRole[], [Validators.required]],
+    title: [''],
     schoolId: [''],
     isActive: [true],
   });
 
-  readonly currentUserRole = this.authService.currentRole;
+  readonly isSuperAdmin = computed(() => this.authService.hasRole('SUPER_ADMIN'));
+  readonly canAssignSchool = computed(() =>
+    this.authService.hasRole('SUPER_ADMIN') ||
+    (this.authService.hasRole('SCHOOL_ADMIN') && !this.user()?.roles?.includes('SUPER_ADMIN'))
+  );
   readonly currentUserId = this.authService.user()?.id;
+
+  readonly allRoles: { value: UserRole; label: string }[] = [
+    { value: 'SUPER_ADMIN', label: 'Super Admin' },
+    { value: 'PROVINCE_ADMIN', label: 'Admin Tỉnh' },
+    { value: 'DISTRICT_ADMIN', label: 'Admin Huyện' },
+    { value: 'SCHOOL_ADMIN', label: 'Admin Trường' },
+    { value: 'CONTENT_CREATOR', label: 'Soạn thảo' },
+    { value: 'CONTENT_REVIEWER', label: 'Reviewer' },
+    { value: 'CONTENT_APPROVER', label: 'Phê duyệt' },
+    { value: 'GRADER', label: 'Chấm điểm' },
+    { value: 'SUBJECT_TEACHER', label: 'Giáo viên bộ môn' },
+    { value: 'HOMEROOM_TEACHER', label: 'GV Chủ nhiệm' },
+    { value: 'STUDENT', label: 'Học sinh' },
+    { value: 'PARENT', label: 'Phụ huynh' },
+  ];
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -69,7 +89,8 @@ export class UsersAdminDetailComponent implements OnInit {
           email: res.data.email,
           fullName: res.data.fullName,
           phone: res.data.phone ?? '',
-          role: res.data.role,
+          roles: res.data.roles,
+          title: res.data.title ?? '',
           schoolId: res.data.schoolId ?? '',
           isActive: res.data.isActive,
         });
@@ -84,7 +105,7 @@ export class UsersAdminDetailComponent implements OnInit {
   }
 
   async loadSchools() {
-    if (this.currentUserRole() === 'SUPER_ADMIN') {
+    if (this.isSuperAdmin()) {
       try {
         const res = await this.schoolsService.find({ perPage: 100 }).toPromise();
         if (res) this.schools.set(res.data);
@@ -96,11 +117,13 @@ export class UsersAdminDetailComponent implements OnInit {
 
   async onUpdateInfo() {
     if (!this.user()) return;
-    const { fullName, phone, isActive } = this.form.getRawValue();
+    const { fullName, phone, isActive, title } = this.form.getRawValue();
 
     this.isSaving.set(true);
     try {
-      await this.usersService.update(this.user()!.id, { fullName, phone, isActive }).toPromise();
+      await this.usersService
+        .update(this.user()!.id, { fullName, phone, isActive, title: title || undefined })
+        .toPromise();
       this.toastService.success('Cập nhật thông tin thành công');
     } catch (error: unknown) {
       this.toastService.error(getApiErrorMessage(error, 'Lỗi cập nhật'));
@@ -109,18 +132,23 @@ export class UsersAdminDetailComponent implements OnInit {
     }
   }
 
-  async onChangeRole() {
-    if (!this.user() || this.currentUserRole() !== 'SUPER_ADMIN') return;
-    const { role } = this.form.getRawValue();
+  async onChangeRoles() {
+    if (!this.user() || !this.isSuperAdmin()) return;
+    const { roles } = this.form.getRawValue();
 
     if (this.user()!.id === this.currentUserId) {
       this.toastService.warning('Bạn không thể tự thay đổi vai trò của chính mình');
       return;
     }
 
+    if (roles.length === 0) {
+      this.toastService.warning('Phải chọn ít nhất 1 vai trò');
+      return;
+    }
+
     this.isSaving.set(true);
     try {
-      await this.usersService.changeRole(this.user()!.id, role as UserRole).toPromise();
+      await this.usersService.changeRoles(this.user()!.id, roles).toPromise();
       this.toastService.success('Thay đổi vai trò thành công');
     } catch (error: unknown) {
       this.toastService.error(getApiErrorMessage(error, 'Lỗi đổi vai trò'));
@@ -178,7 +206,8 @@ export class UsersAdminDetailComponent implements OnInit {
       CONTENT_CREATOR: 'Soạn thảo',
       CONTENT_REVIEWER: 'Reviewer',
       CONTENT_APPROVER: 'Phê duyệt',
-      SUBJECT_TEACHER: 'Giáo viên',
+      GRADER: 'Chấm điểm',
+      SUBJECT_TEACHER: 'Giáo viên bộ môn',
       HOMEROOM_TEACHER: 'GV Chủ nhiệm',
       STUDENT: 'Học sinh',
       PARENT: 'Phụ huynh',

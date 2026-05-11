@@ -27,8 +27,8 @@ export class BlogService {
     this.usersRepo = new UsersRepository(prisma);
   }
 
-  async list(filters: BlogFilters, userRole?: UserRole) {
-    const isAdmin = userRole && CONTENT_ADMIN_ROLES.includes(userRole);
+  async list(filters: BlogFilters, userRoles?: UserRole[]) {
+    const isAdmin = userRoles?.some((r) => CONTENT_ADMIN_ROLES.includes(r));
     const { posts, total } = await this.repo.findMany(filters, !isAdmin);
     return {
       data: posts,
@@ -40,14 +40,14 @@ export class BlogService {
     return this.repo.getPopularTags(limit);
   }
 
-  async getBySlug(slug: string, userRole?: UserRole) {
+  async getBySlug(slug: string, userRoles?: UserRole[]) {
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     const post = UUID_RE.test(slug)
       ? await this.repo.findById(slug)
       : await this.repo.findBySlug(slug);
     if (!post) throw AppError.notFound('Bài viết');
 
-    const isAdmin = userRole && CONTENT_ADMIN_ROLES.includes(userRole);
+    const isAdmin = userRoles?.some((r) => CONTENT_ADMIN_ROLES.includes(r));
     if (post.status !== 'PUBLISHED' && !isAdmin) {
       throw AppError.forbidden('Bạn không có quyền xem bài viết này');
     }
@@ -123,7 +123,7 @@ export class BlogService {
     if (post.authorId !== actorId) {
       // Check if actor is admin
       const user = await this.usersRepo.findById(actorId);
-      if (!user || !CONTENT_ADMIN_ROLES.includes(user.role as UserRole)) {
+      if (!user || !user.roles?.some((r: UserRole) => CONTENT_ADMIN_ROLES.includes(r))) {
         throw AppError.forbidden('Bạn không có quyền chỉnh sửa bài viết này');
       }
     }
@@ -148,19 +148,19 @@ export class BlogService {
     return this.repo.createComment({ content: data.content, authorId, postId, parentId: data.parentId });
   }
 
-  async hideComment(commentId: string, actorRole: UserRole) {
+  async hideComment(commentId: string, actorRoles: UserRole[]) {
     const isModRole: UserRole[] = ['SUPER_ADMIN', 'SCHOOL_ADMIN', 'CONTENT_REVIEWER', 'CONTENT_APPROVER'];
-    if (!isModRole.includes(actorRole)) throw AppError.forbidden('Bạn không có quyền ẩn bình luận');
+    if (!actorRoles.some((r) => isModRole.includes(r))) throw AppError.forbidden('Bạn không có quyền ẩn bình luận');
     const comment = await this.repo.findCommentById(commentId);
     if (!comment) throw AppError.notFound('Bình luận');
     return this.repo.hideComment(commentId);
   }
 
-  async deleteComment(commentId: string, actorId: string, actorRole: UserRole) {
+  async deleteComment(commentId: string, actorId: string, actorRoles: UserRole[]) {
     const comment = await this.repo.findCommentById(commentId);
     if (!comment) throw AppError.notFound('Bình luận');
     const isOwner = comment.authorId === actorId;
-    const isMod = (['SUPER_ADMIN', 'SCHOOL_ADMIN'] as UserRole[]).includes(actorRole);
+    const isMod = (['SUPER_ADMIN', 'SCHOOL_ADMIN'] as UserRole[]).some((r) => actorRoles.includes(r));
     if (!isOwner && !isMod) throw AppError.forbidden('Bạn không có quyền xóa bình luận này');
     return this.repo.deleteComment(commentId);
   }

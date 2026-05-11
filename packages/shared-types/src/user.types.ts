@@ -18,7 +18,8 @@ export interface User {
   phone: string | null;
   fullName: string;
   avatarUrl: string | null;
-  role: UserRole;
+  roles: UserRole[];
+  title: string | null;
   isActive: boolean;
   isVerified: boolean;
   schoolId: string | null;
@@ -30,7 +31,8 @@ export interface CreateUserRequest {
   password: string;
   fullName: string;
   phone?: string;
-  role: UserRole;
+  roles: UserRole[];
+  title?: string;
   schoolId?: string;
 }
 
@@ -39,4 +41,6 @@ export interface UpdateUserRequest {
   phone?: string;
   avatarUrl?: string;
   isActive?: boolean;
+  roles?: UserRole[];
+  title?: string;
 }

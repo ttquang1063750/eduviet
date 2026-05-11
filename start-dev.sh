@@ -86,8 +86,13 @@ success "PostgreSQL OK"
 
 # ── 7. Chạy Prisma migrations ─────────────────────────────────
 info "Chạy database migrations..."
-pnpm db:migrate 2>&1 | tail -5 || warn "Migration có lỗi, bỏ qua (có thể đã migrate rồi)"
+pnpm db:migrate:deploy 2>&1 | tail -10 || warn "Migration có lỗi, bỏ qua (có thể đã migrate rồi)"
 success "Migrations OK"
+
+# ── 7b. Regenerate Prisma client ─────────────────────────────
+info "Regenerate Prisma client..."
+pnpm --filter @eduviet/prisma generate 2>&1 | tail -3
+success "Prisma client OK"
 
 # ── 8. Seed dữ liệu mẫu (chỉ lần đầu) ───────────────────────
 SEED_FLAG="$ROOT/.seeded"

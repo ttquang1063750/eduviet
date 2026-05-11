@@ -1,19 +1,21 @@
-import { PrismaClient, Prisma, Role } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { hashPII } from '../../shared/utils/pii-crypto.js';
+import { UserRole } from '@eduviet/shared-types';
 
 export interface CreateUserData {
   email: string;
   passwordHash: string;
   fullName: string;
   phone?: string;
-  role: Role;
+  roles: UserRole[];
+  title?: string;
   schoolId?: string;
 }
 
 export interface UserFilters {
   page: number;
   perPage: number;
-  role?: string;
+  role?: string;   // filter by single role (contains check)
   search?: string;
 }
 
@@ -27,7 +29,8 @@ interface UserDbRaw {
   password_hash: string;
   full_name: string;
   avatar_url: string | null;
-  role: Role;
+  roles: unknown;  // JSONB — parse to UserRole[]
+  title: string | null;
   is_active: boolean;
   is_verified: boolean;
   school_id: string | null;
@@ -41,18 +44,27 @@ export class UsersRepository {
 
   constructor(private readonly prisma: PrismaClient) {}
 
+  private parseRoles(raw: unknown): UserRole[] {
+    if (Array.isArray(raw)) return raw as UserRole[];
+    if (typeof raw === 'string') {
+      try { return JSON.parse(raw) as UserRole[]; } catch { /* fall through */ }
+    }
+    return ['STUDENT'];
+  }
+
   private mapRawToUser(raw: any) {
     if (!raw) return null;
     return {
       id: raw.id,
       email: raw.email,
-      phone: raw.phone,
+      phone: raw.phone ?? null,
       fullName: raw.full_name || raw.fullName,
-      role: raw.role,
-      avatarUrl: raw.avatar_url || raw.avatarUrl,
+      roles: this.parseRoles(raw.roles),
+      title: raw.title ?? null,
+      avatarUrl: (raw.avatar_url || raw.avatarUrl) ?? null,
       isActive: raw.is_active ?? raw.isActive,
       isVerified: raw.is_verified ?? raw.isVerified,
-      schoolId: raw.school_id || raw.schoolId,
+      schoolId: (raw.school_id || raw.schoolId) ?? null,
       createdAt: raw.created_at || raw.createdAt,
     };
   }
@@ -67,7 +79,8 @@ export class UsersRepository {
     
     let whereClause = Prisma.sql`u.deleted_at IS NULL`;
     if (role) {
-      whereClause = Prisma.sql`${whereClause} AND u.role = ${role}::"Role"`;
+      // JSONB contains check — u.roles @> '["ROLE"]'
+      whereClause = Prisma.sql`${whereClause} AND u.roles @> ${JSON.stringify([role])}::jsonb`;
     }
     if (search) {
       const searchHash = hashPII(search);
@@ -75,11 +88,12 @@ export class UsersRepository {
     }
 
     const users = await this.prisma.$queryRaw<any[]>`
-      SELECT 
-        u.id, 
+      SELECT
+        u.id,
         pgp_sym_decrypt(u.email, ${this.ENCRYPTION_KEY}) as email,
         u.full_name as "fullName",
-        u.role,
+        u.roles,
+        u.title,
         u.avatar_url as "avatarUrl",
         u.is_active as "isActive",
         u.is_verified as "isVerified",
@@ -103,12 +117,13 @@ export class UsersRepository {
 
   async findById(id: string) {
     const users = await this.prisma.$queryRaw<any[]>`
-      SELECT 
-        u.id, 
+      SELECT
+        u.id,
         pgp_sym_decrypt(u.email, ${this.ENCRYPTION_KEY}) as email,
         pgp_sym_decrypt(u.phone, ${this.ENCRYPTION_KEY}) as phone,
         u.full_name as "fullName",
-        u.role,
+        u.roles,
+        u.title,
         u.avatar_url as "avatarUrl",
         u.is_active as "isActive",
         u.is_verified as "isVerified",
@@ -133,12 +148,13 @@ export class UsersRepository {
   async findByEmail(email: string) {
     const emailHash = hashPII(email);
     const users = await this.prisma.$queryRaw<any[]>`
-      SELECT 
-        u.id, 
+      SELECT
+        u.id,
         pgp_sym_decrypt(u.email, ${this.ENCRYPTION_KEY}) as email,
         u.password_hash as "passwordHash",
         u.full_name as "fullName",
-        u.role,
+        u.roles,
+        u.title,
         u.avatar_url as "avatarUrl",
         u.is_active as "isActive",
         u.is_verified as "isVerified",
@@ -161,16 +177,17 @@ export class UsersRepository {
 
     const users = await this.prisma.$queryRaw<any[]>`
       INSERT INTO users (
-        id, 
-        email, 
-        email_hash, 
-        phone, 
-        phone_hash, 
-        password_hash, 
-        full_name, 
-        role, 
-        school_id, 
-        created_at, 
+        id,
+        email,
+        email_hash,
+        phone,
+        phone_hash,
+        password_hash,
+        full_name,
+        roles,
+        title,
+        school_id,
+        created_at,
         updated_at
       ) VALUES (
         gen_random_uuid(),
@@ -180,11 +197,12 @@ export class UsersRepository {
         ${phoneHash},
         ${data.passwordHash},
         ${data.fullName},
-        ${data.role}::"Role",
-        ${data.schoolId},
+        ${JSON.stringify(data.roles)}::jsonb,
+        ${data.title ?? null},
+        ${data.schoolId ?? null},
         NOW(),
         NOW()
-      ) RETURNING id, full_name as "fullName", role, is_active as "isActive", is_verified as "isVerified", school_id as "schoolId", created_at as "createdAt"
+      ) RETURNING id, full_name as "fullName", roles, title, is_active as "isActive", is_verified as "isVerified", school_id as "schoolId", created_at as "createdAt"
     `;
 
     return {
@@ -205,7 +223,8 @@ export class UsersRepository {
     const updates: Prisma.Sql[] = [];
     
     if (data.fullName) updates.push(Prisma.sql`full_name = ${data.fullName}`);
-    if (data.role) updates.push(Prisma.sql`role = ${data.role}::"Role"`);
+    if (data.roles !== undefined) updates.push(Prisma.sql`roles = ${JSON.stringify(data.roles)}::jsonb`);
+    if (data.title !== undefined) updates.push(Prisma.sql`title = ${data.title}`);
     if (data.isActive !== undefined) updates.push(Prisma.sql`is_active = ${data.isActive}`);
     if (data.isVerified !== undefined) updates.push(Prisma.sql`is_verified = ${data.isVerified}`);
     if (data.schoolId !== undefined) updates.push(Prisma.sql`school_id = ${data.schoolId}`);

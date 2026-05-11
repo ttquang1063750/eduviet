@@ -59,7 +59,7 @@ export class LessonDetailComponent implements OnInit {
 
   submitAnswers(): void {
     const answered = Object.keys(this.selectedAnswers()).length;
-    const total = this.lesson()?.exercises.length ?? 0;
+    const total = this.lesson()?.lessonQuestions.length ?? 0;
     // TODO: Thay bằng API call khi hệ thống chấm điểm sẵn sàng
     this.toastService.info(
       `Đã nộp ${answered}/${total} câu trả lời!\n(Chức năng chấm điểm sẽ được tích hợp trong phiên bản đầy đủ)`

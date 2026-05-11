@@ -1,5 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+import type { UserRole } from '@eduviet/shared-types';
 import { AuthService } from '../services/auth.service';
 
 export const authGuard: CanActivateFn = () => {
@@ -18,7 +19,7 @@ export const guestGuard: CanActivateFn = () => {
   return router.createUrlTree(['/dashboard']);
 };
 
-export function roleGuard(...roles: string[]): CanActivateFn {
+export function roleGuard(...roles: UserRole[]): CanActivateFn {
   return () => {
     const auth = inject(AuthService);
     const router = inject(Router);

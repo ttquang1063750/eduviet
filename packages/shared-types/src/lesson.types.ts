@@ -1,4 +1,5 @@
-import type { ContentStatus, Difficulty, ExerciseType, SubjectCode } from './common.types';
+import type { ContentStatus, Difficulty, SubjectCode } from './common.types';
+import type { LessonQuestion } from './question.types';
 
 export interface Subject {
   id: string;
@@ -7,20 +8,6 @@ export interface Subject {
   nameEn: string;
   color: string | null;
   iconUrl: string | null;
-}
-
-export interface Exercise {
-  id: string;
-  type: ExerciseType;
-  question: string;
-  options: string[] | null;
-  correctAnswer: string | string[];
-  explanation: string;
-  hints: string[];
-  points: number;
-  orderIndex: number;
-  /** URL ảnh nền cho bài tập vẽ hình (type = DRAWING). Học sinh vẽ đè lên ảnh này. */
-  backgroundImageUrl?: string | null;
 }
 
 export interface Lesson {
@@ -34,7 +21,8 @@ export interface Lesson {
   theory: string;
   estimatedMinutes: number;
   status: ContentStatus;
-  exercises: Exercise[];
+  randomizeQuestions: boolean;
+  lessonQuestions: LessonQuestion[];
   publishedAt: string | null;
   createdAt: string;
 }

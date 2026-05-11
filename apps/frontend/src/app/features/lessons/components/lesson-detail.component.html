@@ -24,7 +24,7 @@
         <div class="lesson-meta">
           <span>📁 {{ lesson()!.topic }}</span>
           <span>⏱ {{ lesson()!.estimatedMinutes }} phút học</span>
-          <span>📝 {{ lesson()!.exercises.length }} bài tập</span>
+          <span>📝 {{ lesson()!.lessonQuestions.length }} bài tập</span>
         </div>
       </div>
 
@@ -48,64 +48,64 @@
         <!-- Exercises panel -->
         <div class="exercises-panel">
           <div class="panel-header">
-            <h2>✏️ Bài tập ({{ lesson()!.exercises.length }})</h2>
+            <h2>✏️ Bài tập ({{ lesson()!.lessonQuestions.length }})</h2>
           </div>
 
-          @for (exercise of lesson()!.exercises; track exercise.id; let i = $index) {
+          @for (lq of lesson()!.lessonQuestions; track lq.id; let i = $index) {
             <div class="exercise-card">
               <div class="exercise-number">Câu {{ i + 1 }}</div>
               <div class="exercise-question">
-                <markdown [data]="exercise.question" [inline]="true"></markdown>
+                <markdown [data]="lq.question.content" [inline]="true"></markdown>
               </div>
 
-              @if (exercise.type === 'MULTIPLE_CHOICE' && exercise.options) {
+              @if ((lq.question.type === 'SINGLE_CHOICE' || lq.question.type === 'MULTIPLE_CHOICE') && lq.question.options) {
                 <div class="options-list">
-                  @for (opt of exercise.options; track opt; let j = $index) {
-                    <label class="option-item" [class.selected]="selectedAnswers()[exercise.id] === opt">
+                  @for (opt of $any(lq.question.options); track opt.id; let j = $index) {
+                    <label class="option-item" [class.selected]="selectedAnswers()[lq.question.id] === opt.id">
                       <input
                         type="radio"
-                        [name]="'q-' + exercise.id"
-                        [value]="opt"
-                        (change)="selectAnswer(exercise.id, opt)"
+                        [name]="'q-' + lq.question.id"
+                        [value]="opt.id"
+                        (change)="selectAnswer(lq.question.id, opt.id)"
                       />
                       <span class="option-label">{{ 'ABCD'[j] }}</span>
                       <span class="option-text">
-                        <markdown [data]="opt" [inline]="true"></markdown>
+                        <markdown [data]="opt.text" [inline]="true"></markdown>
                       </span>
                     </label>
                   }
                 </div>
               }
 
-              @if (exercise.type === 'FILL_IN_BLANK') {
+              @if (lq.question.type === 'FILL_IN_BLANK') {
                 <div class="fill-blank">
                   <input
                     type="text"
                     class="fill-input"
                     placeholder="Nhập đáp án của bạn..."
-                    (input)="selectAnswer(exercise.id, getInputValue($event))"
+                    (input)="selectAnswer(lq.question.id, getInputValue($event))"
                   />
                 </div>
               }
 
-              @if (exercise.type === 'SHORT_ANSWER' || exercise.type === 'ESSAY') {
+              @if (lq.question.type === 'SHORT_ANSWER' || lq.question.type === 'ESSAY') {
                 <div class="fill-blank">
                   <textarea
                     class="fill-textarea"
                     rows="4"
-                    [placeholder]="exercise.type === 'ESSAY' ? 'Viết bài giải của bạn...' : 'Nhập câu trả lời ngắn...'"
-                    (input)="selectAnswer(exercise.id, getInputValue($event))"
+                    [placeholder]="lq.question.type === 'ESSAY' ? 'Viết bài giải của bạn...' : 'Nhập câu trả lời ngắn...'"
+                    (input)="selectAnswer(lq.question.id, getInputValue($event))"
                   ></textarea>
                 </div>
               }
 
-              @if (exercise.type === 'DRAWING') {
+              @if (lq.question.type === 'DRAWING') {
                 <div class="drawing-exercise">
                   <app-drawing-canvas
-                    [backgroundImageUrl]="exercise.backgroundImageUrl ?? null"
-                    (imageExported)="saveDrawing(exercise.id, $event)"
+                    [backgroundImageUrl]="null"
+                    (imageExported)="saveDrawing(lq.question.id, $event)"
                   />
-                  @if (hasDrawingAnswer(exercise.id)) {
+                  @if (hasDrawingAnswer(lq.question.id)) {
                     <div class="drawing-saved-notice">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <polyline points="20 6 9 17 4 12"/>
@@ -117,15 +117,15 @@
               }
 
               <div class="exercise-footer">
-                <span class="points-badge">{{ exercise.points }} điểm</span>
-                @if (exercise.hints.length > 0) {
-                  <button class="hint-btn" (click)="toggleHint(exercise.id)">💡 Gợi ý</button>
+                <span class="points-badge">{{ lq.question.points }} điểm</span>
+                @if (lq.question.hints.length > 0) {
+                  <button class="hint-btn" (click)="toggleHint(lq.question.id)">💡 Gợi ý</button>
                 }
               </div>
 
-              @if (showHints()[exercise.id] && exercise.hints.length > 0) {
+              @if (showHints()[lq.question.id] && lq.question.hints.length > 0) {
                 <div class="hint-box">
-                  <markdown [data]="exercise.hints[0]" [inline]="true"></markdown>
+                  <markdown [data]="lq.question.hints[0]" [inline]="true"></markdown>
                 </div>
               }
             </div>

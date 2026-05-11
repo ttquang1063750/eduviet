@@ -5,14 +5,14 @@ export type ChatRoomType = 'CLASS' | 'TEACHER_PARENT' | 'ONE_ON_ONE' | 'STAFF';
 export interface ChatRoomMember {
   userId: string;
   lastReadAt: Date | null;
-  user: Pick<User, 'id' | 'fullName' | 'avatarUrl' | 'role'>;
+  user: Pick<User, 'id' | 'fullName' | 'avatarUrl' | 'roles'>;
 }
 
 export interface ChatMessage {
   id: string;
   roomId: string;
   senderId: string;
-  sender: Pick<User, 'id' | 'fullName' | 'avatarUrl' | 'role'>;
+  sender: Pick<User, 'id' | 'fullName' | 'avatarUrl' | 'roles'>;
   content: string;
   mediaUrl: string | null;
   createdAt: Date;

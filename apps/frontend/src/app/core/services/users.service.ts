@@ -37,8 +37,8 @@ export class UsersService {
     return this.http.patch<ApiResponse<User>>(`${this.API}/${id}`, data);
   }
 
-  changeRole(id: string, role: UserRole) {
-    return this.http.patch<ApiResponse<User>>(`${this.API}/${id}/role`, { role });
+  changeRoles(id: string, roles: UserRole[]) {
+    return this.http.patch<ApiResponse<User>>(`${this.API}/${id}/roles`, { roles });
   }
 
   assignSchool(id: string, schoolId: string | null) {

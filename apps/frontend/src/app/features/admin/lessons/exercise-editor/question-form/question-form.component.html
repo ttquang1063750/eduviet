@@ -1,0 +1,208 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="question-form">
+  <div class="form-header">
+    <h3>{{ question ? 'Chỉnh sửa câu hỏi' : 'Tạo câu hỏi mới' }}</h3>
+  </div>
+
+  <!-- Type selector (chỉ hiện khi tạo mới) -->
+  @if (!question) {
+    <div class="form-group">
+      <label>Loại câu hỏi <span class="required">*</span></label>
+      <div class="type-selector">
+        @for (t of questionTypes; track t.value) {
+          <button
+            type="button"
+            class="type-btn"
+            [class.active]="selectedType() === t.value"
+            (click)="onTypeChange(t.value)"
+          >
+            {{ t.label }}
+          </button>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="type-badge-row">
+      <span class="type-badge">{{ questionTypeLabels[question!.type] }}</span>
+    </div>
+  }
+
+  <!-- Content -->
+  <div class="form-group">
+    <label>Nội dung câu hỏi <span class="required">*</span></label>
+    <textarea
+      formControlName="content"
+      class="form-control textarea"
+      rows="4"
+      placeholder="Nhập nội dung câu hỏi. Dùng ___ cho chỗ trống (FILL_IN_BLANK)."
+    ></textarea>
+  </div>
+
+  <!-- Options (SINGLE_CHOICE / MULTIPLE_CHOICE) -->
+  @if (needsOptions()) {
+    <div class="form-group">
+      <label>Các lựa chọn</label>
+      <div class="options-list">
+        @for (opt of options(); track opt.id; let i = $index) {
+          <div class="option-row">
+            <span class="option-id">{{ opt.id }}</span>
+            <input
+              type="text"
+              class="form-control"
+              [value]="opt.text"
+              [placeholder]="'Lựa chọn ' + opt.id"
+              (input)="setOptionText(i, getInputValue($event))"
+            />
+            @if (selectedType() === 'SINGLE_CHOICE') {
+              <input
+                type="radio"
+                name="singleAnswer"
+                [value]="opt.id"
+                [checked]="correctAnswerSingle() === opt.id"
+                (change)="correctAnswerSingle.set(opt.id)"
+                title="Đáp án đúng"
+              />
+            } @else {
+              <input
+                type="checkbox"
+                [checked]="isMultipleSelected(opt.id)"
+                (change)="toggleMultipleAnswer(opt.id)"
+                title="Đáp án đúng"
+              />
+            }
+            @if (options().length > 2) {
+              <button type="button" class="btn-icon-remove" (click)="removeOption(i)">×</button>
+            }
+          </div>
+        }
+      </div>
+      @if (options().length < 8) {
+        <button type="button" class="btn-add-option" (click)="addOption()">+ Thêm lựa chọn</button>
+      }
+      <p class="hint-text">
+        @if (selectedType() === 'SINGLE_CHOICE') {
+          Chọn radio button bên phải để đánh dấu đáp án đúng.
+        } @else {
+          Chọn checkbox để đánh dấu các đáp án đúng (có thể nhiều hơn 1).
+        }
+      </p>
+    </div>
+  }
+
+  <!-- Fill in blank answers -->
+  @if (selectedType() === 'FILL_IN_BLANK') {
+    <div class="form-group">
+      <label>Đáp án cho từng chỗ trống</label>
+      <div class="blanks-list">
+        @for (blank of correctAnswerFillBlanks(); track $index; let i = $index) {
+          <div class="blank-row">
+            <span class="blank-label">Ô {{ i + 1 }}</span>
+            <input
+              type="text"
+              class="form-control"
+              [value]="blank"
+              placeholder="Đáp án..."
+              (input)="setBlankAnswer(i, getInputValue($event))"
+            />
+            @if (correctAnswerFillBlanks().length > 1) {
+              <button type="button" class="btn-icon-remove" (click)="removeBlank(i)">×</button>
+            }
+          </div>
+        }
+      </div>
+      <button type="button" class="btn-add-option" (click)="addBlank()">+ Thêm ô trống</button>
+    </div>
+  }
+
+  <!-- Short answer / Essay / Drawing correct answer -->
+  @if (selectedType() === 'SHORT_ANSWER' || selectedType() === 'ESSAY' || selectedType() === 'DRAWING') {
+    <div class="form-group">
+      <label>
+        @if (selectedType() === 'DRAWING') {
+          Hướng dẫn chấm điểm
+        } @else {
+          Đáp án mẫu / Gợi ý chấm
+        }
+      </label>
+      <textarea
+        class="form-control textarea"
+        rows="3"
+        [value]="correctAnswerText()"
+        (input)="correctAnswerText.set(getInputValue($event))"
+        placeholder="Mô tả đáp án hoặc tiêu chí chấm điểm..."
+      ></textarea>
+    </div>
+  }
+
+  <!-- Points + Difficulty row -->
+  <div class="form-row">
+    <div class="form-group">
+      <label>Điểm</label>
+      <input
+        type="number"
+        formControlName="points"
+        class="form-control"
+        min="1"
+        max="100"
+      />
+    </div>
+    <div class="form-group">
+      <label>Độ khó</label>
+      <select formControlName="difficulty" class="form-control">
+        @for (d of difficultyOptions; track d.value) {
+          <option [value]="d.value">{{ d.label }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <!-- Explanation -->
+  <div class="form-group">
+    <label>Giải thích đáp án <span class="optional">(tuỳ chọn)</span></label>
+    <textarea
+      formControlName="explanation"
+      class="form-control textarea"
+      rows="3"
+      placeholder="Giải thích tại sao đây là đáp án đúng..."
+    ></textarea>
+  </div>
+
+  <!-- Hints -->
+  <div class="form-group">
+    <label>Gợi ý <span class="optional">(phân cách bằng dấu phẩy)</span></label>
+    <input
+      type="text"
+      formControlName="hints"
+      class="form-control"
+      placeholder="VD: Xem lại chương 3, Nhớ công thức..."
+    />
+  </div>
+
+  <!-- Tags -->
+  <div class="form-group">
+    <label>Tags <span class="optional">(phân cách bằng dấu phẩy)</span></label>
+    <input
+      type="text"
+      formControlName="tags"
+      class="form-control"
+      placeholder="VD: đại số, phương trình, lớp 10..."
+    />
+  </div>
+
+  <!-- Actions -->
+  <div class="form-actions">
+    <button type="button" class="btn btn-secondary" (click)="onCancel()">Huỷ</button>
+    <button
+      type="submit"
+      class="btn btn-primary"
+      [disabled]="form.invalid || saving() || isSaving"
+    >
+      @if (saving() || isSaving) {
+        Đang lưu...
+      } @else if (question) {
+        Lưu thay đổi
+      } @else {
+        Tạo & thêm vào bài
+      }
+    </button>
+  </div>
+</form>

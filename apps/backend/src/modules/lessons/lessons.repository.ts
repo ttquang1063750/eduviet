@@ -10,8 +10,34 @@ export interface LessonFilters {
   search?: string;
 }
 
+// Prisma client hasn't been regenerated yet (migration pending).
+// New models (Question, LessonQuestion) and fields (randomizeQuestions, lessonQuestions)
+// are cast as `never` / accessed via (prisma as never) until `prisma generate` runs.
+type AnyPrisma = Record<string, (args: unknown) => Promise<unknown>>;
+
+const questionSelect = {
+  id: true,
+  subjectId: true,
+  type: true,
+  content: true,
+  options: true,
+  correctAnswer: true,
+  explanation: true,
+  hints: true,
+  points: true,
+  difficulty: true,
+  tags: true,
+  creatorId: true,
+  createdAt: true,
+  updatedAt: true,
+};
+
 export class LessonsRepository {
   constructor(private readonly prisma: PrismaClient) {}
+
+  private get lq(): AnyPrisma {
+    return (this.prisma as unknown as Record<string, AnyPrisma>)['lessonQuestion'];
+  }
 
   async findMany(filters: LessonFilters) {
     const { page, perPage, subject, grade, difficulty, statuses, search } = filters;
@@ -64,9 +90,92 @@ export class LessonsRepository {
       include: {
         subject: true,
         creator: { select: { id: true, fullName: true, avatarUrl: true } },
-        exercises: { orderBy: { orderIndex: 'asc' } },
+        lessonQuestions: {
+          where: { question: { deletedAt: null } } as never,
+          orderBy: { orderIndex: 'asc' } as never,
+          include: {
+            question: { select: questionSelect },
+          },
+        } as never,
+      } as never,
+    }) as Promise<(Awaited<ReturnType<typeof this.prisma.lesson.findUnique>> & {
+      randomizeQuestions: boolean;
+      lessonQuestions: Array<{
+        id: string;
+        lessonId: string;
+        questionId: string;
+        orderIndex: number;
+        createdAt: Date;
+        question: Record<string, unknown>;
+      }>;
+    }) | null>;
+  }
+
+  async findLessonQuestions(lessonId: string) {
+    return this.lq['findMany']({
+      where: { lessonId, question: { deletedAt: null } },
+      orderBy: { orderIndex: 'asc' },
+      include: {
+        question: { select: questionSelect },
       },
+    }) as Promise<Array<{
+      id: string;
+      lessonId: string;
+      questionId: string;
+      orderIndex: number;
+      createdAt: Date;
+      question: Record<string, unknown>;
+    }>>;
+  }
+
+  async addQuestionToLesson(lessonId: string, questionId: string) {
+    const maxOrder = await this.lq['findFirst']({
+      where: { lessonId },
+      orderBy: { orderIndex: 'desc' },
+      select: { orderIndex: true },
+    }) as { orderIndex: number } | null;
+
+    return this.lq['create']({
+      data: {
+        lessonId,
+        questionId,
+        orderIndex: (maxOrder?.orderIndex ?? -1) + 1,
+      },
+      include: {
+        question: { select: questionSelect },
+      },
+    }) as Promise<{
+      id: string;
+      lessonId: string;
+      questionId: string;
+      orderIndex: number;
+      createdAt: Date;
+      question: Record<string, unknown>;
+    }>;
+  }
+
+  async removeQuestionFromLesson(lessonId: string, questionId: string) {
+    return this.lq['deleteMany']({
+      where: { lessonId, questionId },
     });
+  }
+
+  async reorderLessonQuestions(lessonId: string, orderedIds: string[]) {
+    // Use sequential updates since lq is a dynamic accessor and can't be typed for $transaction
+    for (let index = 0; index < orderedIds.length; index++) {
+      const questionId = orderedIds[index];
+      await this.lq['updateMany']({
+        where: { lessonId, questionId },
+        data: { orderIndex: index },
+      });
+    }
+  }
+
+  async setRandomize(lessonId: string, randomize: boolean) {
+    return this.prisma.lesson.update({
+      where: { id: lessonId },
+      data: { randomizeQuestions: randomize } as never,
+    }) as unknown as Promise<{ id: string; randomizeQuestions: boolean }>;
   }
 
   async findById(id: string) {

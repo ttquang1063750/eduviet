@@ -26,9 +26,37 @@ export type AuditAction =
   | 'CHAT_ROOM_CREATED'
   | 'CHAT_MESSAGE_SENT'
   | 'CHAT_MESSAGE_EDITED'
-  | 'CHAT_MESSAGE_DELETED';
+  | 'CHAT_MESSAGE_DELETED'
+  // Question bank
+  | 'QUESTION_CREATED'
+  | 'QUESTION_UPDATED'
+  | 'QUESTION_DELETED'
+  | 'LESSON_QUESTION_ADDED'
+  | 'LESSON_QUESTION_REMOVED'
+  | 'LESSON_QUESTIONS_REORDERED'
+  | 'LESSON_RANDOMIZE_TOGGLED'
+  // Subject
+  | 'SUBJECT_CREATED'
+  | 'SUBJECT_UPDATED'
+  | 'SUBJECT_DELETED'
+  // User roles / school
+  | 'USER_ROLES_CHANGED'
+  | 'USER_SCHOOL_ASSIGNED'
+  // Blog
+  | 'BLOG_SUBMITTED_FOR_REVIEW'
+  // File
+  | 'FILE_UPLOADED';
 
-export type AuditResourceType = 'AUTH' | 'USER' | 'LESSON' | 'CLASS' | 'CONTENT' | 'CHAT';
+export type AuditResourceType =
+  | 'AUTH'
+  | 'USER'
+  | 'LESSON'
+  | 'CLASS'
+  | 'CONTENT'
+  | 'CHAT'
+  | 'QUESTION'
+  | 'SUBJECT'
+  | 'FILE';
 
 export interface AuditEntry {
   userId: string;

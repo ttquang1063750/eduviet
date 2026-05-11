@@ -14,21 +14,6 @@ datasource db {
 // ENUMS
 // ===========================
 
-enum Role {
-  SUPER_ADMIN
-  PROVINCE_ADMIN
-  DISTRICT_ADMIN
-  SCHOOL_ADMIN
-  CONTENT_CREATOR
-  CONTENT_REVIEWER
-  CONTENT_APPROVER
-  GRADER
-  HOMEROOM_TEACHER
-  SUBJECT_TEACHER
-  STUDENT
-  PARENT
-}
-
 enum ContentStatus {
   DRAFT
   IN_REVIEW
@@ -58,12 +43,13 @@ enum Difficulty {
   ADVANCED
 }
 
-enum ExerciseType {
+enum QuestionType {
+  SINGLE_CHOICE
   MULTIPLE_CHOICE
   FILL_IN_BLANK
   SHORT_ANSWER
-  DRAWING
   ESSAY
+  DRAWING
 }
 
 enum NotificationChannel {
@@ -190,7 +176,8 @@ model User {
   passwordHash String    @map("password_hash")
   fullName     String    @map("full_name")
   avatarUrl    String?   @map("avatar_url")
-  role         Role
+  roles        Json      @default("[\"STUDENT\"]")
+  title        String?
   isActive     Boolean   @default(true) @map("is_active")
   isVerified   Boolean   @default(false) @map("is_verified")
   schoolId     String?   @map("school_id")
@@ -209,13 +196,13 @@ model User {
   auditLogs          AuditLog[]
   createdLessons     Lesson[]             @relation("LessonCreator")
   reviewedLessons    Lesson[]             @relation("LessonReviewer")
+  createdQuestions   Question[]
   blogPosts          BlogPost[]
   comments           Comment[]
   studentParents     ParentStudent[]      @relation("ParentRelation")
   parentOf           ParentStudent[]      @relation("StudentRelation")
 
   @@index([emailHash])
-  @@index([role])
   @@index([schoolId])
   @@map("users")
 }
@@ -252,13 +239,14 @@ model ParentStudent {
 // ===========================
 
 model Subject {
-  id      String      @id @default(uuid())
-  code    SubjectCode @unique
-  name    String
-  nameEn  String      @map("name_en")
-  iconUrl String?     @map("icon_url")
-  color   String?
-  lessons Lesson[]
+  id        String      @id @default(uuid())
+  code      SubjectCode @unique
+  name      String
+  nameEn    String      @map("name_en")
+  iconUrl   String?     @map("icon_url")
+  color     String?
+  lessons   Lesson[]
+  questions Question[]
 
   @@map("subjects")
 }
@@ -273,17 +261,18 @@ model Lesson {
   topic            String
   difficulty       Difficulty
   theory           String        @db.Text
-  estimatedMinutes Int           @default(30) @map("estimated_minutes")
-  status           ContentStatus @default(DRAFT)
-  creatorId        String        @map("creator_id")
-  creator          User          @relation("LessonCreator", fields: [creatorId], references: [id])
-  reviewerId       String?       @map("reviewer_id")
-  reviewer         User?         @relation("LessonReviewer", fields: [reviewerId], references: [id])
-  reviewNote       String?       @map("review_note") @db.Text
-  publishedAt      DateTime?     @map("published_at")
-  scheduledAt      DateTime?     @map("scheduled_at")
-  exercises        Exercise[]
-  createdAt        DateTime      @default(now()) @map("created_at")
+  estimatedMinutes   Int            @default(30) @map("estimated_minutes")
+  status             ContentStatus  @default(DRAFT)
+  randomizeQuestions Boolean        @default(false) @map("randomize_questions")
+  creatorId          String         @map("creator_id")
+  creator            User           @relation("LessonCreator", fields: [creatorId], references: [id])
+  reviewerId         String?        @map("reviewer_id")
+  reviewer           User?          @relation("LessonReviewer", fields: [reviewerId], references: [id])
+  reviewNote         String?        @map("review_note") @db.Text
+  publishedAt        DateTime?      @map("published_at")
+  scheduledAt        DateTime?      @map("scheduled_at")
+  lessonQuestions    LessonQuestion[]
+  createdAt          DateTime       @default(now()) @map("created_at")
   updatedAt        DateTime      @updatedAt @map("updated_at")
   deletedAt        DateTime?     @map("deleted_at")
 
@@ -293,23 +282,44 @@ model Lesson {
   @@map("lessons")
 }
 
-model Exercise {
-  id            String       @id @default(uuid())
-  lessonId      String       @map("lesson_id")
-  lesson        Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  type          ExerciseType
-  question      String       @db.Text
+model Question {
+  id            String         @id @default(uuid())
+  subjectId     String         @map("subject_id")
+  subject       Subject        @relation(fields: [subjectId], references: [id])
+  type          QuestionType
+  content       String         @db.Text
   options       Json?
-  correctAnswer Json         @map("correct_answer")
-  explanation   String       @db.Text
-  hints         Json         @default("[]")
-  points        Int          @default(10)
-  orderIndex    Int          @default(0) @map("order_index")
-  createdAt     DateTime     @default(now()) @map("created_at")
-  updatedAt     DateTime     @updatedAt @map("updated_at")
+  correctAnswer Json           @map("correct_answer")
+  explanation   String?        @db.Text
+  hints         Json           @default("[]")
+  points        Int            @default(10)
+  difficulty    Difficulty?
+  tags          String[]       @default([])
+  creatorId     String         @map("creator_id")
+  creator       User           @relation(fields: [creatorId], references: [id])
+  lessonLinks   LessonQuestion[]
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  deletedAt     DateTime?      @map("deleted_at")
 
+  @@index([subjectId])
+  @@index([creatorId])
+  @@map("questions")
+}
+
+model LessonQuestion {
+  id         String   @id @default(uuid())
+  lessonId   String   @map("lesson_id")
+  lesson     Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  questionId String   @map("question_id")
+  question   Question @relation(fields: [questionId], references: [id])
+  orderIndex Int      @default(0) @map("order_index")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@unique([lessonId, questionId])
   @@index([lessonId])
-  @@map("exercises")
+  @@index([questionId])
+  @@map("lesson_questions")
 }
 
 // ===========================

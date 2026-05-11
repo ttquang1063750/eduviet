@@ -18,7 +18,8 @@ export interface AuthUser {
   id: string;
   email: string;
   fullName: string;
-  role: UserRole;
+  roles: UserRole[];
+  title: string | null;
   avatarUrl: string | null;
   schoolId: string | null;
 }
@@ -26,7 +27,7 @@ export interface AuthUser {
 export interface JwtPayload {
   sub: string;
   email: string;
-  role: UserRole;
+  roles: UserRole[];
   iat: number;
   exp: number;
 }

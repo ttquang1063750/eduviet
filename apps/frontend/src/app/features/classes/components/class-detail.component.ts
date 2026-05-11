@@ -24,7 +24,7 @@ export class ClassDetailComponent implements OnInit {
 
   readonly studentCount = computed(() => this.cls()?._count.enrollments ?? 0);
   readonly students = computed(() =>
-    this.cls()?.enrollments.filter((e) => e.user.role === 'STUDENT') ?? []
+    this.cls()?.enrollments.filter((e) => e.user.roles?.includes('STUDENT')) ?? []
   );
 
   ngOnInit() {
