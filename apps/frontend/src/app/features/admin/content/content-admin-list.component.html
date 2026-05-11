@@ -4,53 +4,71 @@
   </div>
 
   <div class="tabs">
-    <button class="tab active">Chờ duyệt</button>
+    <button mat-button class="tab-btn active">
+      <mat-icon>hourglass_empty</mat-icon> Chờ duyệt
+    </button>
   </div>
 
-  <div class="table-responsive">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Tiêu đề</th>
-          <th>Tác giả</th>
-          <th>Ngày tạo</th>
-          <th>Hành động</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (item of pendingContent(); track item.id) {
-          <tr>
-            <td>{{ item.title }}</td>
-            <td>{{ item.authorId }}</td>
-            <td>{{ item.createdAt | date:'shortDate' }}</td>
-            <td class="actions">
-              <button (click)="approve(item.id)" class="btn btn-sm btn-success">Duyệt</button>
-              <button (click)="reject(item.id)" class="btn btn-sm btn-danger">Từ chối</button>
-              <a [routerLink]="['/blog', item.slug]" target="_blank" class="btn btn-sm btn-outline">Xem</a>
-            </td>
-          </tr>
-        } @empty {
-          <tr>
-            <td colspan="4" class="text-center">Không có nội dung nào chờ duyệt.</td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+  <mat-card class="table-card">
+    <mat-card-content>
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Tiêu đề</th>
+              <th>Tác giả</th>
+              <th>Ngày tạo</th>
+              <th class="col-actions">Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of pendingContent(); track item.id) {
+              <tr>
+                <td><strong>{{ item.title }}</strong></td>
+                <td class="text-muted">{{ item.authorId }}</td>
+                <td class="text-muted">{{ item.createdAt | date:'dd/MM/yyyy' }}</td>
+                <td class="col-actions">
+                  <div class="action-buttons">
+                    <button mat-flat-button color="primary" (click)="approve(item.id)">
+                      <mat-icon>check</mat-icon> Duyệt
+                    </button>
+                    <button mat-stroked-button color="warn" (click)="reject(item.id)">
+                      <mat-icon>close</mat-icon> Từ chối
+                    </button>
+                    <a mat-icon-button [routerLink]="['/blog', item.slug]" target="_blank" title="Xem trước">
+                      <mat-icon>visibility</mat-icon>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="text-center py-8 text-muted">Không có nội dung nào chờ duyệt.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
 
-  @if (total() > perPage) {
-    <div class="pagination">
-      <button
-        [disabled]="page() === 1"
-        (click)="onPageChange(page() - 1)"
-        class="btn btn-sm"
-      >Trước</button>
-      <span>Trang {{ page() }} / {{ totalPages() }}</span>
-      <button
-        [disabled]="page() >= totalPages()"
-        (click)="onPageChange(page() + 1)"
-        class="btn btn-sm"
-      >Sau</button>
-    </div>
-  }
+      @if (total() > perPage) {
+        <div class="pagination">
+          <button
+            mat-stroked-button
+            [disabled]="page() === 1"
+            (click)="onPageChange(page() - 1)"
+          >
+            <mat-icon>chevron_left</mat-icon> Trước
+          </button>
+          <span class="page-info">Trang {{ page() }} / {{ totalPages() }}</span>
+          <button
+            mat-stroked-button
+            [disabled]="page() >= totalPages()"
+            (click)="onPageChange(page() + 1)"
+          >
+            Sau <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
 </div>

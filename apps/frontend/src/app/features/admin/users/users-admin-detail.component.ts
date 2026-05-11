@@ -11,10 +11,29 @@ import { ConfirmService } from '../../../core/services/confirm.service';
 import { getApiErrorMessage } from '../../../core/utils/http-error';
 import type { User, School, UserRole } from '@eduviet/shared-types';
 
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+
 @Component({
   selector: 'app-users-admin-detail',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule, DatePipe],
+  imports: [
+    RouterLink,
+    ReactiveFormsModule,
+    DatePipe,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatCheckboxModule,
+    MatIconModule,
+    MatCardModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './users-admin-detail.component.html',
   styleUrl: './users-admin-detail.component.scss',

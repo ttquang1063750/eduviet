@@ -1,97 +1,91 @@
 .admin-container {
-  padding: 20px;
+  padding: 1.5rem;
+  background: #f8fafc;
+  min-height: calc(100vh - 64px);
 }
 
 .header-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 2rem;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+  }
 }
 
 .tabs {
-  margin-bottom: 20px;
+  margin-bottom: 1rem;
   display: flex;
-  gap: 10px;
-  border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 10px;
-}
+  gap: 0.5rem;
 
-.tab {
-  padding: 8px 16px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-  color: #6b7280;
-
-  &.active {
-    color: #3b82f6;
-    border-bottom: 2px solid #3b82f6;
+  .tab-btn {
+    border-radius: 8px 8px 0 0;
     font-weight: 600;
+    
+    &.active {
+      background: white;
+      color: var(--color-primary);
+      border-bottom: 2px solid var(--color-primary);
+    }
   }
 }
 
-.table {
+.table-card {
+  border-radius: 0 12px 12px 12px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.data-table {
   width: 100%;
   border-collapse: collapse;
-
-  th,
-  td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #e5e7eb;
-  }
+  font-size: 0.875rem;
 
   th {
-    background-color: #f9fafb;
+    text-align: left;
+    padding: 1rem;
+    border-bottom: 2px solid var(--border-color);
+    color: var(--text-secondary);
     font-weight: 600;
+  }
+
+  td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+  }
+
+  tr:hover td {
+    background: #f8fafc;
   }
 }
 
-.actions {
+.action-buttons {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.col-actions {
+  width: 320px;
 }
 
 .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 15px;
-  margin-top: 20px;
-}
+  gap: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  margin-top: 1rem;
 
-.btn {
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block;
-  border: none;
-
-  &-sm {
-    padding: 4px 8px;
-    font-size: 14px;
+  .page-info {
+    font-size: 0.875rem;
+    font-weight: 600;
   }
-
-  &-success {
-    background-color: #10b981;
-    color: white;
-  }
-
-  &-danger {
-    background-color: #ef4444;
-    color: white;
-  }
-
-  &-outline {
-    border: 1px solid #d1d5db;
-    background: transparent;
-    color: #374151;
-  }
-}
-
-.text-center {
-  text-align: center;
 }

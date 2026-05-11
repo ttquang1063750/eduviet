@@ -57,7 +57,7 @@ export class BlogRepository {
     return this.prisma.blogPost.findUnique({
       where: { slug, deletedAt: null },
       include: {
-        author: { select: { id: true, fullName: true, avatarUrl: true, role: true } },
+        author: { select: { id: true, fullName: true, avatarUrl: true, roles: true } },
         comments: {
           where: { parentId: null, deletedAt: null, isHidden: false },
           include: {

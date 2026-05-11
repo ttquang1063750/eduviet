@@ -3,47 +3,58 @@
     <h1 class="page-title">Ngân hàng câu hỏi</h1>
     <p class="page-subtitle">Quản lý toàn bộ câu hỏi — {{ total() }} câu hỏi</p>
   </div>
-  <button class="btn btn-primary" (click)="openCreate()">
+  <button mat-flat-button (click)="openCreate()">
     <span>＋</span> Tạo câu hỏi
   </button>
 </div>
 
 <!-- Bộ lọc -->
 <div class="filter-bar">
-  <input
-    class="filter-input"
-    type="text"
-    placeholder="Tìm kiếm câu hỏi..."
-    [value]="filterSearch()"
-    (input)="filterSearch.set(getInputValue($event))"
-    (keydown.enter)="applyFilters()"
-  />
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Tìm kiếm</mat-label>
+    <input
+      matInput
+      placeholder="Nội dung câu hỏi..."
+      [value]="filterSearch()"
+      (input)="filterSearch.set(getInputValue($event))"
+      (keydown.enter)="applyFilters()"
+    />
+  </mat-form-field>
 
-  <select class="filter-select" [value]="filterSubject()" (change)="filterSubject.set(getInputValue($event)); applyFilters()">
-    <option value="">Tất cả môn học</option>
-    @for (s of subjects(); track s.id) {
-      <option [value]="s.id">{{ s.name }}</option>
-    }
-  </select>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Môn học</mat-label>
+    <mat-select [value]="filterSubject()" (selectionChange)="filterSubject.set($event.value); applyFilters()">
+      <mat-option value="">Tất cả môn học</mat-option>
+      @for (s of subjects(); track s.id) {
+        <mat-option [value]="s.id">{{ s.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
 
-  <select class="filter-select" [value]="filterType()" (change)="filterType.set(getInputValue($event)); applyFilters()">
-    <option value="">Tất cả loại</option>
-    <option value="SINGLE_CHOICE">Một đáp án</option>
-    <option value="MULTIPLE_CHOICE">Nhiều đáp án</option>
-    <option value="FILL_IN_BLANK">Điền chỗ trống</option>
-    <option value="SHORT_ANSWER">Trả lời ngắn</option>
-    <option value="ESSAY">Tự luận</option>
-    <option value="DRAWING">Vẽ / Sơ đồ</option>
-  </select>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Loại câu hỏi</mat-label>
+    <mat-select [value]="filterType()" (selectionChange)="filterType.set($event.value); applyFilters()">
+      <mat-option value="">Tất cả loại</mat-option>
+      <mat-option value="SINGLE_CHOICE">Một đáp án</mat-option>
+      <mat-option value="MULTIPLE_CHOICE">Nhiều đáp án</mat-option>
+      <mat-option value="FILL_IN_BLANK">Điền chỗ trống</mat-option>
+      <mat-option value="SHORT_ANSWER">Trả lời ngắn</mat-option>
+      <mat-option value="ESSAY">Tự luận</mat-option>
+      <mat-option value="DRAWING">Vẽ / Sơ đồ</mat-option>
+    </mat-select>
+  </mat-form-field>
 
-  <select class="filter-select" [value]="filterDifficulty()" (change)="filterDifficulty.set(getInputValue($event)); applyFilters()">
-    <option value="">Tất cả độ khó</option>
-    <option value="EASY">Dễ</option>
-    <option value="MEDIUM">Trung bình</option>
-    <option value="HARD">Khó</option>
-  </select>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Độ khó</mat-label>
+    <mat-select [value]="filterDifficulty()" (selectionChange)="filterDifficulty.set($event.value); applyFilters()">
+      <mat-option value="">Tất cả độ khó</mat-option>
+      <mat-option value="EASY">Dễ</mat-option>
+      <mat-option value="MEDIUM">Trung bình</mat-option>
+      <mat-option value="HARD">Khó</mat-option>
+    </mat-select>
+  </mat-form-field>
 
-  <button class="btn btn-secondary" (click)="applyFilters()">Tìm</button>
+  <button mat-stroked-button (click)="applyFilters()">Tìm</button>
 </div>
 
 <!-- Bảng câu hỏi -->
@@ -87,8 +98,8 @@
             </td>
             <td class="col-subject">{{ subjectMap()[q.subjectId] ?? '—' }}</td>
             <td class="col-actions">
-              <button class="btn-icon" title="Chỉnh sửa" (click)="openEdit(q)">✏️</button>
-              <button class="btn-icon btn-icon-danger" title="Xoá" (click)="deleteQuestion(q)">🗑️</button>
+              <button mat-icon-button title="Chỉnh sửa" (click)="openEdit(q)">✏️</button>
+              <button mat-icon-button color="warn" title="Xoá" (click)="deleteQuestion(q)">🗑️</button>
             </td>
           </tr>
         }
@@ -104,36 +115,4 @@
       <button class="page-btn" [disabled]="page() === totalPages()" (click)="goToPage(page() + 1)">›</button>
     </div>
   }
-}
-
-<!-- Modal tạo / chỉnh sửa -->
-@if (showModal()) {
-  <div class="modal-overlay" (click)="closeModal()">
-    <div class="modal-panel" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>{{ editingQuestion() ? 'Chỉnh sửa câu hỏi' : 'Tạo câu hỏi mới' }}</h2>
-        <button class="modal-close" (click)="closeModal()">✕</button>
-      </div>
-      <div class="modal-body">
-        @if (!editingQuestion()) {
-          <div class="subject-picker">
-            <label class="field-label">Môn học <span class="required">*</span></label>
-            <select class="filter-select" [value]="modalSubjectId()" (change)="modalSubjectId.set(getInputValue($event))">
-              <option value="">-- Chọn môn học --</option>
-              @for (s of subjects(); track s.id) {
-                <option [value]="s.id">{{ s.name }}</option>
-              }
-            </select>
-          </div>
-        }
-        <app-question-form
-          [question]="editingQuestion()"
-          [subjectId]="modalSubjectId()"
-          [isSaving]="isSaving()"
-          (saved)="onQuestionSaved($event)"
-          (cancelled)="closeModal()"
-        />
-      </div>
-    </div>
-  </div>
 }

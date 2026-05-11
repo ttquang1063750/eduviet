@@ -5,33 +5,44 @@
     <div>
       <h2 class="page-header__title">Quản lý Blog</h2>
       @if (!loading()) {
-        <p class="page-header__sub">{{ total() }} bài viết</p>
+        <p class="page-header__sub text-muted">{{ total() }} bài viết</p>
       }
     </div>
-    <a routerLink="new" class="btn btn-primary">+ Viết bài mới</a>
+    <a mat-flat-button color="primary" routerLink="new">
+      <mat-icon>add</mat-icon> Viết bài mới
+    </a>
   </div>
 
   <!-- Filters -->
-  <div class="filters">
-    <input
-      type="text"
-      [formControl]="searchControl"
-      placeholder="Tìm kiếm tiêu đề, nội dung..."
-      class="form-control search-input"
-    />
-    <select class="form-control status-select" (change)="onStatusChange($event)">
-      @for (s of statuses; track s.value) {
-        <option [value]="s.value" [selected]="statusFilter() === s.value">{{ s.label }}</option>
-      }
-    </select>
+  <div class="filter-bar">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field">
+      <mat-label>Tìm kiếm bài viết</mat-label>
+      <input
+        matInput
+        [formControl]="searchControl"
+        placeholder="Tiêu đề, nội dung..."
+      />
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="status-field">
+      <mat-label>Trạng thái</mat-label>
+      <mat-select [value]="statusFilter()" (selectionChange)="statusFilter.set($event.value); page.set(1); loadPosts()">
+        @for (s of statuses; track s.value) {
+          <mat-option [value]="s.value">{{ s.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
   </div>
 
   <!-- Table -->
   @if (loading()) {
-    <div class="loading-state">Đang tải...</div>
+    <div class="loading-state">
+      <p>Đang tải bài viết...</p>
+    </div>
   } @else {
-    <div class="table-responsive">
-      <table class="table">
+    <div class="table-container">
+      <table class="data-table">
         <thead>
           <tr>
             <th>Tiêu đề</th>
@@ -39,17 +50,17 @@
             <th>Trạng thái</th>
             <th>Tags</th>
             <th>Ngày tạo</th>
-            <th>Hành động</th>
+            <th class="col-actions">Thao tác</th>
           </tr>
         </thead>
         <tbody>
           @for (post of posts(); track trackById($index, post)) {
             <tr>
               <td class="post-title">
-                <a [routerLink]="[post.id, 'edit']" class="post-link">{{ post.title }}</a>
-                <span class="post-slug">{{ post.slug }}</span>
+                <a [routerLink]="[post.id, 'edit']" class="post-link"><strong>{{ post.title }}</strong></a>
+                <span class="post-slug text-muted">{{ post.slug }}</span>
               </td>
-              <td>{{ post.author.fullName }}</td>
+              <td class="text-muted">{{ post.author.fullName }}</td>
               <td>
                 <span class="status-badge" [class]="'status-badge--' + post.status.toLowerCase()">
                   {{ statusLabels[post.status] }}
@@ -57,34 +68,40 @@
               </td>
               <td>
                 <div class="tags">
-                  @for (tag of post.tags.slice(0, 3); track tag) {
-                    <span class="tag">{{ tag }}</span>
+                  @for (tag of post.tags.slice(0, 2); track tag) {
+                    <span class="tag-chip">{{ tag }}</span>
                   }
-                  @if (post.tags.length > 3) {
-                    <span class="tag tag--more">+{{ post.tags.length - 3 }}</span>
+                  @if (post.tags.length > 2) {
+                    <span class="tag-chip more">+{{ post.tags.length - 2 }}</span>
                   }
                 </div>
               </td>
-              <td class="date">{{ post.createdAt | date:'dd/MM/yyyy' }}</td>
-              <td class="actions">
-                <a [routerLink]="[post.id, 'edit']" class="btn btn-sm btn-outline">Sửa</a>
-                @if (post.status === 'APPROVED') {
-                  <button
-                    class="btn btn-sm btn-success"
-                    (click)="onPublish(post)"
-                    type="button"
-                  >Xuất bản</button>
-                }
-                <button
-                  class="btn btn-sm btn-danger"
-                  (click)="onDelete(post)"
-                  type="button"
-                >Xóa</button>
+              <td class="date text-muted">{{ post.createdAt | date:'dd/MM/yyyy' }}</td>
+              <td class="col-actions">
+                <button mat-icon-button [matMenuTriggerFor]="menu" title="Thao tác">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #menu="matMenu">
+                  <a mat-menu-item [routerLink]="[post.id, 'edit']">
+                    <mat-icon>edit</mat-icon>
+                    <span>Chỉnh sửa</span>
+                  </a>
+                  @if (post.status === 'APPROVED') {
+                    <button mat-menu-item (click)="onPublish(post)">
+                      <mat-icon>publish</mat-icon>
+                      <span>Xuất bản</span>
+                    </button>
+                  }
+                  <button mat-menu-item (click)="onDelete(post)" class="text-danger">
+                    <mat-icon color="warn">delete</mat-icon>
+                    <span class="text-danger">Xóa bài viết</span>
+                  </button>
+                </mat-menu>
               </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="6" class="empty-row">Không có bài viết nào.</td>
+              <td colspan="6" class="empty-row text-center py-8 text-muted">Không có bài viết nào.</td>
             </tr>
           }
         </tbody>
@@ -95,12 +112,12 @@
   <!-- Pagination -->
   @if (total() > perPage) {
     <div class="pagination">
-      <button [disabled]="page() === 1" (click)="onPageChange(page() - 1)" class="btn btn-sm">
-        Trước
+      <button mat-stroked-button [disabled]="page() === 1" (click)="onPageChange(page() - 1)">
+        <mat-icon>chevron_left</mat-icon> Trước
       </button>
-      <span>Trang {{ page() }} / {{ totalPages() }}</span>
-      <button [disabled]="page() >= totalPages()" (click)="onPageChange(page() + 1)" class="btn btn-sm">
-        Sau
+      <span class="page-info">Trang {{ page() }} / {{ totalPages() }}</span>
+      <button mat-stroked-button [disabled]="page() >= totalPages()" (click)="onPageChange(page() + 1)">
+        Sau <mat-icon>chevron_right</mat-icon>
       </button>
     </div>
   }

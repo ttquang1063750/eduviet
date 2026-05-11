@@ -1,6 +1,6 @@
 # EduViet — Progress Tracker
 
-> Cập nhật lần cuối: 2026-05-11 (session 12 — Sidebar + Question Bank Admin Page)
+> Cập nhật lần cuối: 2026-05-11 (session 14 — School→Class→Student Flow + Angular Bugfixes)
 > Workflow: `/plan-task` → `/execute-step` (lặp) → `/check-point` → `/resume` → tiếp tục
 
 ---
@@ -343,7 +343,7 @@ Mã hóa `email`, `phone` at-rest trong PostgreSQL bằng pgcrypto.
 | `features/admin/lessons/exercise-editor/` | Split panel 40/60, CDK DragDrop, randomize toggle, AI generate dialog |
 | `features/admin/lessons/exercise-editor/question-form/` | Dynamic form per QuestionType (6 types) |
 | `features/admin/lessons/exercise-editor/question-bank-picker/` | Modal, filter, pagination, multi-select |
-| `features/admin/questions/questions-admin.component.*` | Ngân hàng câu hỏi admin page: filter/paginate, CRUD modal, subject picker |
+| `features/admin/questions/` | Ngân hàng câu hỏi: list + filter/paginate + **trang soạn thảo chi tiết** (3 file, OnPush) |
 | `app.routes.ts` | + /admin/lessons/:id/exercises + /admin/questions |
 | `layout/main-layout.component.html` | + "🗂️ Ngân hàng câu hỏi" link (isAdmin || isContentRole) |
 
@@ -359,3 +359,123 @@ Mã hóa `email`, `phone` at-rest trong PostgreSQL bằng pgcrypto.
 
 ### Còn lại
 - **P3** — Export reports PDF cải thiện font tiếng Việt (PDFKit + NotoSans)
+
+---
+
+## Session 13 — Docker Production Build + Font Verify (2026-05-11)
+
+### Vấn đề phát hiện khi verify
+1. **Font không copy sang dist/**: `tsc` chỉ compile `.ts`, không copy `.ttf` → `node dist/main.js` crash khi load font
+2. **Dockerfile thiếu**: `deploy.yml` reference `./docker/backend/Dockerfile` + `./docker/frontend/Dockerfile` nhưng chưa tồn tại
+3. **tsx trong devDependencies**: Production Docker không install devDep → `start:prod` không có tsx
+
+### Root cause quan trọng
+`@eduviet/redis` và `@eduviet/email-templates` có `"main": "./src/index.ts"` (TypeScript source).  
+Khi backend compiled chạy bằng `node dist/main.js`, Node.js không load được TypeScript workspace packages.  
+→ Quyết định: dùng `tsx` làm runtime trong production (common pattern, no performance issue cho API server).
+
+### Files thêm/sửa
+
+| File | Mô tả |
+|------|-------|
+| `apps/backend/package.json` | `tsx` → dependencies; `build` + `cp -r src/assets dist/`; thêm `start:prod` script |
+| `docker/backend/Dockerfile` | Multi-stage: deps layer cache + runner với tsx |
+| `docker/frontend/Dockerfile` | Angular build (ng build) + Nginx SPA serve |
+| `docker/nginx/nginx.spa.conf` | SPA fallback + static asset cache headers |
+| `.dockerignore` | Loại trừ node_modules, dist, .env, docs |
+
+### Backlog còn lại
+- Không còn backlog kỹ thuật tồn đọng.
+
+---
+
+## Session 14 — School→Class→Student Flow + Angular Bugfixes (2026-05-11)
+
+### Frontend — Thêm mới / Cập nhật
+
+| File | Mô tả |
+|------|-------|
+| `features/admin/schools/schools-admin-detail.component.ts` | Inject `ClassesService` + `ToastService`; thêm `schoolClasses`, `loadingClasses` signals; `loadClasses(schoolId)`; `goToCreateClass()` |
+| `features/admin/schools/schools-admin-detail.component.html` | Thêm section danh sách lớp học (edit mode): header + count badge, nút "Tạo lớp mới", loading/empty state, list lớp (tên, khối, năm học, GVCN chip, số HS, chevron) |
+| `features/admin/schools/schools-admin-detail.component.scss` | Thêm `.classes-section`: header, count-badge, loading-row, empty-state, class-list, class-row hover |
+| `features/admin/classes/classes-admin-detail.component.ts` | Thêm `fromSchoolId` signal + `backUrl()` dynamic; `enrollments`, `enrolledIds` (computed Set); student search pagination (`studentPage`, `STUDENT_PER_PAGE=10`, `fetchStudents(term, append)`, `onStudentListScroll()`); `enroll()`, `unenroll()` (optimistic update + ConfirmService); `toggleAddStudent()` load 10 mặc định |
+| `features/admin/classes/classes-admin-detail.component.html` | Back/Cancel dùng `backUrl()`; thêm student card (edit mode): search panel + infinite scroll + load-more spinner + end-of-list; danh sách enrollment hiện tại với avatar, name, email, nút xóa |
+| `features/admin/classes/classes-admin-detail.component.scss` | Thêm `.students-card`, `.students-header`, `.add-student-panel`, `.search-results` (max-h 280px + thin scrollbar), `.load-more-spinner`, `.end-of-list` |
+| `layout/main-layout.component.html` | Xóa link `/classes` (student-facing nav); đổi tên "Lớp (quản trị)" → "Lớp học" (🏫) cho `/admin/classes` |
+
+### Bugfixes (Angular compile errors)
+
+| File | Lỗi | Fix |
+|------|-----|-----|
+| `subjects-admin.component.html` | `mat-hint` bên trong `@else` — Material không content-project qua control flow | Chuyển `<mat-hint>` ra ngoài `@if/@else`, dùng ternary expression cho nội dung |
+| `blog-admin-list.component.html` | `[ngModel]`/`(ngModelChange)` trên `mat-select` — yêu cầu FormsModule chưa import | Thay bằng `[value]` + `(selectionChange)` (Angular Material API thuần) |
+| `exercise-editor.component.ts` | `goBack()` navigate nhầm về `/admin/content` (trang blog moderation) | Sửa thành `navigate(['/admin/lessons', this.lessonId(), 'edit'])` |
+
+### UX / Navigation Decisions
+
+| Quyết định | Lý do |
+|------------|-------|
+| School detail → list lớp + "Tạo lớp mới" | Workflow tự nhiên: quản trị viên tạo trường → thêm lớp ngay trong trang trường |
+| Class detail → quản lý học sinh (add/remove) | Không cần trang riêng; enrollment gắn với lớp cụ thể |
+| `?schoolId` queryParam khi tạo lớp từ trang trường | Pre-fill school; `backUrl()` trả về đúng trang gốc sau khi lưu |
+| Load 10 HS mặc định khi mở panel | Tránh panel trống; người dùng có ngay danh sách chọn |
+| Infinite scroll (threshold 60px) thay nút "Tải thêm" | UX mượt hơn cho danh sách dài |
+| Xóa `/classes` khỏi sidebar; giữ `/admin/classes` | `/classes` dành cho học sinh — không phù hợp trong khu vực quản trị |
+
+### Backlog còn lại
+- Không còn backlog kỹ thuật tồn đọng.
+
+---
+
+## Session 15 — Theme Fix + Chat Hoàn chỉnh (2026-05-11)
+
+### Angular Material Theme Fix
+
+| File | Thay đổi |
+|------|---------|
+| `apps/frontend/angular.json` | Xóa `indigo-pink.css` prebuilt theme khỏi styles[] — đây là nguyên nhân override toàn bộ CSS custom properties của `mat.theme`, khiến density không có tác dụng |
+| `apps/frontend/src/app/styles/material-theme.scss` | Giữ `@include mat.theme(...)` (đúng M3 API); density điều chỉnh về giá trị phù hợp |
+| `features/admin/schools/schools-admin-list.component.scss` | `.search-field { max-width: 440px }` — tránh flex:1 kéo full width khi không có sidebar |
+
+> **Root cause:** `indigo-pink.css` load sau `styles.scss`, override hết CSS variables do `mat.theme` tạo ra → density, color tokens không có tác dụng.
+> **Key insight:** `mat.theme()` mixin là đúng (M3 API). `mat.define-theme()` là cũ. density -5 = form-field 36px, -3 = 44px (càng âm càng nhỏ).
+
+### Chat — Sửa toàn bộ luồng hoạt động
+
+#### Bug fixes
+
+| Bug | Nguyên nhân | Fix |
+|-----|-------------|-----|
+| Input tin nhắn không gõ được | `[(ngModel)]="messageContent"` với WritableSignal — ngModel không ghi vào signal | Đổi thành `[ngModel]="messageContent()" (ngModelChange)="messageContent.set($event)"` |
+| Người nhận không thấy tin nhắn | Socket của recipient không join room khi room mới tạo sau khi login | Mỗi socket tự join `user:<userId>` khi connect; backend emit `room_invited` → client tự join socket room |
+| Không thể tìm kiếm người chat — pending vô tận | `catchError` thiếu trong switchMap → observable die khi 401/403 | Thêm `catchError` trong switchMap, set `userSearchError`, reset `searchingUsers` |
+
+#### Tính năng mới
+
+| Feature | Files |
+|---------|-------|
+| Tạo cuộc hội thoại mới | `room-list.component`: nút ✏️, search panel debounce 300ms, user results list, gọi `getOrCreateOneOnOne()` |
+| Xoá chat room | BE: `repo.deleteRoom()` cascade; `service.deleteRoom()` RBAC; `DELETE /rooms/:id` emit `room_deleted`; FE: nút 🗑 hover, `chatService.deleteRoom()`, socket `room_deleted` listener |
+| Real-time room invite | BE gateway: `socket.join('user:<userId>')` on connect; routes emit `room_invited` sau khi tạo ONE_ON_ONE; FE: listener thêm room + emit `join_rooms` |
+
+#### Files thay đổi
+
+| File | Mô tả |
+|------|-------|
+| `chat/chat.gateway.ts` | + `socket.join('user:<userId>')` on connect |
+| `chat/chat.routes.ts` | + `DELETE /rooms/:id`; `POST /rooms/one-on-one` emit `room_invited` tới members |
+| `chat/chat.service.ts` (BE) | + `deleteRoom(roomId, userId)` — RBAC + cascade + audit |
+| `chat/chat.repository.ts` | + `deleteRoom(roomId)` — deleteMany members + messages + delete room |
+| `chat/chat.service.ts` (FE) | + `deleteRoom()`; + listeners `room_invited`, `room_deleted` |
+| `chat-widget/room-list.component.ts` | + `showNewChat`, user search + error handling, `deleteRoom()`, `deletingRoomId` |
+| `chat-widget/room-list.component.html` | + panel tạo chat mới, nút 🗑 xoá room, hiển thị lỗi search |
+| `chat-widget/room-list.component.scss` | + `.btn-new-chat`, `.new-chat-panel`, `.user-result-row`, `.btn-delete-room` |
+| `chat-widget/message-thread.component.html` | Fix `[(ngModel)]` → `[ngModel]` + `(ngModelChange)` cho signal |
+
+### Architectural Decisions thêm mới
+
+| Quyết định | Lý do |
+|------------|-------|
+| Private socket room `user:<userId>` | Standard pattern để push event tới user cụ thể qua Redis adapter (multi-instance safe) |
+| `room_invited` event khi tạo ONE_ON_ONE | Đảm bảo recipient tự join socket room mà không cần poll; không cần WebRTC signaling phức tạp |
+| Cascade delete room (members → messages → room) | Tránh FK constraint violation; không dùng soft-delete cho room vì không cần audit trail lịch sử room |

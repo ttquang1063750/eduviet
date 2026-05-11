@@ -16,10 +16,16 @@ import { ToastService } from '../../../core/services/toast.service';
 import { getApiErrorMessage } from '../../../core/utils/http-error';
 import type { User, CreateUserRequest, School } from '@eduviet/shared-types';
 
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+
 @Component({
   selector: 'app-users-admin',
   standalone: true,
-  imports: [DatePipe, FormsModule],
+  imports: [DatePipe, FormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './users-admin.component.html',
   styleUrl: './users-admin.component.scss',

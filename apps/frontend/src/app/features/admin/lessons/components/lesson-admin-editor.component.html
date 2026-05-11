@@ -1,0 +1,131 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">{{ lessonId() ? 'Chỉnh sửa bài học' : 'Tạo bài học mới' }}</h1>
+    <p class="page-subtitle">Cập nhật nội dung lý thuyết và thông tin cơ bản</p>
+  </div>
+  <div class="header-actions">
+    <a mat-stroked-button routerLink="/admin/lessons">Hủy</a>
+    <button mat-flat-button [disabled]="saving()" (click)="onSubmit()">
+      {{ saving() ? 'Đang lưu...' : 'Lưu bài học' }}
+    </button>
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="loading-state">Đang tải dữ liệu...</div>
+} @else {
+  <form [formGroup]="lessonForm" (ngSubmit)="onSubmit()" class="editor-layout">
+    <div class="main-content">
+      <!-- Thông tin cơ bản -->
+      <section class="card section-basic">
+        <h2 class="section-title">Thông tin cơ bản</h2>
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Tiêu đề bài học</mat-label>
+          <input matInput formControlName="title" placeholder="Ví dụ: Đạo hàm cấp 2" />
+          @if (lessonForm.get('title')?.touched && lessonForm.get('title')?.invalid) {
+            <mat-error>Tiêu đề phải ít nhất 5 ký tự</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Môn học</mat-label>
+            <mat-select formControlName="subjectId">
+              <mat-option value="">Chọn môn học</mat-option>
+              @for (s of subjects(); track s.id) {
+                <mat-option [value]="s.id">{{ s.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Khối lớp</mat-label>
+            <mat-select formControlName="grade">
+              <mat-option value="">Chọn khối</mat-option>
+              @for (g of [1,2,3,4,5,6,7,8,9,10,11,12]; track g) {
+                <mat-option [value]="g">Khối {{ g }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Chủ đề</mat-label>
+            <input matInput formControlName="topic" placeholder="Ví dụ: Giải tích" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Độ khó</mat-label>
+            <mat-select formControlName="difficulty">
+              <mat-option value="EASY">Dễ</mat-option>
+              <mat-option value="MEDIUM">Trung bình</mat-option>
+              <mat-option value="HARD">Khó</mat-option>
+              <mat-option value="ADVANCED">Nâng cao</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </section>
+
+      <!-- Nội dung lý thuyết -->
+      <section class="card section-theory">
+        <h2 class="section-title">Nội dung lý thuyết <span class="required">*</span></h2>
+        <quill-editor 
+          formControlName="theory" 
+          [modules]="quillConfig"
+          placeholder="Nhập nội dung bài học..."
+          style="height: 500px; display: block;"
+        ></quill-editor>
+        @if (lessonForm.get('theory')?.touched && lessonForm.get('theory')?.invalid) {
+          <span class="error-text">Nội dung lý thuyết không được để trống (tối thiểu 10 ký tự)</span>
+        }
+      </section>
+    </div>
+
+    <aside class="sidebar-content">
+      <!-- Cài đặt xuất bản -->
+      <section class="card section-publish">
+        <h2 class="section-title">Cài đặt & Gán quyền</h2>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Thời gian ước tính (phút)</mat-label>
+          <input matInput type="number" formControlName="estimatedMinutes" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Người duyệt bài (Reviewer)</mat-label>
+          <mat-select formControlName="reviewerId">
+            <mat-option [value]="null">Chưa gán</mat-option>
+            @for (r of reviewers(); track r.id) {
+              <mat-option [value]="r.id">{{ r.fullName }}</mat-option>
+            }
+          </mat-select>
+          <mat-hint>Người được gán sẽ nhận thông báo khi bài được gửi duyệt.</mat-hint>
+        </mat-form-field>
+
+        <div class="sidebar-info">
+          <div class="info-item">
+            <span class="label">Trạng thái:</span>
+            <span class="value">Draft</span>
+          </div>
+          @if (lessonId()) {
+            <div class="info-item">
+              <span class="label">ID:</span>
+              <span class="value code">{{ lessonId() }}</span>
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="card section-help">
+        <h3 class="help-title">Hướng dẫn</h3>
+        <ul class="help-list">
+          <li>Dùng <strong>$$...$$</strong> cho công thức Toán học khối.</li>
+          <li>Dùng <strong>$...$</strong> cho công thức Toán học inline.</li>
+          <li>Ảnh nên được upload trực tiếp vào trình soạn thảo.</li>
+        </ul>
+      </section>
+    </aside>
+  </form>
+}

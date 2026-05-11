@@ -49,3 +49,4 @@ export interface LessonListItem {
   estimatedMinutes: number;
   publishedAt: string | null;
 }
+export type UpdateLessonRequest = Partial<CreateLessonRequest>;

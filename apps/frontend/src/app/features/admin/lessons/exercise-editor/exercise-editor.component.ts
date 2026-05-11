@@ -85,7 +85,7 @@ export class ExerciseEditorComponent implements OnInit {
 
     this.loading.set(true);
 
-    this.lessonsService.getBySlug(id).subscribe({
+    this.lessonsService.getById(id).subscribe({
       next: (res) => {
         this.lesson.set(res.data as unknown as Lesson);
         this.loading.set(false);
@@ -347,6 +347,6 @@ export class ExerciseEditorComponent implements OnInit {
   }
 
   goBack() {
-    void this.router.navigate(['/admin/content']);
+    void this.router.navigate(['/admin/lessons', this.lessonId(), 'edit']);
   }
 }

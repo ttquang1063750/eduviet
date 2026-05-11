@@ -1,160 +1,182 @@
 <div class="page">
   <div class="page-header">
     <div class="header-left">
-      <a routerLink="/admin/users" class="back-link">
-        <span class="icon">←</span> Quay lại danh sách
+      <a mat-icon-button routerLink="/admin/users" title="Quay lại danh sách">
+        <mat-icon>arrow_back</mat-icon>
       </a>
-      <h1>👤 Chi tiết người dùng</h1>
+      <h1>Chi tiết người dùng</h1>
     </div>
     <div class="header-actions">
       @if (isSuperAdmin() && user()?.id !== currentUserId) {
-        <button class="btn-danger-outline" (click)="onDelete()">Xóa tài khoản</button>
+        <button mat-stroked-button color="warn" (click)="onDelete()">
+          <mat-icon>delete</mat-icon> Xóa tài khoản
+        </button>
       }
     </div>
   </div>
 
   @if (loading()) {
     <div class="loading-state">
-      <div class="spinner"></div>
       <p>Đang tải thông tin người dùng...</p>
     </div>
   } @else if (user()) {
     <div class="detail-grid">
       <!-- Cột trái: Thông tin chính -->
       <div class="main-column">
-        <div class="card profile-header-card">
-          <div class="profile-avatar">
-            {{ user()?.fullName?.split(' ')?.at(-1)?.[0] }}
-          </div>
-          <div class="profile-info">
-            <h2>{{ user()?.fullName }}</h2>
-            @if (user()?.title) {
-              <p class="user-title">{{ user()?.title }}</p>
-            }
-            <p class="email">{{ user()?.email }}</p>
-            <div class="badges">
-              @for (role of user()!.roles; track role) {
-                <span class="role-badge">{{ roleLabel(role) }}</span>
+        <mat-card class="profile-header-card">
+          <mat-card-content>
+            <div class="profile-avatar">
+              {{ user()?.fullName?.split(' ')?.at(-1)?.[0] }}
+            </div>
+            <div class="profile-info">
+              <h2>{{ user()?.fullName }}</h2>
+              @if (user()?.title) {
+                <p class="user-title">{{ user()?.title }}</p>
               }
-              <span class="status-badge" [class.active]="user()?.isActive">
-                {{ user()?.isActive ? 'Hoạt động' : 'Bị khóa' }}
-              </span>
+              <p class="email">{{ user()?.email }}</p>
+              <div class="badges">
+                @for (role of user()!.roles; track role) {
+                  <span class="role-badge">{{ roleLabel(role) }}</span>
+                }
+                <span class="status-badge" [class.active]="user()?.isActive">
+                  {{ user()?.isActive ? 'Hoạt động' : 'Bị khóa' }}
+                </span>
+              </div>
             </div>
-          </div>
-        </div>
+          </mat-card-content>
+        </mat-card>
 
-        <div class="card section-card">
-          <div class="card-header">
-            <h3>📝 Thông tin cơ bản</h3>
-            <button class="btn-primary-sm" (click)="onUpdateInfo()" [disabled]="isSaving()">
-              {{ isSaving() ? 'Đang lưu...' : 'Cập nhật thông tin' }}
+        <mat-card class="section-card">
+          <mat-card-header>
+            <mat-card-title>📝 Thông tin cơ bản</mat-card-title>
+            <div class="spacer"></div>
+            <button mat-flat-button color="primary" (click)="onUpdateInfo()" [disabled]="isSaving()">
+              <mat-icon>save</mat-icon> {{ isSaving() ? 'Đang lưu...' : 'Cập nhật' }}
             </button>
-          </div>
-          <form [formGroup]="form" class="form-grid">
-            <div class="form-group full-width">
-              <label>Email (Không thể thay đổi)</label>
-              <input type="email" formControlName="email" class="readonly" />
-            </div>
-            <div class="form-group">
-              <label>Họ và tên <span class="required">*</span></label>
-              <input type="text" formControlName="fullName" placeholder="Nguyễn Văn A" />
-            </div>
-            <div class="form-group">
-              <label>Số điện thoại</label>
-              <input type="text" formControlName="phone" placeholder="09xxxxxxxx" />
-            </div>
-            <div class="form-group full-width">
-              <label>Chức danh hiển thị</label>
-              <input type="text" formControlName="title" placeholder="Ví dụ: Trưởng bộ môn Toán" />
-              <span class="field-hint">Chức danh tự do, hiển thị thay thế tên vai trò nếu có</span>
-            </div>
-            <div class="form-group full-width">
-              <label class="checkbox-label">
-                <input type="checkbox" formControlName="isActive" />
-                <span>Kích hoạt tài khoản</span>
-              </label>
-            </div>
-          </form>
-        </div>
+          </mat-card-header>
+          <mat-card-content>
+            <form [formGroup]="form" class="material-form">
+              <div class="form-grid">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Email (Không thể thay đổi)</mat-label>
+                  <input matInput type="email" formControlName="email" readonly />
+                  <mat-icon matSuffix>email</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Họ và tên</mat-label>
+                  <input matInput type="text" formControlName="fullName" placeholder="Nguyễn Văn A" required />
+                  <mat-icon matSuffix>person</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Số điện thoại</mat-label>
+                  <input matInput type="text" formControlName="phone" placeholder="09xxxxxxxx" />
+                  <mat-icon matSuffix>phone</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Chức danh hiển thị</mat-label>
+                  <input matInput type="text" formControlName="title" placeholder="Ví dụ: Trưởng bộ môn Toán" />
+                  <mat-hint>Chức danh hiển thị thay thế tên vai trò nếu có</mat-hint>
+                </mat-form-field>
+
+                <div class="checkbox-container full-width">
+                  <mat-checkbox formControlName="isActive">Kích hoạt tài khoản</mat-checkbox>
+                </div>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
       </div>
 
       <!-- Cột phải: Quản lý quyền/trường -->
       <div class="side-column">
         <!-- Đổi vai trò (Chỉ Super Admin) -->
         @if (isSuperAdmin()) {
-          <div class="card section-card">
-            <div class="card-header">
-              <h3>🔑 Phân quyền</h3>
+          <mat-card class="section-card">
+            <mat-card-header>
+              <mat-card-title>🔑 Phân quyền</mat-card-title>
+              <div class="spacer"></div>
               <button
-                class="btn-secondary-sm"
+                mat-stroked-button
                 (click)="onChangeRoles()"
                 [disabled]="isSaving() || user()?.id === currentUserId"
               >
                 Lưu
               </button>
-            </div>
-            <p class="section-desc">Thay đổi vai trò hệ thống của người dùng. Có thể chọn nhiều vai trò.</p>
-            <form [formGroup]="form">
-              <div class="form-group">
-                <label>Vai trò hệ thống</label>
-                <select formControlName="roles" multiple size="8" class="multi-select">
-                  @for (r of allRoles; track r.value) {
-                    <option [value]="r.value">{{ r.label }}</option>
-                  }
-                </select>
-                <span class="field-hint">Giữ Ctrl (Windows) / Cmd (Mac) để chọn nhiều vai trò</span>
-              </div>
-            </form>
-            @if (user()?.id === currentUserId) {
-              <p class="hint-text">Bạn không thể tự đổi vai trò của mình.</p>
-            }
-          </div>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="section-desc">Thay đổi vai trò hệ thống. Có thể chọn nhiều vai trò.</p>
+              <form [formGroup]="form">
+                <mat-form-field appearance="outline">
+                  <mat-label>Vai trò hệ thống</mat-label>
+                  <mat-select formControlName="roles" multiple required>
+                    @for (r of allRoles; track r.value) {
+                      <mat-option [value]="r.value">{{ r.label }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </form>
+              @if (user()?.id === currentUserId) {
+                <p class="hint-text warning">Bạn không thể tự đổi vai trò của mình.</p>
+              }
+            </mat-card-content>
+          </mat-card>
         }
 
         <!-- Gán trường học -->
         @if (canAssignSchool()) {
-          <div class="card section-card">
-            <div class="card-header">
-              <h3>🏫 Đơn vị công tác</h3>
-              <button class="btn-secondary-sm" (click)="onAssignSchool()" [disabled]="isSaving()">
+          <mat-card class="section-card">
+            <mat-card-header>
+              <mat-card-title>🏫 Đơn vị công tác</mat-card-title>
+              <div class="spacer"></div>
+              <button mat-stroked-button (click)="onAssignSchool()" [disabled]="isSaving()">
                 Lưu
               </button>
-            </div>
-            <p class="section-desc">Gán người dùng vào một trường học cụ thể.</p>
-            <form [formGroup]="form">
-              <div class="form-group">
-                <label>Trường học</label>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="section-desc">Gán người dùng vào một trường học cụ thể.</p>
+              <form [formGroup]="form">
                 @if (isSuperAdmin()) {
-                  <select formControlName="schoolId">
-                    <option value="">Không thuộc trường nào</option>
-                    @for (school of schools(); track school.id) {
-                      <option [value]="school.id">{{ school.name }}</option>
-                    }
-                  </select>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Trường học</mat-label>
+                    <mat-select formControlName="schoolId">
+                      <mat-option value="">Không thuộc trường nào</mat-option>
+                      @for (school of schools(); track school.id) {
+                        <mat-option [value]="school.id">{{ school.name }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
                 } @else {
                   <div class="read-only-box">
-                    {{ user()?.schoolId ? 'Đã gán trường' : 'Chưa gán trường' }}
+                    <mat-icon>school</mat-icon>
+                    <span>{{ user()?.schoolId ? 'Đã gán trường' : 'Chưa gán trường' }}</span>
                   </div>
                 }
-              </div>
-            </form>
-          </div>
+              </form>
+            </mat-card-content>
+          </mat-card>
         }
 
         <!-- Thông tin hệ thống -->
-        <div class="card info-card">
-          <h3>🕒 Thông tin hệ thống</h3>
-          <div class="info-list">
-            <div class="info-item">
-              <span class="label">Ngày tham gia:</span>
-              <span class="value">{{ user()?.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+        <mat-card class="info-card">
+          <mat-card-header>
+            <mat-card-title>🕒 Hệ thống</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="info-list">
+              <div class="info-item">
+                <span class="label">Tham gia:</span>
+                <span class="value">{{ user()?.createdAt | date: 'dd/MM/yyyy' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">ID:</span>
+                <span class="value code">{{ user()?.id }}</span>
+              </div>
             </div>
-            <div class="info-item">
-              <span class="label">ID người dùng:</span>
-              <span class="value code">{{ user()?.id }}</span>
-            </div>
-          </div>
-        </div>
+          </mat-card-content>
+        </mat-card>
       </div>
     </div>
   }

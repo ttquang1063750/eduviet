@@ -29,10 +29,11 @@
   </div>
 
   <form class="message-input" (ngSubmit)="sendMessage()">
-    <input 
-      type="text" 
+    <input
+      type="text"
       name="message"
-      [(ngModel)]="messageContent" 
+      [ngModel]="messageContent()"
+      (ngModelChange)="messageContent.set($event)"
       (input)="onTyping($event)"
       placeholder="Nhập tin nhắn..."
       autocomplete="off"

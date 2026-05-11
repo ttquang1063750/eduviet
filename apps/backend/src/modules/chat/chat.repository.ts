@@ -6,7 +6,7 @@ const senderSelect = {
   id: true,
   fullName: true,
   avatarUrl: true,
-  role: true,
+  roles: true,
 } satisfies Prisma.UserSelect;
 
 const messageSelect = {
@@ -175,6 +175,13 @@ export class ChatRepository {
   }
 
   // ── Read receipts ──────────────────────────────────────────────────────────
+
+  async deleteRoom(roomId: string) {
+    // Xoá members trước (FK), sau đó xoá messages rồi xoá room
+    await this.prisma.chatRoomMember.deleteMany({ where: { roomId } });
+    await this.prisma.chatMessage.deleteMany({ where: { roomId } });
+    return this.prisma.chatRoom.delete({ where: { id: roomId } });
+  }
 
   async markRead(roomId: string, userId: string) {
     return this.prisma.chatRoomMember.update({

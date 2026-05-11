@@ -4,52 +4,64 @@
   <div class="page-header">
     <div>
       <h2 class="page-header__title">Quản lý môn học</h2>
-      <p class="page-header__sub">{{ subjects().length }} môn / {{ subjects().length + availableCodes().length }} tổng</p>
+      <p class="page-header__sub text-muted">{{ subjects().length }} môn / {{ subjects().length + availableCodes().length }} tổng</p>
     </div>
     @if (availableCodes().length > 0) {
-      <button class="btn btn-primary" (click)="openCreate()" type="button">
-        + Thêm môn học
+      <button mat-flat-button color="primary" (click)="openCreate()">
+        <mat-icon>add</mat-icon> Thêm môn học
       </button>
     }
   </div>
 
   <!-- Loading -->
   @if (loading()) {
-    <div class="loading-state">Đang tải danh sách môn học...</div>
+    <div class="loading-state">
+      <p>Đang tải danh sách môn học...</p>
+    </div>
   }
 
   <!-- Subject cards grid -->
   @if (!loading()) {
     <div class="subject-grid">
       @for (subject of subjects(); track trackById($index, subject)) {
-        <div class="subject-card" [style.--subject-color]="subject.color ?? '#4A90E2'">
-          <div class="subject-card__icon">
-            @if (subject.iconUrl) {
-              <span>{{ subject.iconUrl }}</span>
-            } @else {
-              <span class="subject-card__fallback">{{ subject.code[0] }}</span>
-            }
-          </div>
-          <div class="subject-card__body">
-            <p class="subject-card__code">{{ subject.code }}</p>
-            <h3 class="subject-card__name">{{ subject.name }}</h3>
-            <p class="subject-card__name-en">{{ subject.nameEn }}</p>
-          </div>
-          <div class="subject-card__actions">
-            <button
-              class="btn btn-sm btn-outline"
-              (click)="openEdit(subject)"
-              type="button"
-            >Sửa</button>
-            <button
-              class="btn btn-sm btn-danger"
-              (click)="onDelete(subject)"
-              type="button"
-            >Xóa</button>
-          </div>
-        </div>
+        <mat-card class="subject-card" [style.--subject-color]="subject.color ?? '#4A90E2'">
+          <mat-card-content>
+            <div class="subject-card__icon">
+              @if (subject.iconUrl) {
+                <span>{{ subject.iconUrl }}</span>
+              } @else {
+                <span class="subject-card__fallback">{{ subject.code[0] }}</span>
+              }
+            </div>
+            <div class="subject-card__body">
+              <p class="subject-card__code">{{ subject.code }}</p>
+              <h3 class="subject-card__name">{{ subject.name }}</h3>
+              <p class="subject-card__name-en">{{ subject.nameEn }}</p>
+            </div>
+            <div class="subject-card__actions">
+              <button
+                mat-icon-button
+                (click)="openEdit(subject)"
+                title="Chỉnh sửa"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                color="warn"
+                (click)="onDelete(subject)"
+                title="Xóa"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
       } @empty {
-        <p class="empty-state">Chưa có môn học nào. Nhấn "Thêm môn học" để bắt đầu.</p>
+        <div class="empty-state">
+          <mat-icon class="huge-icon">school</mat-icon>
+          <p>Chưa có môn học nào. Nhấn "Thêm môn học" để bắt đầu.</p>
+        </div>
       }
     </div>
   }
@@ -58,143 +70,111 @@
 
 <!-- Modal overlay -->
 @if (showModal()) {
-  <div class="modal-overlay" (click)="closeModal()"></div>
-  <div class="modal" role="dialog" aria-modal="true">
-    <div class="modal__header">
-      <h3 class="modal__title">
-        {{ editingId() ? 'Chỉnh sửa môn học' : 'Thêm môn học mới' }}
-      </h3>
-      <button class="modal__close" (click)="closeModal()" type="button">✕</button>
-    </div>
-
-    <form [formGroup]="subjectForm" (ngSubmit)="onSubmit()" class="modal__body">
-
-      <!-- Mã môn (chỉ enable khi tạo mới) -->
-      <div class="form-group">
-        <label class="form-label">Mã môn học <span class="required">*</span></label>
-        @if (!editingId()) {
-          <select formControlName="code" class="form-control">
-            <option value="">-- Chọn mã môn --</option>
-            @for (code of availableCodes(); track code) {
-              <option [value]="code">{{ code }} — {{ codeLabels[code] }}</option>
-            }
-          </select>
-        } @else {
-          <input
-            type="text"
-            class="form-control form-control--disabled"
-            [value]="subjectForm.get('code')?.value"
-            readonly
-          />
-          <p class="form-hint">Mã môn không thể thay đổi sau khi tạo.</p>
-        }
-      </div>
-
-      <!-- AI Suggest button -->
-      @if (!editingId()) {
-        <div class="suggest-bar">
-          <button
-            type="button"
-            class="btn btn-suggest"
-            [disabled]="!subjectForm.get('code')?.value || suggesting()"
-            (click)="onAutoSuggest()"
-          >
-            @if (suggesting()) {
-              <span class="btn-spinner"></span> Đang gợi ý...
-            } @else {
-              ✨ AI tự điền thông tin
-            }
-          </button>
-          <span class="suggest-bar__hint">Claude AI sẽ tự điền tên, màu sắc và biểu tượng cho môn học.</span>
-        </div>
-      }
-
-      <!-- Tên tiếng Việt -->
-      <div class="form-group">
-        <label class="form-label">Tên tiếng Việt <span class="required">*</span></label>
-        <input
-          type="text"
-          formControlName="name"
-          class="form-control"
-          placeholder="VD: Toán học"
-          maxlength="100"
-        />
-      </div>
-
-      <!-- Tên tiếng Anh -->
-      <div class="form-group">
-        <label class="form-label">Tên tiếng Anh <span class="required">*</span></label>
-        <input
-          type="text"
-          formControlName="nameEn"
-          class="form-control"
-          placeholder="VD: Mathematics"
-          maxlength="100"
-        />
-      </div>
-
-      <!-- Màu + Icon (2 cột) -->
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Màu chủ đạo</label>
-          <div class="color-picker-wrap">
-            <input
-              type="color"
-              formControlName="color"
-              class="color-input"
-            />
-            <input
-              type="text"
-              formControlName="color"
-              class="form-control color-text"
-              placeholder="#4A90E2"
-              maxlength="7"
-            />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Biểu tượng (emoji)</label>
-          <input
-            type="text"
-            formControlName="iconUrl"
-            class="form-control"
-            placeholder="VD: 📐"
-            maxlength="4"
-          />
-        </div>
-      </div>
-
-      <!-- Preview -->
-      @if (subjectForm.get('name')?.value) {
-        <div class="preview">
-          <span class="preview__label">Xem trước:</span>
-          <div
-            class="preview__chip"
-            [style.background-color]="subjectForm.get('color')?.value + '20'"
-            [style.border-color]="subjectForm.get('color')?.value"
-            [style.color]="subjectForm.get('color')?.value"
-          >
-            @if (subjectForm.get('iconUrl')?.value) {
-              {{ subjectForm.get('iconUrl')?.value }}
-            }
-            {{ subjectForm.get('name')?.value }}
-          </div>
-        </div>
-      }
-
-      <!-- Actions -->
-      <div class="modal__footer">
-        <button type="button" class="btn btn-secondary" (click)="closeModal()">Hủy</button>
-        <button
-          type="submit"
-          class="btn btn-primary"
-          [disabled]="subjectForm.invalid || saving()"
-        >
-          @if (saving()) { Đang lưu... } @else { {{ editingId() ? 'Lưu thay đổi' : 'Tạo môn học' }} }
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ editingId() ? 'Chỉnh sửa môn học' : 'Thêm môn học mới' }}</h2>
+        <button mat-icon-button (click)="closeModal()">
+          <mat-icon>close</mat-icon>
         </button>
       </div>
 
-    </form>
+      <div class="modal-body">
+        <form [formGroup]="subjectForm" (ngSubmit)="onSubmit()" class="material-form">
+          <div class="form-grid">
+            <!-- Mã môn (chỉ enable khi tạo mới) -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Mã môn học</mat-label>
+              @if (!editingId()) {
+                <mat-select formControlName="code" required>
+                  @for (code of availableCodes(); track code) {
+                    <mat-option [value]="code">{{ code }} — {{ codeLabels[code] }}</mat-option>
+                  }
+                </mat-select>
+              } @else {
+                <input matInput formControlName="code" readonly />
+              }
+              <!-- mat-hint phải render unconditionally — không đặt trong @if/@else
+                   vì Angular Material không thể project qua control flow -->
+              <mat-hint>{{ editingId() ? 'Mã môn không thể thay đổi sau khi tạo' : '' }}</mat-hint>
+            </mat-form-field>
+
+            <!-- AI Suggest button -->
+            @if (!editingId()) {
+              <div class="suggest-row full-width">
+                <button
+                  mat-stroked-button
+                  type="button"
+                  color="accent"
+                  [disabled]="!subjectForm.get('code')?.value || suggesting()"
+                  (click)="onAutoSuggest()"
+                >
+                  <mat-icon>auto_awesome</mat-icon>
+                  {{ suggesting() ? 'Đang gợi ý...' : 'AI tự điền thông tin' }}
+                </button>
+                <span class="suggest-hint">AI sẽ tự điền tên, màu sắc và biểu tượng.</span>
+              </div>
+            }
+
+            <!-- Tên tiếng Việt -->
+            <mat-form-field appearance="outline">
+              <mat-label>Tên tiếng Việt</mat-label>
+              <input matInput formControlName="name" placeholder="VD: Toán học" maxlength="100" required />
+            </mat-form-field>
+
+            <!-- Tên tiếng Anh -->
+            <mat-form-field appearance="outline">
+              <mat-label>Tên tiếng Anh</mat-label>
+              <input matInput formControlName="nameEn" placeholder="VD: Mathematics" maxlength="100" required />
+            </mat-form-field>
+
+            <!-- Màu + Icon -->
+            <div class="form-row full-width">
+              <mat-form-field appearance="outline" class="color-field">
+                <mat-label>Màu chủ đạo</mat-label>
+                <input matInput formControlName="color" placeholder="#4A90E2" maxlength="7" />
+                <input type="color" formControlName="color" class="color-swatch" matSuffix />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="icon-field">
+                <mat-label>Biểu tượng (emoji)</mat-label>
+                <input matInput formControlName="iconUrl" placeholder="VD: 📐" maxlength="4" />
+              </mat-form-field>
+            </div>
+
+            <!-- Preview -->
+            @if (subjectForm.get('name')?.value) {
+              <div class="preview-row full-width">
+                <span class="preview-label">Xem trước:</span>
+                <div
+                  class="preview-chip"
+                  [style.background-color]="subjectForm.get('color')?.value + '20'"
+                  [style.border-color]="subjectForm.get('color')?.value"
+                  [style.color]="subjectForm.get('color')?.value"
+                >
+                  @if (subjectForm.get('iconUrl')?.value) {
+                    <span class="preview-icon">{{ subjectForm.get('iconUrl')?.value }}</span>
+                  }
+                  <span class="preview-name">{{ subjectForm.get('name')?.value }}</span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="form-actions">
+            <button mat-button type="button" (click)="closeModal()">Hủy</button>
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              [disabled]="subjectForm.invalid || saving()"
+            >
+              <mat-icon>save</mat-icon>
+              {{ saving() ? 'Đang lưu...' : (editingId() ? 'Lưu thay đổi' : 'Tạo môn học') }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 }

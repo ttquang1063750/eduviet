@@ -28,34 +28,14 @@
 .filter-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 1rem;
   margin-bottom: 1.25rem;
-}
+  align-items: center;
 
-.filter-input,
-.filter-select {
-  height: 2.25rem;
-  padding: 0 0.75rem;
-  border: 1px solid var(--color-border, #e5e7eb);
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  background: white;
-  color: var(--color-text-primary, #1a1a2e);
-  outline: none;
-
-  &:focus {
-    border-color: var(--color-primary, #4a90e2);
-    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.15);
+  mat-form-field {
+    flex: 1;
+    min-width: 200px;
   }
-}
-
-.filter-input {
-  flex: 1;
-  min-width: 200px;
-}
-
-.filter-select {
-  min-width: 160px;
 }
 
 // ── Table ────────────────────────────────────────────────────────────────────
@@ -136,44 +116,7 @@
 
 // ── Buttons ──────────────────────────────────────────────────────────────────
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  transition: background 0.15s;
-}
-
-.btn-primary {
-  background: var(--color-primary, #4a90e2);
-  color: white;
-  &:hover { background: #3a7fd5; }
-}
-
-.btn-secondary {
-  background: var(--color-bg-secondary, #f3f4f6);
-  color: var(--color-text-primary, #1a1a2e);
-  border: 1px solid var(--color-border, #e5e7eb);
-  &:hover { background: #e9eaec; }
-}
-
-.btn-icon {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.25rem;
-  font-size: 1rem;
-  border-radius: 0.25rem;
-  transition: background 0.15s;
-  &:hover { background: var(--color-bg-hover, #f5f8ff); }
-}
-
-.btn-icon-danger:hover { background: #fee2e2; }
+// Buttons handled by Angular Material mat-button and mat-icon-button
 
 // ── States ───────────────────────────────────────────────────────────────────
 

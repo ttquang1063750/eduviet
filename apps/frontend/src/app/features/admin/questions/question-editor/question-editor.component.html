@@ -1,0 +1,43 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">{{ isEdit() ? 'Chỉnh sửa câu hỏi' : 'Tạo câu hỏi mới' }}</h1>
+    <p class="page-subtitle">
+      {{ isEdit() ? 'Cập nhật thông tin chi tiết cho câu hỏi' : 'Thêm câu hỏi mới vào ngân hàng' }}
+    </p>
+  </div>
+  <button class="btn btn-secondary" routerLink="/admin/questions">
+    Quay lại
+  </button>
+</div>
+
+@if (loading()) {
+  <div class="loading-state">Đang tải thông tin câu hỏi...</div>
+} @else {
+  <div class="editor-container">
+    <div class="editor-card">
+      @if (!isEdit()) {
+        <div class="subject-picker-section">
+          <label class="field-label">Môn học <span class="required">*</span></label>
+          <select class="filter-select" [value]="subjectId()" (change)="subjectId.set(getInputValue($event))">
+            <option value="">-- Chọn môn học --</option>
+            @for (s of subjects(); track s.id) {
+              <option [value]="s.id">{{ s.name }}</option>
+            }
+          </select>
+          @if (!subjectId()) {
+            <p class="field-hint text-danger">Vui lòng chọn môn học trước khi nhập nội dung.</p>
+          }
+        </div>
+      }
+
+      <div class="form-wrapper" [class.disabled]="!subjectId() && !isEdit()">
+        <app-question-form
+          [question]="question()"
+          [subjectId]="subjectId()"
+          (saved)="onSaved($event)"
+          (cancelled)="onCancelled()"
+        />
+      </div>
+    </div>
+  </div>
+}

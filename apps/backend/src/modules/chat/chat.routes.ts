@@ -61,7 +61,27 @@ export const chatRoutes: FastifyPluginAsync = async (app) => {
       request.user.id,
       body.data.recipientId
     );
+
+    // Notify cả 2 thành viên qua private room để client tự join socket room
+    const memberIds = room.members?.map((m: { userId: string }) => m.userId) ?? [request.user.id, body.data.recipientId];
+    memberIds.forEach((uid: string) => {
+      app.io.to(`user:${uid}`).emit('room_invited', room);
+    });
+
     return reply.status(201).send({ data: room });
+  });
+
+  // DELETE /rooms/:id — Xoá phòng chat
+  app.delete('/rooms/:id', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const result = await service.deleteRoom(id, request.user.id);
+
+    // Thông báo tất cả thành viên để client xoá room khỏi danh sách
+    result.memberIds.forEach((uid: string) => {
+      app.io.to(`user:${uid}`).emit('room_deleted', { roomId: result.roomId });
+    });
+
+    return reply.send({ data: { roomId: result.roomId } });
   });
 
   // PATCH /messages/:id — Sửa tin nhắn

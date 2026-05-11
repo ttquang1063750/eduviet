@@ -1,0 +1,124 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Quản lý bài học</h1>
+    <p class="page-subtitle">Tạo, chỉnh sửa và quản lý nội dung bài học — {{ total() }} bài học</p>
+  </div>
+  <button mat-flat-button (click)="openCreate()">
+    <span>＋</span> Tạo bài học mới
+  </button>
+</div>
+
+<!-- Bộ lọc -->
+<div class="filter-bar">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Tìm kiếm</mat-label>
+    <input
+      matInput
+      placeholder="Tiêu đề, chủ đề..."
+      [value]="filterSearch()"
+      (input)="filterSearch.set(getInputValue($event))"
+      (keydown.enter)="applyFilters()"
+    />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Môn học</mat-label>
+    <mat-select [value]="filterSubject()" (selectionChange)="filterSubject.set($event.value); applyFilters()">
+      <mat-option value="">Tất cả môn học</mat-option>
+      @for (s of subjects(); track s.id) {
+        <mat-option [value]="s.code">{{ s.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Khối lớp</mat-label>
+    <mat-select [value]="filterGrade()" (selectionChange)="filterGrade.set($event.value === '' ? '' : +$event.value); applyFilters()">
+      <mat-option value="">Tất cả khối</mat-option>
+      @for (g of [1,2,3,4,5,6,7,8,9,10,11,12]; track g) {
+        <mat-option [value]="g">Khối {{ g }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Trạng thái</mat-label>
+    <mat-select [value]="filterStatus()" (selectionChange)="filterStatus.set($event.value); applyFilters()">
+      <mat-option value="">Tất cả trạng thái</mat-option>
+      @for (entry of statusLabels | keyvalue; track entry.key) {
+        <mat-option [value]="entry.key">{{ entry.value }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <button mat-stroked-button (click)="applyFilters()">Tìm</button>
+</div>
+
+<!-- Bảng bài học -->
+@if (loading()) {
+  <div class="loading-state">Đang tải...</div>
+} @else if (lessons().length === 0) {
+  <div class="empty-state">
+    <span class="empty-icon">📚</span>
+    <p>Chưa có bài học nào phù hợp.</p>
+    <button class="btn btn-primary" (click)="openCreate()">Tạo bài học đầu tiên</button>
+  </div>
+} @else {
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th class="col-title">Bài học</th>
+          <th class="col-subject">Môn / Khối</th>
+          <th class="col-status">Trạng thái</th>
+          <th class="col-date">Ngày tạo</th>
+          <th class="col-actions">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (l of lessons(); track l.id) {
+          <tr>
+            <td class="col-title">
+              <div class="lesson-info">
+                <span class="lesson-name">{{ l.title }}</span>
+                <span class="lesson-topic">{{ l.topic }}</span>
+              </div>
+            </td>
+            <td class="col-subject">
+              <div class="subject-info">
+                <span class="badge badge-subject" [style.background-color]="l.subject.color">{{ l.subject.name }}</span>
+                <span class="text-muted">Lớp {{ l.grade }}</span>
+              </div>
+            </td>
+            <td class="col-status">
+              <span class="badge" [class]="'badge-status-' + l.status.toLowerCase()">
+                {{ statusLabels[l.status] }}
+              </span>
+            </td>
+            <td class="col-date">
+              {{ l.publishedAt ? (l.publishedAt | date: 'dd/MM/yyyy') : '—' }}
+            </td>
+            <td class="col-actions">
+              <div class="action-buttons">
+                <button mat-icon-button title="Sửa nội dung" (click)="openEdit(l)">✏️</button>
+                <button mat-icon-button title="Biên soạn câu hỏi" (click)="openExercises(l)">🧩</button>
+                @if (l.status === 'DRAFT' || l.status === 'REJECTED') {
+                  <button mat-icon-button title="Gửi duyệt" (click)="submitReview(l)">📤</button>
+                }
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Phân trang -->
+  @if (totalPages() > 1) {
+    <div class="pagination">
+      <button class="page-btn" [disabled]="page() === 1" (click)="goToPage(page() - 1)">‹</button>
+      <span class="page-info">{{ page() }} / {{ totalPages() }}</span>
+      <button class="page-btn" [disabled]="page() === totalPages()" (click)="goToPage(page() + 1)">›</button>
+    </div>
+  }
+}

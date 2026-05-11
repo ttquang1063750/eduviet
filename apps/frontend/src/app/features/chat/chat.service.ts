@@ -109,6 +109,21 @@ export class ChatService {
       this.updateTypingStatus(data.roomId, '', false, data.userId);
     });
 
+    this.socket.on('room_invited', (room: ChatRoom) => {
+      const exists = this._rooms().find(r => r.id === room.id);
+      if (!exists) {
+        this._rooms.update(rooms => [room, ...rooms]);
+      }
+      this.socket?.emit('join_rooms', [room.id]);
+    });
+
+    this.socket.on('room_deleted', ({ roomId }: { roomId: string }) => {
+      this._rooms.update(rooms => rooms.filter(r => r.id !== roomId));
+      if (this._activeRoomId() === roomId) {
+        this._activeRoomId.set(null);
+      }
+    });
+
     this.socket.on('message_edited', (updated: ChatMessage) => {
       this.updateMessageInState(updated);
     });
@@ -182,6 +197,17 @@ export class ChatService {
     if (!roomId || !this.socket) return;
 
     this.socket.emit('send_message', { roomId, content, mediaUrl });
+  }
+
+  deleteRoom(roomId: string) {
+    return this.http.delete<{ data: { roomId: string } }>(`${this.API}/rooms/${roomId}`).pipe(
+      tap(() => {
+        this._rooms.update(rooms => rooms.filter(r => r.id !== roomId));
+        if (this._activeRoomId() === roomId) {
+          this._activeRoomId.set(null);
+        }
+      }),
+    );
   }
 
   editMessage(messageId: string, content: string) {

@@ -1,9 +1,52 @@
 <div class="room-list-container">
-  <div class="room-tabs">
-    <button [class.active]="currentTab() === 'ALL'" (click)="currentTab.set('ALL')">Tất cả</button>
-    <button [class.active]="currentTab() === 'CLASS'" (click)="currentTab.set('CLASS')">Lớp học</button>
-    <button [class.active]="currentTab() === 'DIRECT'" (click)="currentTab.set('DIRECT')">Cá nhân</button>
+  <!-- Header tabs + nút tạo cuộc hội thoại mới -->
+  <div class="room-list-header">
+    <div class="room-tabs">
+      <button [class.active]="currentTab() === 'ALL'" (click)="currentTab.set('ALL')">Tất cả</button>
+      <button [class.active]="currentTab() === 'CLASS'" (click)="currentTab.set('CLASS')">Lớp học</button>
+      <button [class.active]="currentTab() === 'DIRECT'" (click)="currentTab.set('DIRECT')">Cá nhân</button>
+    </div>
+    <button class="btn-new-chat" (click)="toggleNewChat()" [class.active]="showNewChat()" title="Cuộc hội thoại mới">
+      {{ showNewChat() ? '✕' : '✏️' }}
+    </button>
   </div>
+
+  <!-- Panel tìm kiếm người dùng mới -->
+  @if (showNewChat()) {
+    <div class="new-chat-panel">
+      <input
+        type="text"
+        class="user-search-input"
+        placeholder="Tìm tên hoặc email..."
+        [ngModel]="userSearchTerm()"
+        (ngModelChange)="onUserSearch($event)"
+        autocomplete="off"
+      />
+
+      @if (searchingUsers()) {
+        <div class="search-hint">Đang tìm kiếm...</div>
+      } @else if (userSearchError()) {
+        <div class="search-hint search-hint--error">{{ userSearchError() }}</div>
+      } @else if (userSearchTerm() && userResults().length === 0) {
+        <div class="search-hint">Không tìm thấy người dùng.</div>
+      } @else if (!userSearchTerm()) {
+        <div class="search-hint">Nhập tên hoặc email để tìm người dùng.</div>
+      }
+
+      @for (user of userResults(); track user.id) {
+        <div class="user-result-row" (click)="startChat(user)">
+          <div class="user-avatar-sm">{{ user.fullName.charAt(0).toUpperCase() }}</div>
+          <div class="user-result-info">
+            <span class="user-result-name">{{ user.fullName }}</span>
+            <span class="user-result-email">{{ user.email }}</span>
+          </div>
+          @if (startingChat() === user.id) {
+            <span class="starting-hint">...</span>
+          }
+        </div>
+      }
+    </div>
+  }
 
   <div class="rooms-scroll">
     @for (room of filteredRooms(); track room.id) {
@@ -15,7 +58,7 @@
             <span class="avatar-icon">👤</span>
           }
         </div>
-        
+
         <div class="room-info">
           <div class="room-top">
             <span class="room-name">{{ getRoomName(room) }}</span>
@@ -23,7 +66,7 @@
               <span class="room-time">{{ room.lastMessage.createdAt | date:'HH:mm' }}</span>
             }
           </div>
-          
+
           <div class="room-bottom">
             <span class="last-message">
               @if (room.lastMessage) {
@@ -37,10 +80,18 @@
             }
           </div>
         </div>
+
+        <button
+          class="btn-delete-room"
+          [class.deleting]="deletingRoomId() === room.id"
+          (click)="deleteRoom($event, room.id)"
+          title="Xoá cuộc hội thoại"
+        >{{ deletingRoomId() === room.id ? '…' : '🗑' }}</button>
       </div>
     } @empty {
       <div class="empty-rooms">
-        <p>Không có phòng chat nào</p>
+        <p>Chưa có cuộc hội thoại nào.</p>
+        <p class="empty-hint">Nhấn ✏️ để bắt đầu trò chuyện.</p>
       </div>
     }
   </div>

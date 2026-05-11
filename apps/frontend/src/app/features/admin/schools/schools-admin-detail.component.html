@@ -1,42 +1,104 @@
 <div class="admin-container">
-  <h2>{{ isEditMode() ? 'Chỉnh sửa trường học' : 'Tạo trường học mới' }}</h2>
+  <div class="header-actions">
+    <h2>{{ isEditMode() ? 'Chỉnh sửa trường' : 'Thêm trường mới' }}</h2>
+    <a mat-stroked-button routerLink="/admin/schools">
+      <mat-icon>chevron_left</mat-icon> Quay lại
+    </a>
+  </div>
 
-  <form [formGroup]="schoolForm" (ngSubmit)="onSubmit()">
-    <div class="form-group">
-      <label for="name">Tên trường</label>
-      <input id="name" type="text" formControlName="name" class="form-control">
-    </div>
+  <form [formGroup]="schoolForm" (ngSubmit)="onSubmit()" class="detail-form">
+    <div class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Tên trường</mat-label>
+        <input matInput formControlName="name" placeholder="Ví dụ: THPT Chu Văn An" required>
+        <mat-error>Tên trường là bắt buộc</mat-error>
+      </mat-form-field>
 
-    <div class="form-group">
-      <label for="code">Mã trường</label>
-      <input id="code" type="text" formControlName="code" class="form-control">
-    </div>
+      <mat-form-field appearance="outline">
+        <mat-label>Mã trường</mat-label>
+        <input matInput formControlName="code" placeholder="Ví dụ: CVAN" required>
+        <mat-error>Mã trường là bắt buộc</mat-error>
+      </mat-form-field>
 
-    <div class="form-group">
-      <label for="address">Địa chỉ</label>
-      <input id="address" type="text" formControlName="address" class="form-control">
-    </div>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Địa chỉ</mat-label>
+        <input matInput formControlName="address" placeholder="Số nhà, đường, phường/xã...">
+      </mat-form-field>
 
-    <div class="form-group">
-      <label for="phone">Số điện thoại</label>
-      <input id="phone" type="text" formControlName="phone" class="form-control">
-    </div>
+      <mat-form-field appearance="outline">
+        <mat-label>Số điện thoại</mat-label>
+        <input matInput formControlName="phone" placeholder="024xxxxxxx">
+      </mat-form-field>
 
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input id="email" type="email" formControlName="email" class="form-control">
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" placeholder="school@example.com">
+        <mat-error>Email không hợp lệ</mat-error>
+      </mat-form-field>
     </div>
 
     <div class="form-actions">
-      <button type="submit" [disabled]="schoolForm.invalid" class="btn btn-primary">
-        {{ isEditMode() ? 'Lưu thay đổi' : 'Tạo mới' }}
+      <button mat-flat-button color="primary" type="submit" [disabled]="schoolForm.invalid">
+        <mat-icon>save</mat-icon> {{ isEditMode() ? 'Cập nhật' : 'Tạo mới' }}
       </button>
-      <a routerLink="/admin/schools" class="btn btn-secondary">Hủy</a>
+
       @if (isEditMode()) {
-        <button type="button" (click)="onDelete()" class="btn btn-danger">
-          Xóa
+        <button mat-button color="warn" type="button" (click)="onDelete()">
+          <mat-icon>delete</mat-icon> Xóa trường
         </button>
       }
     </div>
   </form>
+
+  <!-- ── Danh sách lớp học ──────────────────────────────── -->
+  @if (isEditMode()) {
+    <div class="classes-section">
+      <div class="section-header">
+        <h3>
+          <mat-icon>class</mat-icon>
+          Danh sách lớp học
+          @if (!loadingClasses()) {
+            <span class="count-badge">{{ schoolClasses().length }}</span>
+          }
+        </h3>
+        <button mat-flat-button color="primary" (click)="goToCreateClass()">
+          <mat-icon>add</mat-icon> Tạo lớp mới
+        </button>
+      </div>
+
+      @if (loadingClasses()) {
+        <div class="loading-row">
+          <mat-spinner diameter="32"></mat-spinner>
+          <span>Đang tải danh sách lớp...</span>
+        </div>
+      } @else if (schoolClasses().length === 0) {
+        <div class="empty-state">
+          <mat-icon>inbox</mat-icon>
+          <p>Trường chưa có lớp học nào. Hãy tạo lớp đầu tiên!</p>
+        </div>
+      } @else {
+        <div class="classes-list">
+          @for (cls of schoolClasses(); track cls.id) {
+            <a class="class-row" [routerLink]="['/admin/classes', cls.id]">
+              <div class="class-info">
+                <span class="class-name">{{ cls.name }}</span>
+                <span class="class-meta">Khối {{ cls.grade }} · {{ cls.academicYear }}</span>
+              </div>
+              <div class="class-right">
+                @if (cls.homeroomTeacher) {
+                  <span class="teacher-chip">
+                    <mat-icon>person</mat-icon>{{ cls.homeroomTeacher.fullName }}
+                  </span>
+                }
+                <span class="student-count">
+                  <mat-icon>people</mat-icon>{{ cls._count.enrollments }} HS
+                </span>
+                <mat-icon class="chevron">chevron_right</mat-icon>
+              </div>
+            </a>
+          }
+        </div>
+      }
+    </div>
+  }
 </div>

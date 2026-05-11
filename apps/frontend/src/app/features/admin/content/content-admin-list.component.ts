@@ -13,10 +13,14 @@ import { ToastService } from '../../../core/services/toast.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
 import { BlogPost } from '@eduviet/shared-types';
 
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+
 @Component({
   selector: 'app-content-admin-list',
   standalone: true,
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink, DatePipe, MatButtonModule, MatIconModule, MatCardModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './content-admin-list.component.html',
   styleUrl: './content-admin-list.component.scss',

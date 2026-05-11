@@ -64,7 +64,8 @@ eduviet/
 │   │       │   ├── blog/
 │   │       │   ├── admin/
 │   │       │   │   ├── exercises/   # exercise-editor (split panel)
-│   │       │   │   └── questions/   # question-bank CRUD
+│               │   ├── questions/   # question-bank list & detail editor
+
 │   │       │   └── reports/
 │   │       └── layout/      # MainLayoutComponent
 │   └── backend/

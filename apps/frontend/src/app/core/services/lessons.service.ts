@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import type { LessonListItem, Lesson, CreateLessonRequest, PaginatedResponse, ApiResponse } from '@eduviet/shared-types';
+import type { LessonListItem, Lesson, CreateLessonRequest, UpdateLessonRequest, PaginatedResponse, ApiResponse } from '@eduviet/shared-types';
 
 interface LessonFilter {
   page?: number;
@@ -31,8 +31,20 @@ export class LessonsService {
     return this.http.get<ApiResponse<Lesson>>(`${this.API}/${slug}`);
   }
 
+  getById(id: string) {
+    return this.http.get<ApiResponse<Lesson>>(`${this.API}/id/${id}`);
+  }
+
   create(data: CreateLessonRequest) {
     return this.http.post<ApiResponse<Lesson>>(this.API, data);
+  }
+
+  update(id: string, data: UpdateLessonRequest) {
+    return this.http.patch<ApiResponse<Lesson>>(`${this.API}/${id}`, data);
+  }
+
+  assignReviewer(id: string, reviewerId: string) {
+    return this.http.patch<ApiResponse<Lesson>>(`${this.API}/${id}/assign`, { reviewerId });
   }
 
   submitReview(id: string) {

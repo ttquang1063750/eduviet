@@ -1,84 +1,100 @@
 <div class="page">
   <div class="page-header">
     <h1>👥 Quản lý người dùng</h1>
-    <button class="btn-primary" (click)="openCreateModal()">+ Thêm người dùng</button>
+    <button mat-flat-button (click)="openCreateModal()">
+      <mat-icon>add</mat-icon> Thêm người dùng
+    </button>
   </div>
 
   <div class="filter-bar">
-    <div class="search-box">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field">
+      <mat-label>Tìm kiếm người dùng</mat-label>
       <input
-        type="text"
-        placeholder="Tìm theo tên hoặc email..."
+        matInput
+        placeholder="Tên hoặc email..."
         [ngModel]="search()"
         (ngModelChange)="onSearch($event)"
       />
-    </div>
-    <div class="filters">
-      <select [ngModel]="roleFilter()" (ngModelChange)="onRoleChange($event)">
-        <option value="">Tất cả vai trò</option>
-        <option value="SUPER_ADMIN">Super Admin</option>
-        <option value="SCHOOL_ADMIN">Admin Trường</option>
-        <option value="SUBJECT_TEACHER">Giáo viên</option>
-        <option value="STUDENT">Học sinh</option>
-        <option value="PARENT">Phụ huynh</option>
-      </select>
-    </div>
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="role-field">
+      <mat-label>Vai trò</mat-label>
+      <mat-select [ngModel]="roleFilter()" (ngModelChange)="onRoleChange($event)">
+        <mat-option value="">Tất cả vai trò</mat-option>
+        <mat-option value="SUPER_ADMIN">Super Admin</mat-option>
+        <mat-option value="SCHOOL_ADMIN">Admin Trường</mat-option>
+        <mat-option value="SUBJECT_TEACHER">Giáo viên</mat-option>
+        <mat-option value="STUDENT">Học sinh</mat-option>
+        <mat-option value="PARENT">Phụ huynh</mat-option>
+      </mat-select>
+    </mat-form-field>
   </div>
 
   <div class="table-card">
     @if (loading()) {
       <div class="loading">Đang tải...</div>
     } @else {
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Họ tên</th>
-            <th>Email</th>
-            <th>Vai trò</th>
-            <th>Trạng thái</th>
-            <th>Ngày tạo</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (user of users(); track user.id) {
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
             <tr>
-              <td>
-                <div class="user-cell">
-                  <div class="user-avatar">{{ user.fullName.split(' ').at(-1)?.[0] }}</div>
-                  <span>{{ user.fullName }}</span>
-                </div>
-              </td>
-              <td class="text-muted">{{ user.email }}</td>
-              <td>
-                <div class="role-badges">
-                  @for (role of user.roles; track role) {
-                    <span class="role-badge">{{ roleLabel(role) }}</span>
-                  }
-                </div>
-              </td>
-              <td>
-                <span class="status-badge" [class.active]="user.isActive">
-                  {{ user.isActive ? 'Hoạt động' : 'Bị khóa' }}
-                </span>
-              </td>
-              <td class="text-muted">{{ user.createdAt | date: 'dd/MM/yyyy' }}</td>
-              <td><button class="action-btn" (click)="editUser(user.id)">Sửa</button></td>
+              <th>Họ tên</th>
+              <th>Email</th>
+              <th>Vai trò</th>
+              <th>Trạng thái</th>
+              <th>Ngày tạo</th>
+              <th class="col-actions">Thao tác</th>
             </tr>
-          } @empty {
-            <tr>
-              <td colspan="6" class="text-center py-8 text-muted">Không tìm thấy người dùng nào</td>
-            </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (user of users(); track user.id) {
+              <tr>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar">{{ user.fullName.split(' ').at(-1)?.[0] }}</div>
+                    <strong>{{ user.fullName }}</strong>
+                  </div>
+                </td>
+                <td class="text-muted">{{ user.email }}</td>
+                <td>
+                  <div class="role-badges">
+                    @for (role of user.roles; track role) {
+                      <span class="role-badge">{{ roleLabel(role) }}</span>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <span class="status-badge" [class.active]="user.isActive">
+                    {{ user.isActive ? 'Hoạt động' : 'Bị khóa' }}
+                  </span>
+                </td>
+                <td class="text-muted">{{ user.createdAt | date: 'dd/MM/yyyy' }}</td>
+                <td class="col-actions">
+                  <button mat-icon-button (click)="editUser(user.id)" title="Sửa">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="text-center py-8 text-muted">Không tìm thấy người dùng nào</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
 
       <div class="table-footer">
         <span class="total-count">Tổng: {{ total() }} người dùng</span>
         <div class="pagination">
-          <button [disabled]="page() === 1" (click)="goToPage(page() - 1)">‹</button>
+          <button mat-stroked-button [disabled]="page() === 1" (click)="goToPage(page() - 1)">
+            <mat-icon>chevron_left</mat-icon> Trước
+          </button>
           <span class="page-info">Trang {{ page() }} / {{ totalPages() }}</span>
-          <button [disabled]="page() === totalPages()" (click)="goToPage(page() + 1)">›</button>
+          <button mat-stroked-button [disabled]="page() === totalPages()" (click)="goToPage(page() + 1)">
+            Sau <mat-icon>chevron_right</mat-icon>
+          </button>
         </div>
       </div>
     }
@@ -91,61 +107,72 @@
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2>Tạo người dùng mới</h2>
-        <button class="close-btn" (click)="closeCreateModal()">×</button>
+        <button mat-icon-button (click)="closeCreateModal()">
+          <mat-icon>close</mat-icon>
+        </button>
       </div>
       <div class="modal-body">
-        <form class="form-grid" (submit)="$event.preventDefault(); saveUser()">
-          <div class="form-group">
-            <label>Email <span class="required">*</span></label>
-            <input type="email" [(ngModel)]="newUser().email" name="email" required placeholder="example@eduviet.vn" />
+        <form class="material-form" (submit)="$event.preventDefault(); saveUser()">
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Email</mat-label>
+              <input matInput type="email" [(ngModel)]="newUser().email" name="email" required placeholder="example@eduviet.vn" />
+              <mat-icon matSuffix>email</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Họ và tên</mat-label>
+              <input matInput type="text" [(ngModel)]="newUser().fullName" name="fullName" required placeholder="Nguyễn Văn A" />
+              <mat-icon matSuffix>person</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Mật khẩu</mat-label>
+              <input matInput type="password" [(ngModel)]="newUser().password" name="password" required placeholder="Tối thiểu 8 ký tự" />
+              <mat-icon matSuffix>lock</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Vai trò</mat-label>
+              <mat-select
+                [ngModel]="newUser().roles"
+                (ngModelChange)="newUser.update(u => ({ ...u, roles: $event }))"
+                name="roles"
+                multiple
+                required
+              >
+                <mat-option value="STUDENT">Học sinh</mat-option>
+                <mat-option value="PARENT">Phụ huynh</mat-option>
+                <mat-option value="SUBJECT_TEACHER">Giáo viên bộ môn</mat-option>
+                <mat-option value="HOMEROOM_TEACHER">GV Chủ nhiệm</mat-option>
+                <mat-option value="CONTENT_CREATOR">Soạn thảo</mat-option>
+                <mat-option value="CONTENT_REVIEWER">Reviewer</mat-option>
+                <mat-option value="CONTENT_APPROVER">Phê duyệt</mat-option>
+                <mat-option value="GRADER">Chấm điểm</mat-option>
+                <mat-option value="SCHOOL_ADMIN">Admin Trường</mat-option>
+                <mat-option value="DISTRICT_ADMIN">Admin Huyện</mat-option>
+                <mat-option value="PROVINCE_ADMIN">Admin Tỉnh</mat-option>
+                <mat-option value="SUPER_ADMIN">Super Admin</mat-option>
+              </mat-select>
+              <mat-hint>Có thể chọn nhiều vai trò</mat-hint>
+            </mat-form-field>
+
+            @if (isSuperAdmin()) {
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Trường học</mat-label>
+                <mat-select [(ngModel)]="newUser().schoolId" name="schoolId">
+                  <mat-option [value]="undefined">Không thuộc trường nào</mat-option>
+                  @for (school of schools(); track school.id) {
+                    <mat-option [value]="school.id">{{ school.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            }
           </div>
-          <div class="form-group">
-            <label>Họ và tên <span class="required">*</span></label>
-            <input type="text" [(ngModel)]="newUser().fullName" name="fullName" required placeholder="Nguyễn Văn A" />
-          </div>
-          <div class="form-group">
-            <label>Mật khẩu <span class="required">*</span></label>
-            <input type="password" [(ngModel)]="newUser().password" name="password" required placeholder="Tối thiểu 8 ký tự" />
-          </div>
-          <div class="form-group">
-            <label>Vai trò <span class="required">*</span></label>
-            <select
-              [ngModel]="newUser().roles"
-              (ngModelChange)="newUser.update(u => ({ ...u, roles: $event }))"
-              name="roles"
-              multiple
-              size="6"
-              class="multi-select"
-            >
-              <option value="STUDENT">Học sinh</option>
-              <option value="PARENT">Phụ huynh</option>
-              <option value="SUBJECT_TEACHER">Giáo viên bộ môn</option>
-              <option value="HOMEROOM_TEACHER">GV Chủ nhiệm</option>
-              <option value="CONTENT_CREATOR">Soạn thảo</option>
-              <option value="CONTENT_REVIEWER">Reviewer</option>
-              <option value="CONTENT_APPROVER">Phê duyệt</option>
-              <option value="GRADER">Chấm điểm</option>
-              <option value="SCHOOL_ADMIN">Admin Trường</option>
-              <option value="DISTRICT_ADMIN">Admin Huyện</option>
-              <option value="PROVINCE_ADMIN">Admin Tỉnh</option>
-              <option value="SUPER_ADMIN">Super Admin</option>
-            </select>
-            <span class="field-hint">Giữ Ctrl / Cmd để chọn nhiều vai trò</span>
-          </div>
-          @if (isSuperAdmin()) {
-            <div class="form-group full-width">
-              <label>Trường học</label>
-              <select [(ngModel)]="newUser().schoolId" name="schoolId">
-                <option [value]="undefined">Không thuộc trường nào</option>
-                @for (school of schools(); track school.id) {
-                  <option [value]="school.id">{{ school.name }}</option>
-                }
-              </select>
-            </div>
-          }
+
           <div class="form-actions">
-            <button type="button" class="btn-secondary" (click)="closeCreateModal()">Hủy</button>
-            <button type="submit" class="btn-primary" [disabled]="isSaving()">
+            <button mat-button type="button" (click)="closeCreateModal()">Hủy</button>
+            <button mat-flat-button color="primary" type="submit" [disabled]="isSaving()">
               {{ isSaving() ? 'Đang tạo...' : 'Tạo người dùng' }}
             </button>
           </div>

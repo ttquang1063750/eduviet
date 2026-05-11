@@ -18,7 +18,7 @@ Route handler → Service → Repository → Prisma
 declare module '@fastify/jwt' {
   interface FastifyJWT {
     payload: AccessTokenPayload | RefreshTokenPayload;
-    user: { id: string; email: string; role: UserRole; };
+    user: { id: string; email: string; roles: UserRole[]; }; // MẢNG, không phải đơn
   }
 }
 ```
@@ -62,8 +62,17 @@ export class FooComponent {
 - Không import `CommonModule`.
 - `provideZonelessChangeDetection()` đã có trong app.config.ts — không thêm zone.js.
 - **KHÔNG dùng** `alert()`, `confirm()`, `prompt()` của trình duyệt.
-  - Dùng `ToastService` (`success`, `error`, `info`, `warning`) cho thông báo.
   - Dùng `ConfirmService.confirm()` (trả về `Promise<boolean>`) cho các hộp thoại xác nhận.
+
+### UI/UX Standards (Angular Material 3)
+- **TẤT CẢ** các thành phần UI (input, button, select, checkbox, radio...) PHẢI dùng **Angular Material Design 3**.
+- **Theme**: Sử dụng Material 3 với **High Density** (`density: -5  // valid: 0 → -5; form-field 36px tại -5`).
+- **Quy định Component**:
+  - Form Fields: Dùng `mat-form-field` với `appearance="outline"`.
+  - Buttons: `mat-flat-button` cho hành động chính, `mat-stroked-button` cho hành động phụ, `mat-icon-button` cho thao tác nhanh.
+  - Phân trang & Bảng: Dùng `mat-table` và `mat-paginator`.
+- **KHÔNG** tự viết CSS cho các input/button cơ bản trừ khi cần tinh chỉnh layout đặc thù.
+- Luôn ưu tiên dùng các biến màu của Material theme (Primary, Secondary, Tertiary, Warn).
 
 ## Prisma / Database
 - UUID primary key: `@id @default(uuid())`.

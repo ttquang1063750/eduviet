@@ -57,7 +57,7 @@ export class ClassesRepository {
           include: {
             user: {
               select: {
-                id: true, fullName: true, email: true, avatarUrl: true, role: true,
+                id: true, fullName: true, email: true, avatarUrl: true, roles: true,
               },
             },
           },

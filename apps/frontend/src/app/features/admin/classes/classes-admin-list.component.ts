@@ -11,10 +11,15 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ClassesService, ClassItem } from '../../../core/services/classes.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+
 @Component({
   selector: 'app-classes-admin-list',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule],
+  imports: [RouterLink, ReactiveFormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatIconModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './classes-admin-list.component.html',
   styleUrl: './classes-admin-list.component.scss',

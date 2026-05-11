@@ -1,18 +1,19 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="question-form">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="question-form material-form">
   <div class="form-header">
     <h3>{{ question ? 'Chỉnh sửa câu hỏi' : 'Tạo câu hỏi mới' }}</h3>
   </div>
 
   <!-- Type selector (chỉ hiện khi tạo mới) -->
   @if (!question) {
-    <div class="form-group">
-      <label>Loại câu hỏi <span class="required">*</span></label>
-      <div class="type-selector">
+    <div class="type-selector-container">
+      <label class="field-label">Loại câu hỏi <span class="required">*</span></label>
+      <div class="type-grid">
         @for (t of questionTypes; track t.value) {
           <button
             type="button"
-            class="type-btn"
-            [class.active]="selectedType() === t.value"
+            mat-stroked-button
+            [color]="selectedType() === t.value ? 'primary' : ''"
+            [class.active-type]="selectedType() === t.value"
             (click)="onTypeChange(t.value)"
           >
             {{ t.label }}
@@ -27,173 +28,157 @@
   }
 
   <!-- Content -->
-  <div class="form-group">
-    <label>Nội dung câu hỏi <span class="required">*</span></label>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Nội dung câu hỏi</mat-label>
     <textarea
+      matInput
       formControlName="content"
-      class="form-control textarea"
-      rows="4"
-      placeholder="Nhập nội dung câu hỏi. Dùng ___ cho chỗ trống (FILL_IN_BLANK)."
+      rows="3"
+      placeholder="Nhập nội dung câu hỏi. Dùng ___ cho chỗ trống."
     ></textarea>
-  </div>
+  </mat-form-field>
 
   <!-- Options (SINGLE_CHOICE / MULTIPLE_CHOICE) -->
   @if (needsOptions()) {
-    <div class="form-group">
-      <label>Các lựa chọn</label>
+    <div class="options-section">
+      <label class="field-label">Các lựa chọn & Đáp án đúng</label>
       <div class="options-list">
         @for (opt of options(); track opt.id; let i = $index) {
           <div class="option-row">
             <span class="option-id">{{ opt.id }}</span>
-            <input
-              type="text"
-              class="form-control"
-              [value]="opt.text"
-              [placeholder]="'Lựa chọn ' + opt.id"
-              (input)="setOptionText(i, getInputValue($event))"
-            />
-            @if (selectedType() === 'SINGLE_CHOICE') {
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
               <input
-                type="radio"
-                name="singleAnswer"
-                [value]="opt.id"
+                matInput
+                [value]="opt.text"
+                [placeholder]="'Lựa chọn ' + opt.id"
+                (input)="setOptionText(i, getInputValue($event))"
+              />
+            </mat-form-field>
+            
+            @if (selectedType() === 'SINGLE_CHOICE') {
+              <mat-radio-button
                 [checked]="correctAnswerSingle() === opt.id"
                 (change)="correctAnswerSingle.set(opt.id)"
-                title="Đáp án đúng"
-              />
+                color="primary"
+              ></mat-radio-button>
             } @else {
-              <input
-                type="checkbox"
+              <mat-checkbox
                 [checked]="isMultipleSelected(opt.id)"
                 (change)="toggleMultipleAnswer(opt.id)"
-                title="Đáp án đúng"
-              />
+                color="primary"
+              ></mat-checkbox>
             }
+
             @if (options().length > 2) {
-              <button type="button" class="btn-icon-remove" (click)="removeOption(i)">×</button>
+              <button mat-icon-button type="button" color="warn" (click)="removeOption(i)">
+                <mat-icon>close</mat-icon>
+              </button>
             }
           </div>
         }
       </div>
-      @if (options().length < 8) {
-        <button type="button" class="btn-add-option" (click)="addOption()">+ Thêm lựa chọn</button>
-      }
-      <p class="hint-text">
-        @if (selectedType() === 'SINGLE_CHOICE') {
-          Chọn radio button bên phải để đánh dấu đáp án đúng.
-        } @else {
-          Chọn checkbox để đánh dấu các đáp án đúng (có thể nhiều hơn 1).
+      <div class="options-actions">
+        @if (options().length < 8) {
+          <button type="button" mat-button color="primary" (click)="addOption()">+ Thêm lựa chọn</button>
         }
-      </p>
+        <span class="hint-text">
+          {{ selectedType() === 'SINGLE_CHOICE' ? 'Chọn nút tròn để đánh dấu đáp án.' : 'Chọn checkbox để đánh dấu các đáp án đúng.' }}
+        </span>
+      </div>
     </div>
   }
 
   <!-- Fill in blank answers -->
   @if (selectedType() === 'FILL_IN_BLANK') {
-    <div class="form-group">
-      <label>Đáp án cho từng chỗ trống</label>
-      <div class="blanks-list">
+    <div class="blanks-section">
+      <label class="field-label">Đáp án cho từng chỗ trống</label>
+      <div class="blanks-grid">
         @for (blank of correctAnswerFillBlanks(); track $index; let i = $index) {
           <div class="blank-row">
-            <span class="blank-label">Ô {{ i + 1 }}</span>
-            <input
-              type="text"
-              class="form-control"
-              [value]="blank"
-              placeholder="Đáp án..."
-              (input)="setBlankAnswer(i, getInputValue($event))"
-            />
-            @if (correctAnswerFillBlanks().length > 1) {
-              <button type="button" class="btn-icon-remove" (click)="removeBlank(i)">×</button>
-            }
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Ô {{ i + 1 }}</mat-label>
+              <input
+                matInput
+                [value]="blank"
+                placeholder="Đáp án..."
+                (input)="setBlankAnswer(i, getInputValue($event))"
+              />
+              @if (correctAnswerFillBlanks().length > 1) {
+                <button mat-icon-button matSuffix type="button" color="warn" (click)="removeBlank(i)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              }
+            </mat-form-field>
           </div>
         }
       </div>
-      <button type="button" class="btn-add-option" (click)="addBlank()">+ Thêm ô trống</button>
+      <button type="button" mat-button color="primary" (click)="addBlank()">+ Thêm ô trống</button>
     </div>
   }
 
   <!-- Short answer / Essay / Drawing correct answer -->
   @if (selectedType() === 'SHORT_ANSWER' || selectedType() === 'ESSAY' || selectedType() === 'DRAWING') {
-    <div class="form-group">
-      <label>
-        @if (selectedType() === 'DRAWING') {
-          Hướng dẫn chấm điểm
-        } @else {
-          Đáp án mẫu / Gợi ý chấm
-        }
-      </label>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>
+        {{ selectedType() === 'DRAWING' ? 'Hướng dẫn chấm điểm' : 'Đáp án mẫu / Gợi ý chấm' }}
+      </mat-label>
       <textarea
-        class="form-control textarea"
-        rows="3"
+        matInput
+        rows="2"
         [value]="correctAnswerText()"
         (input)="correctAnswerText.set(getInputValue($event))"
         placeholder="Mô tả đáp án hoặc tiêu chí chấm điểm..."
       ></textarea>
-    </div>
+    </mat-form-field>
   }
 
   <!-- Points + Difficulty row -->
   <div class="form-row">
-    <div class="form-group">
-      <label>Điểm</label>
-      <input
-        type="number"
-        formControlName="points"
-        class="form-control"
-        min="1"
-        max="100"
-      />
-    </div>
-    <div class="form-group">
-      <label>Độ khó</label>
-      <select formControlName="difficulty" class="form-control">
+    <mat-form-field appearance="outline">
+      <mat-label>Điểm</mat-label>
+      <input matInput type="number" formControlName="points" min="1" max="100" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Độ khó</mat-label>
+      <mat-select formControlName="difficulty">
         @for (d of difficultyOptions; track d.value) {
-          <option [value]="d.value">{{ d.label }}</option>
+          <mat-option [value]="d.value">{{ d.label }}</mat-option>
         }
-      </select>
-    </div>
+      </mat-select>
+    </mat-form-field>
   </div>
 
   <!-- Explanation -->
-  <div class="form-group">
-    <label>Giải thích đáp án <span class="optional">(tuỳ chọn)</span></label>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Giải thích đáp án (tùy chọn)</mat-label>
     <textarea
+      matInput
       formControlName="explanation"
-      class="form-control textarea"
-      rows="3"
+      rows="2"
       placeholder="Giải thích tại sao đây là đáp án đúng..."
     ></textarea>
-  </div>
+  </mat-form-field>
 
-  <!-- Hints -->
-  <div class="form-group">
-    <label>Gợi ý <span class="optional">(phân cách bằng dấu phẩy)</span></label>
-    <input
-      type="text"
-      formControlName="hints"
-      class="form-control"
-      placeholder="VD: Xem lại chương 3, Nhớ công thức..."
-    />
-  </div>
+  <div class="form-row">
+    <mat-form-field appearance="outline">
+      <mat-label>Gợi ý (phân cách bằng dấu phẩy)</mat-label>
+      <input matInput formControlName="hints" placeholder="VD: Xem lại chương 3..." />
+    </mat-form-field>
 
-  <!-- Tags -->
-  <div class="form-group">
-    <label>Tags <span class="optional">(phân cách bằng dấu phẩy)</span></label>
-    <input
-      type="text"
-      formControlName="tags"
-      class="form-control"
-      placeholder="VD: đại số, phương trình, lớp 10..."
-    />
+    <mat-form-field appearance="outline">
+      <mat-label>Tags (phân cách bằng dấu phẩy)</mat-label>
+      <input matInput formControlName="tags" placeholder="VD: đại số, phương trình..." />
+    </mat-form-field>
   </div>
 
   <!-- Actions -->
   <div class="form-actions">
-    <button type="button" class="btn btn-secondary" (click)="onCancel()">Huỷ</button>
+    <button type="button" mat-button (click)="onCancel()">Huỷ</button>
     <button
       type="submit"
-      class="btn btn-primary"
+      mat-flat-button
+      color="primary"
       [disabled]="form.invalid || saving() || isSaving"
     >
       @if (saving() || isSaving) {

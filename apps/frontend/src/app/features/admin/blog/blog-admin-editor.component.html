@@ -3,7 +3,9 @@
   <!-- Toolbar -->
   <div class="editor-toolbar">
     <div class="editor-toolbar__left">
-      <a routerLink="/admin/blog" class="btn btn-ghost">← Danh sách</a>
+      <a mat-icon-button routerLink="/admin/blog" title="Quay lại danh sách">
+        <mat-icon>arrow_back</mat-icon>
+      </a>
       <h2 class="editor-toolbar__title">
         {{ isEditMode() ? 'Chỉnh sửa bài viết' : 'Viết bài mới' }}
       </h2>
@@ -13,29 +15,34 @@
     </div>
     <div class="editor-toolbar__actions">
       <button
+        mat-stroked-button
         type="button"
-        class="btn btn-secondary"
         [disabled]="postForm.invalid || saving()"
         (click)="onSave()"
       >
-        @if (saving()) { Đang lưu... } @else { 💾 Lưu nháp }
+        <mat-icon>save</mat-icon>
+        @if (saving()) { Đang lưu... } @else { Lưu nháp }
       </button>
       @if (postId() && canSubmitReview()) {
         <button
+          mat-flat-button
+          color="accent"
           type="button"
-          class="btn btn-review"
           [disabled]="submitting()"
           (click)="onSubmitForReview()"
         >
-          @if (submitting()) { Đang gửi... } @else { 📤 Gửi duyệt }
+          <mat-icon>send</mat-icon>
+          @if (submitting()) { Đang gửi... } @else { Gửi duyệt }
         </button>
       }
       @if (postId() && canPublish()) {
         <button
+          mat-flat-button
+          color="primary"
           type="button"
-          class="btn btn-publish"
           (click)="onPublish()"
         >
+          <mat-icon>publish</mat-icon>
           🚀 Xuất bản
         </button>
       }
@@ -44,73 +51,81 @@
 
   <!-- Editor body -->
   <div class="editor-body" [formGroup]="postForm">
-
-    <!-- Title -->
-    <div class="title-container">
-      <input
-        type="text"
-        formControlName="title"
-        class="title-input"
-        placeholder="Tiêu đề bài viết..."
-      />
-      @if (slugPreview()) {
-        <div class="slug-preview">
-          URL: <code>/blog/{{ slugPreview() }}</code>
+    <mat-card class="editor-card">
+      <mat-card-content>
+        <!-- Title -->
+        <div class="title-container">
+          <mat-form-field appearance="fill" class="full-width title-field">
+            <mat-label>Tiêu đề bài viết</mat-label>
+            <input
+              matInput
+              type="text"
+              formControlName="title"
+              placeholder="Nhập tiêu đề bài viết..."
+            />
+          </mat-form-field>
+          @if (slugPreview()) {
+            <div class="slug-preview">
+              <mat-icon>link</mat-icon>
+              <span>URL: <code>/blog/{{ slugPreview() }}</code></span>
+            </div>
+          }
         </div>
-      }
-    </div>
 
-    <!-- Cover image URL -->
-    <div class="meta-row">
-      <div class="meta-field">
-        <label class="meta-label">Ảnh bìa (URL)</label>
-        <input
-          type="url"
-          formControlName="coverImage"
-          class="form-control"
-          placeholder="https://example.com/image.jpg"
-        />
-      </div>
-      <div class="meta-field">
-        <label class="meta-label">Tags</label>
-        <mat-chip-grid #chipGrid aria-label="Tag selection">
-          @for (tag of selectedTags(); track tag) {
-            <mat-chip-row (removed)="removeTag(tag)">
-              {{ tag }}
-              <button matChipRemove [attr.aria-label]="'remove ' + tag">
-                <mat-icon>cancel</mat-icon>
-              </button>
-            </mat-chip-row>
-          }
-          <input
-            placeholder="Thêm tag..."
-            #tagInput
-            [formControl]="tagCtrl"
-            [matChipInputFor]="chipGrid"
-            [matAutocomplete]="auto"
-            [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-            (matChipInputTokenEnd)="addTag($event)"
-          />
-        </mat-chip-grid>
-        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectedTag($event)">
-          @for (tag of filteredTags | async; track tag) {
-            <mat-option [value]="tag">{{ tag }}</mat-option>
-          }
-        </mat-autocomplete>
-      </div>
-    </div>
+        <!-- Meta Row -->
+        <div class="meta-row">
+          <mat-form-field appearance="outline" class="meta-field">
+            <mat-label>Ảnh bìa (URL)</mat-label>
+            <input
+              matInput
+              type="url"
+              formControlName="coverImage"
+              placeholder="https://example.com/image.jpg"
+            />
+            <mat-icon matSuffix>image</mat-icon>
+          </mat-form-field>
 
-    <!-- Quill editor -->
-    <div class="content-editor">
-      <quill-editor
-        formControlName="content"
-        [modules]="quillModules"
-        (onEditorCreated)="onEditorCreated($event)"
-        placeholder="Bắt đầu viết nội dung bài học..."
-        class="quill-editor"
-      ></quill-editor>
-    </div>
+          <mat-form-field appearance="outline" class="meta-field">
+            <mat-label>Tags</mat-label>
+            <mat-chip-grid #chipGrid aria-label="Tag selection">
+              @for (tag of selectedTags(); track tag) {
+                <mat-chip-row (removed)="removeTag(tag)">
+                  {{ tag }}
+                  <button matChipRemove [attr.aria-label]="'remove ' + tag">
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </mat-chip-row>
+              }
+              <input
+                placeholder="Thêm tag..."
+                #tagInput
+                [formControl]="tagCtrl"
+                [matChipInputFor]="chipGrid"
+                [matAutocomplete]="auto"
+                [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                (matChipInputTokenEnd)="addTag($event)"
+              />
+            </mat-chip-grid>
+            <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectedTag($event)">
+              @for (tag of filteredTags | async; track tag) {
+                <mat-option [value]="tag">{{ tag }}</mat-option>
+              }
+            </mat-autocomplete>
+          </mat-form-field>
+        </div>
 
+        <!-- Quill editor -->
+        <div class="content-editor">
+          <quill-editor
+            formControlName="content"
+            [modules]="quillModules"
+            (onEditorCreated)="onEditorCreated($event)"
+            placeholder="Bắt đầu viết nội dung bài học..."
+            class="quill-editor"
+          ></quill-editor>
+        </div>
+      </mat-card-content>
+    </mat-card>
   </div>
 
 </div>

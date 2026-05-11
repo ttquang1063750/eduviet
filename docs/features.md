@@ -6,7 +6,7 @@
 - Canvas tương tác (Konva.js) cho bài tập hình học — freehand, line, rect, ellipse, eraser, undo/redo
 - LaTeX rendering cho công thức toán (KaTeX) — inline `$...$` và block `$$...$$`
 - Review trước khi publish theo content workflow
-- **[Planned]** Ngân hàng câu hỏi (`Question`) scoped theo môn học — tái sử dụng câu hỏi qua nhiều bài học
+- **[Planned]** Ngân hàng câu hỏi (`Question`) scoped theo môn học — tái sử dụng câu hỏi qua nhiều bài học. Trang quản trị riêng biệt cho phép tạo/sửa câu hỏi trên route chuyên dụng.
 - **[Planned]** Toggle "Hiển thị ngẫu nhiên" per lesson (`randomizeQuestions`)
 - **[Planned]** Admin editor `/admin/lessons/:id/exercises` — giao diện nhập liệu câu hỏi (split panel, drag-drop reorder)
 

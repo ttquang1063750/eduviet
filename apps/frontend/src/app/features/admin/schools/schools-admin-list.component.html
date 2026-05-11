@@ -5,14 +5,19 @@
         <div class="geo-panel__header">
           <h3 class="geo-panel__title">Địa lý</h3>
           @if (selectedGeo()) {
-            <button class="geo-panel__clear" (click)="clearGeoFilter()" type="button">
+            <button mat-button color="warn" (click)="clearGeoFilter()" type="button">
               Bỏ lọc
             </button>
           }
         </div>
         @if (selectedGeo()) {
           <div class="geo-panel__active">
-            <span class="geo-panel__badge">{{ selectedGeoLabel() }}</span>
+            <mat-chip-row (removed)="clearGeoFilter()">
+              {{ selectedGeoLabel() }}
+              <button matChipRemove aria-label="Bỏ lọc">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </mat-chip-row>
           </div>
         }
         <app-geo-tree
@@ -27,42 +32,54 @@
     <div class="admin-container">
       <div class="header-actions">
         <h2>Quản lý trường học</h2>
-        <a routerLink="new" class="btn btn-primary">Thêm trường mới</a>
+        <a mat-flat-button routerLink="new">
+          <mat-icon>add</mat-icon> Thêm trường mới
+        </a>
       </div>
 
       <div class="filters">
-        <input
-          type="text"
-          [formControl]="searchControl"
-          placeholder="Tìm kiếm trường..."
-          class="form-control search-input"
-        />
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field">
+          <mat-label>Tìm kiếm trường</mat-label>
+          <input
+            matInput
+            [formControl]="searchControl"
+            placeholder="Tên trường, mã trường..."
+          />
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+
         @if (selectedGeo()) {
-          <span class="filters__geo-tag">
-            {{ selectedGeoLabel() }}
-            <button (click)="clearGeoFilter()" type="button">✕</button>
-          </span>
+          <mat-chip-set>
+            <mat-chip (removed)="clearGeoFilter()">
+              {{ selectedGeoLabel() }}
+              <button matChipRemove>
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </mat-chip>
+          </mat-chip-set>
         }
       </div>
 
-      <div class="table-responsive">
-        <table class="table">
+      <div class="table-container">
+        <table class="data-table">
           <thead>
             <tr>
               <th>Mã</th>
               <th>Tên trường</th>
               <th>Địa chỉ</th>
-              <th>Hành động</th>
+              <th class="col-actions">Hành động</th>
             </tr>
           </thead>
           <tbody>
             @for (school of schools(); track school.id) {
               <tr>
-                <td>{{ school.code }}</td>
-                <td>{{ school.name }}</td>
+                <td><code class="code-badge">{{ school.code }}</code></td>
+                <td><strong>{{ school.name }}</strong></td>
                 <td>{{ school.address }}</td>
-                <td class="actions">
-                  <a [routerLink]="[school.id]" class="btn btn-sm btn-outline">Sửa</a>
+                <td class="col-actions">
+                  <button mat-icon-button [routerLink]="[school.id]" title="Chỉnh sửa">
+                    <mat-icon>edit</mat-icon>
+                  </button>
                 </td>
               </tr>
             } @empty {
@@ -77,16 +94,20 @@
       @if (total() > perPage) {
         <div class="pagination">
           <button
+            mat-stroked-button
             [disabled]="page() === 1"
             (click)="onPageChange(page() - 1)"
-            class="btn btn-sm"
-          >Trước</button>
-          <span>Trang {{ page() }} / {{ totalPages() }}</span>
+          >
+            <mat-icon>chevron_left</mat-icon> Trước
+          </button>
+          <span class="page-info">Trang {{ page() }} / {{ totalPages() }}</span>
           <button
+            mat-stroked-button
             [disabled]="page() >= totalPages()"
             (click)="onPageChange(page() + 1)"
-            class="btn btn-sm"
-          >Sau</button>
+          >
+            Sau <mat-icon>chevron_right</mat-icon>
+          </button>
         </div>
       }
     </div>

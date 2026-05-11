@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/main.ts",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && cp -r src/assets dist/",
     "start": "node dist/main.js",
+    "start:prod": "tsx src/main.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -40,6 +41,7 @@
     "pino": "^9.6.0",
     "sanitize-html": "^2.13.0",
     "socket.io": "^4.8.1",
+    "tsx": "^4.19.2",
     "zod": "^3.24.1"
   },
   "devDependencies": {
@@ -50,7 +52,6 @@
     "@types/sanitize-html": "^2.13.0",
     "@vitest/coverage-v8": "^3.0.2",
     "eslint": "^9.18.0",
-    "tsx": "^4.19.2",
     "typescript": "^5.7.3",
     "vitest": "^3.0.2"
   }

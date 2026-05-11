@@ -6,7 +6,7 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import type { Question } from '@eduviet/shared-types';
 import { QuestionsService } from '../../../core/services/questions.service';
@@ -14,12 +14,17 @@ import { SubjectsService } from '../../../core/services/subjects.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
 import { getApiErrorMessage } from '../../../core/utils/http-error';
-import { QuestionFormComponent } from '../lessons/exercise-editor/question-form/question-form.component';
+
+import { MatButtonModule, MatIconButton } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-questions-admin',
   standalone: true,
-  imports: [FormsModule, RouterLink, QuestionFormComponent],
+  imports: [FormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './questions-admin.component.html',
   styleUrl: './questions-admin.component.scss',
@@ -29,6 +34,7 @@ export class QuestionsAdminComponent implements OnInit {
   private subjectsService = inject(SubjectsService);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmService);
+  private router = inject(Router);
 
   readonly questions = signal<Question[]>([]);
   readonly subjects = signal<{ id: string; name: string }[]>([]);
@@ -43,21 +49,15 @@ export class QuestionsAdminComponent implements OnInit {
   readonly filterType = signal('');
   readonly filterDifficulty = signal('');
 
-  // Modal state
-  readonly showModal = signal(false);
-  readonly editingQuestion = signal<Question | null>(null);
-  readonly modalSubjectId = signal('');
-  readonly isSaving = signal(false);
-
   readonly totalPages = computed(() => Math.ceil(this.total() / this.perPage));
 
   readonly subjectMap = computed(() => {
-    const map: Record<string, string> = {};
+    const map: Record<string, string | undefined> = {};
     for (const s of this.subjects()) map[s.id] = s.name;
     return map;
   });
 
-  readonly questionTypeLabels: Record<string, string> = {
+  readonly questionTypeLabels: Record<string, string | undefined> = {
     SINGLE_CHOICE: 'Một đáp án',
     MULTIPLE_CHOICE: 'Nhiều đáp án',
     FILL_IN_BLANK: 'Điền chỗ trống',
@@ -66,7 +66,7 @@ export class QuestionsAdminComponent implements OnInit {
     DRAWING: 'Vẽ / Sơ đồ',
   };
 
-  readonly difficultyLabels: Record<string, string> = {
+  readonly difficultyLabels: Record<string, string | undefined> = {
     EASY: 'Dễ',
     MEDIUM: 'Trung bình',
     HARD: 'Khó',
@@ -119,30 +119,12 @@ export class QuestionsAdminComponent implements OnInit {
   }
 
   openCreate() {
-    this.editingQuestion.set(null);
-    this.modalSubjectId.set(this.filterSubject());
-    this.showModal.set(true);
+    const queryParams = this.filterSubject() ? { subjectId: this.filterSubject() } : {};
+    this.router.navigate(['/admin/questions/new'], { queryParams });
   }
 
   openEdit(q: Question) {
-    this.editingQuestion.set(q);
-    this.modalSubjectId.set(q.subjectId ?? '');
-    this.showModal.set(true);
-  }
-
-  closeModal() {
-    this.showModal.set(false);
-    this.editingQuestion.set(null);
-    this.modalSubjectId.set('');
-  }
-
-  onQuestionSaved(q: Question) {
-    this.toastService.success(
-      this.editingQuestion() ? 'Đã cập nhật câu hỏi' : 'Đã tạo câu hỏi mới',
-    );
-    this.closeModal();
-    this.loadQuestions();
-    this.isSaving.set(false);
+    this.router.navigate(['/admin/questions', q.id, 'edit']);
   }
 
   async deleteQuestion(q: Question) {

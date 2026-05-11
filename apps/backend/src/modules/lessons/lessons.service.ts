@@ -108,6 +108,13 @@ export class LessonsService {
     return { ...lesson, lessonQuestions } as unknown as typeof lesson;
   }
 
+  /** Chi tiết bài học theo ID */
+  async getById(id: string) {
+    const lesson = await this.repo.findById(id);
+    if (!lesson) throw AppError.notFound('Bài học');
+    return lesson;
+  }
+
   /** Danh sách câu hỏi của bài học (admin only) */
   async getLessonQuestions(lessonId: string, userRoles: UserRole[]) {
     const isAllowed = userRoles.some((r) => ADMIN_ROLES.includes(r));
@@ -303,6 +310,63 @@ export class LessonsService {
       action: 'LESSON_PUBLISHED',
       resourceType: 'LESSON',
       resourceId: id,
+    });
+
+    return updated;
+  }
+
+  /** Cập nhật thông tin bài học */
+  async update(id: string, data: any, actorId: string, userRoles: UserRole[]) {
+    const isAllowed = userRoles.some((r) => ADMIN_ROLES.includes(r));
+    if (!isAllowed) throw AppError.forbidden('Bạn không có quyền sửa bài học');
+
+    const lesson = await this.repo.findById(id);
+    if (!lesson) throw AppError.notFound('Bài học');
+
+    // Nếu đổi title, build lại slug
+    const updateData = { ...data };
+    if (data.title && data.title !== lesson.title) {
+      updateData.slug = buildSlug(data.title);
+    }
+
+    const updated = await this.repo.update(id, updateData);
+
+    await writeAuditLog(this.prisma, {
+      userId: actorId,
+      action: 'LESSON_UPDATED',
+      resourceType: 'LESSON',
+      resourceId: id,
+      details: data,
+    });
+
+    return updated;
+  }
+
+  /** Gán reviewer cho bài học */
+  async assignReviewer(id: string, reviewerId: string, actorId: string, userRoles: UserRole[]) {
+    const isAllowed = userRoles.some((r) => ['SUPER_ADMIN', 'SCHOOL_ADMIN', 'CONTENT_APPROVER'].includes(r));
+    if (!isAllowed) throw AppError.forbidden('Bạn không có quyền gán reviewer');
+
+    const lesson = await this.repo.findById(id);
+    if (!lesson) throw AppError.notFound('Bài học');
+
+    // Verify reviewer exists and has review role
+    const reviewer = await this.prisma.user.findUnique({ where: { id: reviewerId, deletedAt: null } });
+    if (!reviewer) throw AppError.notFound('Người duyệt');
+    
+    const reviewerRoles = (reviewer.roles as string[]) || [];
+    if (!reviewerRoles.includes('CONTENT_REVIEWER') && !reviewerRoles.includes('SUPER_ADMIN')) {
+      throw AppError.validation('Người dùng này không có quyền review nội dung');
+    }
+
+    const updated = await this.repo.updateStatus(id, lesson.status, { reviewerId });
+
+    await writeAuditLog(this.prisma, {
+      userId: actorId,
+      action: 'LESSON_REVIEWER_ASSIGNED',
+      resourceType: 'LESSON',
+      resourceId: id,
+      details: { reviewerId },
     });
 
     return updated;

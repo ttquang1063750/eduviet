@@ -18,7 +18,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-11 — session 12)
+## Trạng thái hiện tại (cập nhật 2026-05-11 — session 15)
 
 ### ✅ Đã hoàn thành
 
@@ -48,12 +48,12 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 | `classes` | ✅ | ✅ | ✅ | ✅ |
 | `blog` | ✅ | ✅ | ✅ | ✅ |
 | `admin/users` | ✅ CRUD complete | ✅ CRUD complete | ✅ | ✅ |
-| `admin/schools` | ✅ | ✅ | — | ✅ |
-| `admin/classes` | ✅ | ✅ | — | ✅ |
+| `admin/schools` | ✅ | ✅ + danh sách lớp | — | ✅ |
+| `admin/classes` | ✅ | ✅ + quản lý học sinh | — | ✅ |
 | `admin/content` | ✅ | — | — | ✅ |
 | `admin/subjects` | ✅ grid + modal CRUD + AI suggest | — | ✅ | ✅ |
 | `admin/blog` | ✅ list + filter | ✅ Quill WYSIWYG + Draft/Review | ✅ | ✅ |
-| `admin/questions` | ✅ list + filter + CRUD modal | — | ✅ | ✅ |
+| `admin/questions` | ✅ list + filter | ✅ detail editor (page) | ✅ | ✅ |
 | `reports` | ✅ + Xuất Excel/PDF | — | ✅ | ✅ |
 | `chat` | ✅ widget (FAB) | ✅ room-list + message-thread | ✅ | — |
 
@@ -83,6 +83,33 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ `GET /api/reports/export/excel` — xuất Excel (exceljs), 2 sheets, styled
 - ✅ `GET /api/reports/export/pdf` — xuất PDF (pdfkit)
 - ✅ FE: nút "Xuất Excel" + "Xuất PDF" với loading state, ToastService
+
+#### Docker Production Build ✅ COMPLETED (2026-05-11 session 13)
+- ✅ `docker/backend/Dockerfile` — multi-stage, tsx runtime (giải quyết monorepo TS packages)
+- ✅ `docker/frontend/Dockerfile` — Angular build + Nginx SPA serve
+- ✅ `docker/nginx/nginx.spa.conf` — SPA fallback + static asset caching
+- ✅ `.dockerignore` — loại trừ node_modules, dist, .env, docs
+- ✅ `apps/backend/package.json` — `tsx` → dependencies; `build` copy assets; `start:prod`
+- 🔧 Lý do tsx làm runtime: `@eduviet/redis` + `@eduviet/email-templates` là TypeScript source (`"main": "./src/index.ts"`), không thể load bằng `node` thuần mà không compile từng package
+
+#### School → Class → Student Flow + UX Fixes ✅ COMPLETED (2026-05-11 session 14)
+- ✅ `admin/schools/schools-admin-detail.*` — thêm danh sách lớp học, nút "Tạo lớp mới" (navigate đến `/admin/classes/new?schoolId=xxx`)
+- ✅ `admin/classes/classes-admin-detail.*` — quản lý học sinh: xem danh sách, tìm kiếm + thêm mới, xóa khỏi lớp
+- ✅ Student search: load 10 học sinh mặc định khi mở panel, infinite scroll tải thêm khi gần đáy
+- ✅ `backUrl()` dynamic — về `/admin/schools/:id` nếu vào từ trang trường, về `/admin/classes` nếu vào thẳng
+- ✅ `main-layout.component.html` — xóa link `/classes` (student-facing); giữ `/admin/classes` là "Lớp học" (🏫) dưới Quản trị
+- 🐛 Fix `mat-hint` trong `@else` — Angular Material không content-project qua control flow; chuyển ra ngoài `@if/@else`
+- 🐛 Fix `mat-select` dùng `[ngModel]`/`(ngModelChange)` — yêu cầu FormsModule; đổi sang `[value]` + `(selectionChange)`
+- 🐛 Fix `exercise-editor.goBack()` — điều hướng nhầm về `/admin/content`; sửa thành `/admin/lessons/:lessonId/edit`
+
+#### Theme + Chat Polish ✅ COMPLETED (2026-05-11 session 15)
+- ✅ `angular.json` — xóa `indigo-pink.css` prebuilt theme (đây là nguyên nhân density không có tác dụng)
+- ✅ `material-theme.scss` — `mat.theme()` M3 API đúng, density hoạt động sau khi xóa prebuilt theme
+- 🐛 Fix `[(ngModel)]="signal"` trong message-thread → `[ngModel]="sig()" (ngModelChange)="sig.set($event)"`
+- ✅ Chat real-time fix: `socket.join('user:<userId>')` on connect + `room_invited` event → recipient tự join room mới
+- ✅ Tạo cuộc hội thoại mới: nút ✏️ + search user + `getOrCreateOneOnOne()`
+- ✅ Xoá chat room: `DELETE /rooms/:id` BE cascade + FE nút 🗑 hover + socket `room_deleted` broadcast
+- ✅ Search error handling: `catchError` trong switchMap → không pending vô tận khi 401/403
 
 #### Các module lớn trước đó
 - ✅ Live Chat (Socket.io v4, Redis adapter, RBAC per room)
@@ -130,7 +157,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ `chat.types.ts` — `role` → `roles` (multi-role fix)
 
 ### 🚧 Còn lại (theo độ ưu tiên)
-1. **Export reports PDF cải thiện font**: PDFKit tiếng Việt (P3)
+- **Không còn backlog kỹ thuật tồn đọng.** Tất cả P1–P3 đã hoàn thành.
 
 #### Blog UX & Cleanup session 8 ✅ COMPLETED (2026-05-10)
 - ✅ **Blog UX**: Tag autocomplete (Material Chips), Slug auto-gen, Slug preview.

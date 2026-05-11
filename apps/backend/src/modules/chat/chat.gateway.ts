@@ -21,15 +21,13 @@ export class ChatGateway {
       const userId = socket.user.id;
       console.log(`[ChatGateway] User connected: ${userId} (Socket: ${socket.id})`);
 
+      // ── Tham gia private room của chính user (để server push được event riêng) ──
+      socket.join(`user:${userId}`);
+
       // ── Tham gia các phòng chat ──────────────────────────────────────────
       socket.on('join_rooms', async (roomIds: string[]) => {
         if (!Array.isArray(roomIds)) return;
-        
-        // Join vào từng room socket
-        roomIds.forEach((roomId) => {
-          socket.join(roomId);
-        });
-        
+        roomIds.forEach((roomId) => socket.join(roomId));
         console.log(`[ChatGateway] User ${userId} joined rooms: ${roomIds.join(', ')}`);
       });
 

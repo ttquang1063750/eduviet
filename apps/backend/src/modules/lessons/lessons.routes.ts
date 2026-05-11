@@ -79,6 +79,13 @@ export const lessonsRoutes: FastifyPluginAsync = async (app) => {
     return reply.send({ data: lesson });
   });
 
+  // GET /lessons/id/:id
+  app.get('/id/:id', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const lesson = await service.getById(id);
+    return reply.send({ data: lesson });
+  });
+
   // POST /lessons — tạo bài học mới
   app.post(
     '/',
@@ -160,6 +167,53 @@ export const lessonsRoutes: FastifyPluginAsync = async (app) => {
     async (request, reply) => {
       const { id } = request.params as { id: string };
       const updated = await service.publish(id, request.user.id);
+      return reply.send({ data: updated });
+    }
+  );
+
+  // PATCH /lessons/:id — cập nhật bài học
+  app.patch(
+    '/:id',
+    {
+      preHandler: [
+        authenticate,
+        authorize(...WRITER_ROLES),
+      ],
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      // Dùng partial của create schema
+      const body = createLessonSchema.partial().safeParse(request.body);
+      if (!body.success) {
+        return reply.status(400).send({
+          error: { code: 'VALIDATION_ERROR', message: 'Dữ liệu không hợp lệ' },
+        });
+      }
+
+      const updated = await service.update(id, body.data, request.user.id, request.user.roles);
+      return reply.send({ data: updated });
+    }
+  );
+
+  // PATCH /lessons/:id/assign — gán reviewer
+  app.patch(
+    '/:id/assign',
+    {
+      preHandler: [
+        authenticate,
+        authorize('SUPER_ADMIN', 'SCHOOL_ADMIN', 'CONTENT_APPROVER'),
+      ],
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const body = z.object({ reviewerId: z.string().uuid() }).safeParse(request.body);
+      if (!body.success) {
+        return reply.status(400).send({
+          error: { code: 'VALIDATION_ERROR', message: 'reviewerId không hợp lệ' },
+        });
+      }
+
+      const updated = await service.assignReviewer(id, body.data.reviewerId, request.user.id, request.user.roles);
       return reply.send({ data: updated });
     }
   );

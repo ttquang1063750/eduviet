@@ -1,147 +1,224 @@
 <div class="admin-container">
   <div class="page-header">
-    <h2>{{ isEditMode() ? 'Chỉnh sửa lớp học' : 'Tạo lớp học mới' }}</h2>
-    <a routerLink="/admin/classes" class="btn btn-ghost">← Quay lại</a>
+    <div class="header-left">
+      <a mat-icon-button [routerLink]="backUrl()" title="Quay lại">
+        <mat-icon>arrow_back</mat-icon>
+      </a>
+      <h1>{{ isEditMode() ? 'Chỉnh sửa lớp học' : 'Tạo lớp học mới' }}</h1>
+    </div>
   </div>
 
-  <form [formGroup]="classForm" (ngSubmit)="onSubmit()" class="class-form">
+  <mat-card class="form-card">
+    <mat-card-content>
+      <form [formGroup]="classForm" (ngSubmit)="onSubmit()" class="material-form">
+        <div class="form-grid">
+          <!-- Tên lớp -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Tên lớp</mat-label>
+            <input matInput formControlName="name" placeholder="VD: 10A1, 11B2..." required />
+            <mat-icon matSuffix>class</mat-icon>
+          </mat-form-field>
 
-    <!-- Tên lớp -->
-    <div class="form-group">
-      <label for="name" class="form-label">Tên lớp <span class="required">*</span></label>
-      <input
-        id="name"
-        type="text"
-        formControlName="name"
-        class="form-control"
-        placeholder="VD: 10A1, 11B2..."
-      />
-    </div>
+          <!-- Khối lớp -->
+          <mat-form-field appearance="outline">
+            <mat-label>Khối</mat-label>
+            <mat-select formControlName="grade" required>
+              @for (g of [1,2,3,4,5,6,7,8,9,10,11,12]; track g) {
+                <mat-option [value]="g">Khối {{ g }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
 
-    <!-- Khối lớp + Năm học (2 cột) -->
-    <div class="form-row">
-      <div class="form-group">
-        <label for="grade" class="form-label">Khối <span class="required">*</span></label>
-        <select id="grade" formControlName="grade" class="form-control">
-          @for (g of [1,2,3,4,5,6,7,8,9,10,11,12]; track g) {
-            <option [ngValue]="g">Khối {{ g }}</option>
-          }
-        </select>
-      </div>
+          <!-- Năm học -->
+          <mat-form-field appearance="outline">
+            <mat-label>Năm học</mat-label>
+            <input matInput formControlName="academicYear" placeholder="VD: 2025-2026" required />
+            <mat-icon matSuffix>calendar_today</mat-icon>
+          </mat-form-field>
 
-      <div class="form-group">
-        <label for="academicYear" class="form-label">Năm học <span class="required">*</span></label>
-        <input
-          id="academicYear"
-          type="text"
-          formControlName="academicYear"
-          class="form-control"
-          placeholder="VD: 2025-2026"
-        />
-      </div>
-    </div>
-
-    <!-- Trường học (picker) -->
-    <div class="form-group">
-      <label class="form-label">Trường <span class="required">*</span></label>
-      <div class="picker-wrapper">
-        @if (selectedSchool()) {
-          <div class="picker-selected">
-            <span class="picker-selected__name">{{ selectedSchool()!.name }}</span>
-            <span class="picker-selected__code">{{ selectedSchool()!.code }}</span>
-            <button type="button" class="picker-selected__clear" (click)="clearSchool()">✕</button>
-          </div>
-        } @else {
-          <div class="picker-input-wrap">
+          <!-- Trường học (Autocomplete) -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Trường học</mat-label>
             <input
-              type="text"
-              class="form-control"
+              matInput
+              [matAutocomplete]="schoolAuto"
               placeholder="Tìm kiếm trường..."
-              [value]="schoolSearch()"
+              [value]="selectedSchool()?.name || schoolSearch()"
               (input)="onSchoolSearchInput($event)"
               (focus)="openSchoolDropdown()"
             />
-            @if (loadingSchools()) {
-              <span class="picker-spinner"></span>
+            @if (selectedSchool()) {
+              <button mat-icon-button matSuffix (click)="clearSchool()" type="button">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+            <mat-icon matSuffix>school</mat-icon>
+            <mat-autocomplete #schoolAuto="matAutocomplete">
+              @for (school of schools(); track school.id) {
+                <mat-option [value]="school.name" (onSelectionChange)="selectSchool(school)">
+                  {{ school.name }} ({{ school.code }})
+                </mat-option>
+              }
+            </mat-autocomplete>
+          </mat-form-field>
+
+          <!-- Giáo viên chủ nhiệm (Autocomplete, phụ thuộc trường) -->
+          <mat-form-field appearance="outline" class="full-width" [class.disabled]="!selectedSchool()">
+            <mat-label>Giáo viên chủ nhiệm</mat-label>
+            <input
+              matInput
+              [matAutocomplete]="teacherAuto"
+              placeholder="Tìm giáo viên..."
+              [value]="selectedTeacher()?.fullName || teacherSearch()"
+              (input)="onTeacherSearchInput($event)"
+              (focus)="openTeacherDropdown()"
+              [disabled]="!selectedSchool()"
+            />
+            @if (selectedTeacher()) {
+              <button mat-icon-button matSuffix (click)="clearTeacher()" type="button">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+            <mat-icon matSuffix>person</mat-icon>
+            <mat-hint>@if (!selectedSchool()) { Chọn trường trước để xem danh sách giáo viên }</mat-hint>
+            <mat-autocomplete #teacherAuto="matAutocomplete">
+              @for (teacher of teachers(); track teacher.id) {
+                <mat-option [value]="teacher.fullName" (onSelectionChange)="selectTeacher(teacher)">
+                  {{ teacher.fullName }} ({{ teacher.email }})
+                </mat-option>
+              }
+            </mat-autocomplete>
+          </mat-form-field>
+        </div>
+
+        <div class="form-actions">
+          <button mat-button type="button" [routerLink]="backUrl()">Hủy</button>
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="classForm.invalid || saving()"
+          >
+            <mat-icon>save</mat-icon>
+            {{ saving() ? 'Đang lưu...' : (isEditMode() ? 'Lưu thay đổi' : 'Tạo lớp') }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ── Danh sách học sinh ──────────────────────────────── -->
+  @if (isEditMode()) {
+    <mat-card class="students-card">
+      <mat-card-content>
+        <div class="students-header">
+          <h3>
+            <mat-icon>people</mat-icon>
+            Danh sách học sinh
+            <span class="count-badge">{{ enrollments().length }}</span>
+          </h3>
+          <button mat-stroked-button (click)="toggleAddStudent()">
+            <mat-icon>{{ showAddStudent() ? 'close' : 'person_add' }}</mat-icon>
+            {{ showAddStudent() ? 'Đóng' : 'Thêm học sinh' }}
+          </button>
+        </div>
+
+        <!-- Panel tìm kiếm học sinh -->
+        @if (showAddStudent()) {
+          <div class="add-student-panel">
+            <mat-form-field appearance="outline" class="search-field">
+              <mat-label>Tìm học sinh theo tên hoặc email</mat-label>
+              <input
+                matInput
+                [value]="studentSearchTerm()"
+                (input)="onStudentSearchInput($event)"
+                placeholder="VD: Nguyễn Văn A..."
+                autocomplete="off"
+              />
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+
+            @if (searchingStudents()) {
+              <div class="search-loading">
+                <mat-spinner diameter="24"></mat-spinner>
+                <span>Đang tải...</span>
+              </div>
+            } @else {
+              <div
+                class="search-results"
+                (scroll)="onStudentListScroll($event)"
+              >
+                @if (studentResults().length === 0) {
+                  <p class="no-results">
+                    {{ studentSearchTerm() ? 'Không tìm thấy học sinh phù hợp (hoặc đã có trong lớp).' : 'Không có học sinh nào.' }}
+                  </p>
+                } @else {
+                  @for (student of studentResults(); track student.id) {
+                    <div class="result-row">
+                      <div class="student-info">
+                        <span class="student-name">{{ student.fullName }}</span>
+                        <span class="student-email">{{ student.email }}</span>
+                      </div>
+                      <button
+                        mat-flat-button
+                        color="primary"
+                        [disabled]="enrollingId() === student.id"
+                        (click)="enroll(student)"
+                      >
+                        @if (enrollingId() === student.id) {
+                          <mat-spinner diameter="16"></mat-spinner>
+                        } @else {
+                          <mat-icon>add</mat-icon>
+                        }
+                        Thêm vào lớp
+                      </button>
+                    </div>
+                  }
+                  @if (loadingMoreStudents()) {
+                    <div class="load-more-spinner">
+                      <mat-spinner diameter="20"></mat-spinner>
+                      <span>Đang tải thêm...</span>
+                    </div>
+                  }
+                  @if (!studentHasMore() && studentResults().length > 0) {
+                    <p class="end-of-list">Đã hiển thị tất cả kết quả</p>
+                  }
+                }
+              </div>
             }
           </div>
-
-          @if (showSchoolDropdown() && schools().length > 0) {
-            <ul class="picker-dropdown">
-              @for (school of schools(); track school.id) {
-                <li class="picker-dropdown__item" (click)="selectSchool(school)">
-                  <span class="picker-dropdown__name">{{ school.name }}</span>
-                  <span class="picker-dropdown__meta">{{ school.code }}</span>
-                </li>
-              }
-            </ul>
-          }
         }
-      </div>
-    </div>
 
-    <!-- Giáo viên chủ nhiệm (picker, phụ thuộc trường) -->
-    <div class="form-group">
-      <label class="form-label">Giáo viên chủ nhiệm</label>
-      @if (!selectedSchool()) {
-        <p class="form-hint">Chọn trường trước để xem danh sách giáo viên.</p>
-      } @else {
-        <div class="picker-wrapper">
-          @if (selectedTeacher()) {
-            <div class="picker-selected">
-              <span class="picker-selected__name">{{ selectedTeacher()!.fullName }}</span>
-              <span class="picker-selected__code">{{ selectedTeacher()!.email }}</span>
-              <button type="button" class="picker-selected__clear" (click)="clearTeacher()">✕</button>
-            </div>
-          } @else {
-            <div class="picker-input-wrap">
-              <input
-                type="text"
-                class="form-control"
-                placeholder="Tìm giáo viên chủ nhiệm..."
-                [value]="teacherSearch()"
-                (input)="onTeacherSearchInput($event)"
-                (focus)="openTeacherDropdown()"
-              />
-              @if (loadingTeachers()) {
-                <span class="picker-spinner"></span>
-              }
-            </div>
-
-            @if (showTeacherDropdown()) {
-              @if (teachers().length === 0 && !loadingTeachers()) {
-                <div class="picker-empty">Không tìm thấy giáo viên chủ nhiệm nào tại trường này.</div>
-              } @else {
-                <ul class="picker-dropdown">
-                  @for (teacher of teachers(); track teacher.id) {
-                    <li class="picker-dropdown__item" (click)="selectTeacher(teacher)">
-                      <span class="picker-dropdown__name">{{ teacher.fullName }}</span>
-                      <span class="picker-dropdown__meta">{{ teacher.email }}</span>
-                    </li>
-                  }
-                </ul>
-              }
-            }
-          }
-        </div>
-      }
-    </div>
-
-    <!-- Actions -->
-    <div class="form-actions">
-      <button
-        type="submit"
-        [disabled]="classForm.invalid || saving()"
-        class="btn btn-primary"
-      >
-        @if (saving()) {
-          Đang lưu...
+        <!-- Danh sách học sinh hiện tại -->
+        @if (enrollments().length === 0) {
+          <div class="empty-students">
+            <mat-icon>person_off</mat-icon>
+            <p>Lớp chưa có học sinh nào.</p>
+          </div>
         } @else {
-          {{ isEditMode() ? 'Lưu thay đổi' : 'Tạo lớp' }}
+          <div class="student-list">
+            @for (enrollment of enrollments(); track enrollment.user.id) {
+              <div class="student-row">
+                <div class="student-avatar">
+                  {{ enrollment.user.fullName.charAt(0).toUpperCase() }}
+                </div>
+                <div class="student-info">
+                  <span class="student-name">{{ enrollment.user.fullName }}</span>
+                  <span class="student-email">{{ enrollment.user.email }}</span>
+                </div>
+                <button
+                  mat-icon-button
+                  color="warn"
+                  matTooltip="Xóa khỏi lớp"
+                  (click)="unenroll(enrollment)"
+                >
+                  <mat-icon>person_remove</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
         }
-      </button>
-      <a routerLink="/admin/classes" class="btn btn-secondary">Hủy</a>
-    </div>
-
-  </form>
+      </mat-card-content>
+    </mat-card>
+  }
 </div>

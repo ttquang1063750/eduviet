@@ -181,6 +181,7 @@ export class LessonsRepository {
   async findById(id: string) {
     return this.prisma.lesson.findUnique({
       where: { id, deletedAt: null },
+      include: { subject: true },
     });
   }
 
@@ -206,6 +207,14 @@ export class LessonsRepository {
     return this.prisma.lesson.update({
       where: { id },
       data: { status: status as never, ...extra },
+    });
+  }
+
+  async update(id: string, data: Partial<Prisma.LessonUpdateInput>) {
+    return this.prisma.lesson.update({
+      where: { id },
+      data,
+      include: { subject: true },
     });
   }
 }

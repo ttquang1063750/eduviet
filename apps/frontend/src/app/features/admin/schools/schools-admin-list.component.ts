@@ -14,10 +14,25 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { GeoTreeComponent, GeoNodeSelected } from '../../../shared/components/geo-tree/geo-tree.component';
 import { AuthService } from '../../../core/services/auth.service';
 
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
+
 @Component({
   selector: 'app-schools-admin-list',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule, GeoTreeComponent],
+  imports: [
+    RouterLink,
+    ReactiveFormsModule,
+    GeoTreeComponent,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    MatChipsModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './schools-admin-list.component.html',
   styleUrl: './schools-admin-list.component.scss',

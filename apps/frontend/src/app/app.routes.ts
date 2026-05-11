@@ -170,24 +170,39 @@ export const routes: Routes = [
           {
             path: 'questions',
             data: { breadcrumb: 'Ngân hàng câu hỏi' },
-            loadComponent: () =>
-              import('./features/admin/questions/questions-admin.component').then(
-                (m) => m.QuestionsAdminComponent
-              ),
+            children: [
+              {
+                path: '',
+                loadComponent: () =>
+                  import('./features/admin/questions/questions-admin.component').then(
+                    (m) => m.QuestionsAdminComponent
+                  ),
+              },
+              {
+                path: 'new',
+                data: { breadcrumb: 'Tạo mới' },
+                loadComponent: () =>
+                  import(
+                    './features/admin/questions/question-editor/question-editor.component'
+                  ).then((m) => m.QuestionEditorComponent),
+              },
+              {
+                path: ':id/edit',
+                data: { breadcrumb: 'Chỉnh sửa' },
+                loadComponent: () =>
+                  import(
+                    './features/admin/questions/question-editor/question-editor.component'
+                  ).then((m) => m.QuestionEditorComponent),
+              },
+            ],
           },
           {
             path: 'lessons',
-            data: { breadcrumb: 'Câu hỏi bài học' },
-            children: [
-              {
-                path: ':id/exercises',
-                data: { breadcrumb: 'Trình biên soạn câu hỏi' },
-                loadComponent: () =>
-                  import(
-                    './features/admin/lessons/exercise-editor/exercise-editor.component'
-                  ).then((m) => m.ExerciseEditorComponent),
-              },
-            ],
+            data: { breadcrumb: 'Quản lý bài học' },
+            loadChildren: () =>
+              import('./features/admin/lessons/lessons-admin.routes').then(
+                (m) => m.LESSONS_ADMIN_ROUTES
+              ),
           },
         ],
       },

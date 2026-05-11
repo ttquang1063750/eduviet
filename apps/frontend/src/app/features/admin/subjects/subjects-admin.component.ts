@@ -27,10 +27,17 @@ const SUBJECT_CODE_LABELS: Record<SubjectCode, string> = {
 
 const ALL_CODES = Object.keys(SUBJECT_CODE_LABELS) as SubjectCode[];
 
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+
 @Component({
   selector: 'app-subjects-admin',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule, MatCardModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './subjects-admin.component.html',
   styleUrl: './subjects-admin.component.scss',

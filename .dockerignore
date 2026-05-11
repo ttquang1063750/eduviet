@@ -1,0 +1,37 @@
+# Dependencies — reinstalled inside Docker
+**/node_modules
+
+# Build outputs
+**/dist
+apps/frontend/.angular
+
+# Dev/test files
+**/*.spec.ts
+**/*.test.ts
+**/coverage
+**/.nyc_output
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Editor
+.vscode
+.idea
+**/.DS_Store
+
+# Git
+.git
+.gitignore
+
+# Docs / scripts not needed in image
+docs/
+*.md
+!apps/backend/src/**/*.md
+
+# CI
+.github/
+
+# Docker files themselves (no recursion)
+docker-compose*.yml

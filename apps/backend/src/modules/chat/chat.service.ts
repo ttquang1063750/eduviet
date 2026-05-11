@@ -157,4 +157,24 @@ export class ChatService {
 
     return room;
   }
+
+  async deleteRoom(roomId: string, userId: string) {
+    const room = await this.repo.findRoomById(roomId);
+    if (!room) throw AppError.notFound('Phòng chat');
+
+    const isMember = room.members.some((m) => m.userId === userId);
+    if (!isMember) throw AppError.forbidden('Bạn không có quyền xoá phòng chat này');
+
+    const memberIds = room.members.map((m) => m.userId);
+    await this.repo.deleteRoom(roomId);
+
+    await writeAuditLog(this.prisma, {
+      userId,
+      action: 'CHAT_ROOM_DELETED',
+      resourceType: 'CHAT',
+      resourceId: roomId,
+    });
+
+    return { roomId, memberIds };
+  }
 }

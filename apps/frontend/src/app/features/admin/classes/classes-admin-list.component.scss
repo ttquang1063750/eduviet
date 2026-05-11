@@ -1,77 +1,102 @@
 .admin-container {
-  padding: 20px;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
+  margin: 1.5rem;
 }
 
 .header-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 2rem;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+  }
 }
 
 .filters {
-  margin-bottom: 20px;
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+
+  .search-field {
+    flex: 1;
+    max-width: 400px;
+  }
 }
 
-.search-input {
-  max-width: 300px;
+.table-container {
+  overflow-x: auto;
+  margin-bottom: 1.5rem;
 }
 
-.table {
+.data-table {
   width: 100%;
   border-collapse: collapse;
-
-  th,
-  td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #e5e7eb;
-  }
+  font-size: 0.875rem;
 
   th {
-    background-color: #f9fafb;
+    text-align: left;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid var(--border-color);
+    color: var(--text-secondary);
     font-weight: 600;
+  }
+
+  td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  tr:hover td {
+    background: #f8fafc;
   }
 }
 
-.actions {
+.user-chip {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 0.5rem;
+
+  .user-avatar {
+    width: 24px;
+    height: 24px;
+    background: #e0f2fe;
+    color: #0369a1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 0.625rem;
+    font-weight: 700;
+  }
+}
+
+.col-actions {
+  text-align: right;
+  width: 80px;
 }
 
 .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 15px;
-  margin-top: 20px;
-}
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
 
-.btn {
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block;
-  border: none;
-
-  &-primary {
-    background-color: #3b82f6;
-    color: white;
-  }
-
-  &-sm {
-    padding: 4px 8px;
-    font-size: 14px;
-  }
-
-  &-outline {
-    border: 1px solid #d1d5db;
-    background: transparent;
-    color: #374151;
+  .page-info {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
   }
 }
 
-.text-center {
-  text-align: center;
+.italic {
+  font-style: italic;
 }
