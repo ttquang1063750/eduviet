@@ -37,6 +37,16 @@
         </a>
       </li>
 
+      <!-- ── Trang học sinh ── -->
+      @if (isStudent()) {
+        <li class="nav-item">
+          <a routerLink="/student" routerLinkActive="active" class="nav-link">
+            <span class="nav-icon">🎓</span>
+            <span>Trang của tôi</span>
+          </a>
+        </li>
+      }
+
       <li class="nav-item">
         <a routerLink="/blog" routerLinkActive="active" class="nav-link">
           <span class="nav-icon">📰</span>

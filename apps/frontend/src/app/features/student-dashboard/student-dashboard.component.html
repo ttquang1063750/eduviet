@@ -1,0 +1,147 @@
+<div class="student-dashboard">
+
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="dashboard-header__greeting">
+      <h1>Xin chào, {{ currentUser()?.fullName ?? 'bạn' }}! 👋</h1>
+      <p class="text-muted">Đây là tổng quan học tập của bạn hôm nay</p>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (isLoading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="48" />
+      <p>Đang tải dữ liệu...</p>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (!isLoading() && error()) {
+    <div class="error-state">
+      <mat-icon color="warn">error_outline</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-stroked-button (click)="loadDashboard()">Thử lại</button>
+    </div>
+  }
+
+  @if (!isLoading() && !error() && dashboard()) {
+
+    <!-- Progress Card -->
+    <div class="stats-row">
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-card__icon stat-card__icon--blue">
+            <mat-icon>school</mat-icon>
+          </div>
+          <div class="stat-card__body">
+            <span class="stat-card__value">{{ dashboard()!.progress.totalClasses }}</span>
+            <span class="stat-card__label">Lớp đang học</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-card__icon stat-card__icon--green">
+            <mat-icon>menu_book</mat-icon>
+          </div>
+          <div class="stat-card__body">
+            <span class="stat-card__value">{{ dashboard()!.progress.totalLessons }}</span>
+            <span class="stat-card__label">Bài học có sẵn</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card stat-card--progress">
+        <mat-card-content>
+          <div class="stat-card__icon stat-card__icon--orange">
+            <mat-icon>trending_up</mat-icon>
+          </div>
+          <div class="stat-card__body">
+            <span class="stat-card__value">{{ completionPercent() }}%</span>
+            <span class="stat-card__label">Tiến độ hoàn thành</span>
+            <mat-progress-bar
+              mode="determinate"
+              [value]="completionPercent()"
+              class="stat-card__bar"
+            />
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Lớp học và bài học -->
+    @if (dashboard()!.classes.length === 0) {
+      <mat-card class="empty-card">
+        <mat-card-content>
+          <mat-icon>class</mat-icon>
+          <h3>Bạn chưa được vào lớp nào</h3>
+          <p class="text-muted">Liên hệ giáo viên hoặc quản trị viên để được thêm vào lớp học.</p>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    @for (cls of dashboard()!.classes; track cls.id) {
+      <mat-card class="class-card">
+
+        <!-- Class Header -->
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon class="class-icon">class</mat-icon>
+            {{ cls.name }}
+            <mat-chip class="grade-chip">{{ getGradeLabel(cls.grade) }}</mat-chip>
+          </mat-card-title>
+          <mat-card-subtitle>
+            {{ cls.school.name }}
+            @if (cls.homeroomTeacher) {
+              · GVCN: {{ cls.homeroomTeacher.fullName }}
+            }
+            · Năm học {{ cls.academicYear }}
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <mat-divider />
+
+          @if (cls.lessons.length === 0) {
+            <p class="no-lessons">Chưa có bài học nào cho lớp này.</p>
+          }
+
+          <!-- Lesson List -->
+          <div class="lesson-list">
+            @for (lesson of cls.lessons; track lesson.id) {
+              <a
+                class="lesson-row"
+                [routerLink]="['/lessons', lesson.slug]"
+              >
+                <div
+                  class="lesson-row__subject-dot"
+                  [style.background]="lesson.subject.color ?? '#4A90E2'"
+                ></div>
+                <div class="lesson-row__body">
+                  <span class="lesson-row__title">{{ lesson.title }}</span>
+                  <span class="lesson-row__meta">
+                    {{ lesson.subject.name }} · {{ lesson.topic }} · {{ lesson.estimatedMinutes }} phút
+                  </span>
+                </div>
+                <div class="lesson-row__right">
+                  <mat-chip [color]="getDifficultyColor(lesson.difficulty)" highlighted>
+                    {{ getDifficultyLabel(lesson.difficulty) }}
+                  </mat-chip>
+                  @if (lesson.totalQuestions > 0) {
+                    <span class="lesson-row__questions">{{ lesson.totalQuestions }} câu</span>
+                  }
+                  <mat-icon class="chevron">chevron_right</mat-icon>
+                </div>
+              </a>
+            }
+          </div>
+        </mat-card-content>
+
+      </mat-card>
+    }
+
+  }
+
+</div>

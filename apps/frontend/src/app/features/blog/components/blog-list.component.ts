@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { BlogService, BlogListItem } from '../../../core/services/blog.service';
@@ -8,7 +8,7 @@ import { BlogService, BlogListItem } from '../../../core/services/blog.service';
 @Component({
   selector: 'app-blog-list',
   standalone: true,
-  imports: [RouterLink, DatePipe, ReactiveFormsModule],
+  imports: [RouterLink, DatePipe, DecimalPipe, ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './blog-list.component.html',
   styleUrl: './blog-list.component.scss',
@@ -19,6 +19,7 @@ export class BlogListComponent implements OnInit {
 
   readonly loading = signal(true);
   readonly posts = signal<BlogListItem[]>([]);
+  readonly topViewed = signal<BlogListItem[]>([]);
   readonly page = signal(1);
   readonly totalPages = signal(1);
   readonly total = signal(0);
@@ -26,6 +27,7 @@ export class BlogListComponent implements OnInit {
   readonly filterForm = this.fb.nonNullable.group({ search: [''], tag: [''] });
 
   ngOnInit() {
+    this.blogService.getTopViewed(3).subscribe((posts) => this.topViewed.set(posts));
     this.loadPosts();
     this.filterForm.valueChanges
       .pipe(debounceTime(350), distinctUntilChanged())

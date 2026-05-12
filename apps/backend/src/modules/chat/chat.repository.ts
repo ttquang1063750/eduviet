@@ -14,6 +14,7 @@ const messageSelect = {
   roomId: true,
   content: true,
   mediaUrl: true,
+  readBy: true,
   createdAt: true,
   editedAt: true,
   deletedAt: true,
@@ -175,6 +176,36 @@ export class ChatRepository {
   }
 
   // ── Read receipts ──────────────────────────────────────────────────────────
+
+  /**
+   * Thêm userId vào mảng readBy của tất cả messages chưa đọc trong room.
+   * Dùng JSONB operator PostgreSQL để tránh race condition.
+   */
+  async markMessagesRead(roomId: string, userId: string): Promise<void> {
+    await this.prisma.$executeRaw`
+      UPDATE chat_messages
+      SET read_by = read_by || ${JSON.stringify([userId])}::jsonb
+      WHERE room_id = ${roomId}
+        AND sender_id != ${userId}
+        AND deleted_at IS NULL
+        AND NOT (read_by @> ${JSON.stringify([userId])}::jsonb)
+    `;
+  }
+
+  /**
+   * Đếm messages trong room mà userId chưa đọc (không có trong readBy).
+   */
+  async findUnreadCount(roomId: string, userId: string): Promise<number> {
+    const result = await this.prisma.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(*)::bigint as count
+      FROM chat_messages
+      WHERE room_id = ${roomId}
+        AND sender_id != ${userId}
+        AND deleted_at IS NULL
+        AND NOT (read_by @> ${JSON.stringify([userId])}::jsonb)
+    `;
+    return Number(result[0]?.count ?? 0);
+  }
 
   async deleteRoom(roomId: string) {
     // Xoá members trước (FK), sau đó xoá messages rồi xoá room

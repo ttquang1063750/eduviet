@@ -15,6 +15,7 @@ export interface ChatMessage {
   sender: Pick<User, 'id' | 'fullName' | 'avatarUrl' | 'roles'>;
   content: string;
   mediaUrl: string | null;
+  readBy: string[];   // mảng userId đã đọc tin nhắn này
   createdAt: Date;
   editedAt: Date | null;
   deletedAt: Date | null;

@@ -18,7 +18,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-11 — session 15)
+## Trạng thái hiện tại (cập nhật 2026-05-12 — session 17)
 
 ### ✅ Đã hoàn thành
 
@@ -28,12 +28,12 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 | `auth` | ✅ | ✅ | — | — |
 | `users` | ✅ | ✅ | ✅ | ✅ |
 | `lessons` | ✅ + question routes | ✅ + LessonQuestion methods | ✅ + LessonQuestion CRUD | ✅ |
-| `questions` | ✅ | ✅ + AI generate | ✅ | — |
+| `questions` | ✅ | ✅ + AI generate | ✅ | ✅ |
 | `subjects` | ✅ | ✅ (CRUD + AI suggest) | — | — |
 | `geo` | ✅ | ✅ | — | — |
-| `schools` | ✅ | ✅ | ✅ | — |
-| `classes` | ✅ | ✅ | ✅ | — |
-| `blog` | ✅ + submit-review | ✅ + submitForReview() | ✅ | — |
+| `schools` | ✅ | ✅ | ✅ | ✅ |
+| `classes` | ✅ | ✅ | ✅ | ✅ |
+| `blog` | ✅ + submit-review + admin/posts + top-viewed + related | ✅ + submitForReview() + getTopViewed() + getRelated() | ✅ + incrementView() + findTopViewed() + findRelated() | — |
 | `notifications` | ✅ | ✅ (BullMQ) | — | — |
 | `chat` | ✅ | ✅ | ✅ | ✅ |
 | `storage` | ✅ | — | — | — |
@@ -46,7 +46,8 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 | `dashboard` | ✅ | — | — | ✅ |
 | `lessons` | ✅ | ✅ + KaTeX + Konva | ✅ | ✅ |
 | `classes` | ✅ | ✅ | ✅ | ✅ |
-| `blog` | ✅ | ✅ | ✅ | ✅ |
+| `blog` | ✅ BlogLayout + viewCount + top-viewed sidebar | ✅ related posts + top-viewed | ✅ | ✅ |
+| `student-dashboard` | ✅ | — | — | ✅ |
 | `admin/users` | ✅ CRUD complete | ✅ CRUD complete | ✅ | ✅ |
 | `admin/schools` | ✅ | ✅ + danh sách lớp | — | ✅ |
 | `admin/classes` | ✅ | ✅ + quản lý học sinh | — | ✅ |
@@ -63,6 +64,8 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ `shared/pipes/safe-html.pipe.ts` — DOMPurify + bypassSecurityTrustHtml
 - ✅ `shared/components/geo-tree/` — GeoTreeComponent: lazy-load Nations→Provinces→Districts, RBAC scoping, emits nodeSelected
 - ✅ `core/utils/http-error.ts` — `getApiErrorMessage()` cho catch blocks
+- ✅ `core/services/push-notification.service.ts` — Browser Notification API, chỉ hiện khi tab ẩn
+- ✅ `layout/blog-layout/` — BlogLayoutComponent: sticky header, logo, no sidebar, no breadcrumb
 
 #### Admin UI Session 6 ✅ COMPLETED (2026-05-10)
 - ✅ `shared/components/geo-tree/` — GeoTreeComponent: lazy-load Nations→Provinces→Districts, RBAC scoping, emits GeoNodeSelected
@@ -110,6 +113,36 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ Tạo cuộc hội thoại mới: nút ✏️ + search user + `getOrCreateOneOnOne()`
 - ✅ Xoá chat room: `DELETE /rooms/:id` BE cascade + FE nút 🗑 hover + socket `room_deleted` broadcast
 - ✅ Search error handling: `catchError` trong switchMap → không pending vô tận khi 401/403
+
+#### Chat Read Receipts + Push Notifications + Test Specs ✅ COMPLETED (2026-05-12 session 16)
+- ✅ `message-thread.component.html` — double-tick UI `✓`/`✓✓` sau timestamp cho tin nhắn của mình
+- ✅ `message-thread.component.scss` — `.tick` (opacity 0.55) + `.tick--read` (#64d2ff, font-weight 700)
+- ✅ `message-thread.component.ts` — `isReadByOther(msg)` helper kiểm tra `msg.readBy[]` != currentUser
+- ✅ `core/services/push-notification.service.ts` — `requestPermission()` + `show()` chỉ khi `document.hidden === true`
+- ✅ `chat.service.ts` — gọi `pushNotification.show()` khi nhận tin nhắn từ người khác
+- ✅ `auth.service.ts` — `requestPermission()` sau khi login thành công
+- ✅ `questions.service.spec.ts` — 12 test cases (list RBAC, getById 404, create audit, update, delete)
+- ✅ `schools.service.spec.ts` — 11 test cases (list, getById, create audit, update, delete, geo)
+- ✅ `classes.service.spec.ts` — 12 test cases (list, getById, create ChatRoom, enroll 409, unenroll ChatRoom)
+
+#### Blog Overhaul + Admin Fix + Student Dashboard ✅ COMPLETED (2026-05-12 session 17)
+- 🐛 Fix `authService.currentUser` → `authService.user` (student-dashboard.component.ts:51)
+- 🐛 Fix blog không accessible cho unauthenticated users — `/blog` routes tách ra khỏi `authGuard` block
+- 🐛 Fix admin blog list rỗng — `optionalAuthenticate` silently nuốt 401 khi token hết hạn → FE không refresh → isAdmin=false → onlyPublished=true
+- ✅ `GET /api/blog/admin/posts` + `GET /api/blog/admin/posts/:id` — mandatory `authenticate + authorize`, luôn truyền roles → isAdmin=true
+- ✅ `blog.service.ts` (FE) — `getAdminAll()` + `getAdminById()` trỏ đến admin endpoints
+- ✅ `blog-admin-list.component.ts` — dùng `getAdminAll()` thay `getAll()`
+- ✅ `blog-admin-editor.component.ts` — dùng `getAdminById()` thay `getById()`
+- ✅ `libs/prisma/schema.prisma` — `viewCount Int @default(0)` + `@@index([viewCount])` cho BlogPost
+- ✅ Migration `20260512000002_blog_view_count` — ADD COLUMN + CREATE INDEX
+- ✅ `blog.repository.ts` — `incrementView()` fire-and-forget, `findTopViewed()`, `findRelated()` (tags hasSome)
+- ✅ `blog.service.ts` (BE) — `getTopViewed()`, `getRelated()`, `getBySlug()` auto-increment PUBLISHED posts
+- ✅ `GET /api/blog/top-viewed` + `GET /api/blog/:id/related` (public endpoints)
+- ✅ `layout/blog-layout/` — BlogLayoutComponent: sticky header, public access, no sidebar/breadcrumb
+- ✅ `app.routes.ts` — `/blog` tách riêng vào public block (BlogLayoutComponent, no authGuard)
+- ✅ `blog-detail.component.*` — 2-column layout, related posts grid, top-viewed sidebar (gold/silver/bronze badges)
+- ✅ `blog-list.component.*` — 2-column layout, top-viewed sidebar, viewCount `👁` display
+- ✅ `blog.service.ts` (FE) — `getTopViewed()`, `getRelated()`, `viewCount` in BlogListItem interface
 
 #### Các module lớn trước đó
 - ✅ Live Chat (Socket.io v4, Redis adapter, RBAC per room)

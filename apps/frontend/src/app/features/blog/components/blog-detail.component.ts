@@ -1,17 +1,16 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, computed } from '@angular/core';
-import { DatePipe } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { DatePipe, DecimalPipe } from '@angular/common';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { switchMap } from 'rxjs';
-import { BlogService, BlogPost, Comment } from '../../../core/services/blog.service';
-import { BreadcrumbService } from '../../../core/services/breadcrumb.service';
+import { switchMap, forkJoin, of } from 'rxjs';
+import { BlogService, BlogPost, BlogListItem, Comment } from '../../../core/services/blog.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { SafeHtmlPipe } from '../../../shared/pipes/safe-html.pipe';
 
 @Component({
   selector: 'app-blog-detail',
   standalone: true,
-  imports: [RouterLink, DatePipe, ReactiveFormsModule, SafeHtmlPipe],
+  imports: [RouterLink, DatePipe, DecimalPipe, ReactiveFormsModule, SafeHtmlPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './blog-detail.component.html',
   styleUrl: './blog-detail.component.scss',
@@ -19,7 +18,6 @@ import { SafeHtmlPipe } from '../../../shared/pipes/safe-html.pipe';
 export class BlogDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private blogService = inject(BlogService);
-  private breadcrumbService = inject(BreadcrumbService);
   private authService = inject(AuthService);
   private fb = inject(FormBuilder);
 
@@ -27,7 +25,10 @@ export class BlogDetailComponent implements OnInit {
   readonly post = signal<BlogPost | null>(null);
   readonly error = signal<string | null>(null);
   readonly submitting = signal(false);
-  readonly replyingTo = signal<string | null>(null); // commentId đang reply
+  readonly replyingTo = signal<string | null>(null);
+
+  readonly relatedPosts = signal<BlogListItem[]>([]);
+  readonly topViewed = signal<BlogListItem[]>([]);
 
   readonly isLoggedIn = computed(() => !!this.authService.user());
   readonly totalComments = computed(
@@ -43,17 +44,28 @@ export class BlogDetailComponent implements OnInit {
   });
 
   ngOnInit() {
+    // Load top viewed một lần
+    this.blogService.getTopViewed(3).subscribe((posts) => this.topViewed.set(posts));
+
     this.route.paramMap.pipe(
       switchMap((params) => {
         const slug = params.get('slug')!;
         this.loading.set(true);
+        this.relatedPosts.set([]);
         return this.blogService.getBySlug(slug);
       })
     ).subscribe({
       next: (res) => {
-        this.post.set(res.data);
-        this.breadcrumbService.setLabel('blog/:slug', res.data.title);
+        const post = res.data;
+        this.post.set(post);
         this.loading.set(false);
+
+        // Load related posts sau khi có post
+        if (post.tags?.length) {
+          this.blogService.getRelated(post.id, post.tags, 5).subscribe((related) =>
+            this.relatedPosts.set(related)
+          );
+        }
       },
       error: () => {
         this.error.set('Không thể tải bài viết.');

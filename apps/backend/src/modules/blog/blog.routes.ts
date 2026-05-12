@@ -42,6 +42,48 @@ export const blogRoutes: FastifyPluginAsync = async (app) => {
     return reply.send(result);
   });
 
+  // GET /blog/admin/posts — danh sách TẤT CẢ bài viết cho admin/creator (bắt buộc auth)
+  app.get(
+    '/admin/posts',
+    { preHandler: [authenticate, authorize('SUPER_ADMIN', 'SCHOOL_ADMIN', 'CONTENT_CREATOR', 'CONTENT_REVIEWER', 'CONTENT_APPROVER', 'SUBJECT_TEACHER', 'HOMEROOM_TEACHER')] },
+    async (request, reply) => {
+      const query = listSchema.safeParse(request.query);
+      if (!query.success) {
+        return reply.status(400).send({ error: { code: 'VALIDATION_ERROR', message: 'Query không hợp lệ' } });
+      }
+      // Luôn truyền userRoles → isAdmin = true → onlyPublished = false
+      const result = await service.list(query.data, request.user.roles);
+      return reply.send(result);
+    }
+  );
+
+  // GET /blog/admin/posts/:id — lấy bài viết theo ID cho admin editor (bắt buộc auth)
+  app.get(
+    '/admin/posts/:id',
+    { preHandler: [authenticate, authorize('SUPER_ADMIN', 'SCHOOL_ADMIN', 'CONTENT_CREATOR', 'CONTENT_REVIEWER', 'CONTENT_APPROVER', 'SUBJECT_TEACHER', 'HOMEROOM_TEACHER')] },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const post = await service.getBySlug(id, request.user.roles);
+      return reply.send({ data: post });
+    }
+  );
+
+  // GET /blog/top-viewed — 3 bài được xem nhiều nhất (public)
+  app.get('/top-viewed', async (_request, reply) => {
+    const posts = await service.getTopViewed(3);
+    return reply.send({ data: posts });
+  });
+
+  // GET /blog/:id/related — bài liên quan theo tag (public)
+  app.get('/:id/related', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const query = z.object({ tags: z.string().optional(), limit: z.coerce.number().min(1).max(10).default(5) }).safeParse(request.query);
+    const limit = query.success ? query.data.limit : 5;
+    const tags = query.success && query.data.tags ? query.data.tags.split(',') : [];
+    const posts = await service.getRelated(id, tags, limit);
+    return reply.send({ data: posts });
+  });
+
   // GET /blog/tags — lấy danh sách tags phổ biến
   app.get('/tags', async (request, reply) => {
     const query = z.object({ limit: z.coerce.number().min(1).max(100).default(20) }).safeParse(request.query);

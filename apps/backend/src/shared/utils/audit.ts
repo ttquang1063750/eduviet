@@ -27,6 +27,8 @@ export type AuditAction =
   | 'CHAT_MESSAGE_SENT'
   | 'CHAT_MESSAGE_EDITED'
   | 'CHAT_MESSAGE_DELETED'
+  | 'CHAT_MESSAGES_READ'
+  | 'CHAT_ROOM_DELETED'
   // Question bank
   | 'QUESTION_CREATED'
   | 'QUESTION_UPDATED'

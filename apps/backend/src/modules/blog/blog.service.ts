@@ -51,7 +51,21 @@ export class BlogService {
     if (post.status !== 'PUBLISHED' && !isAdmin) {
       throw AppError.forbidden('Bạn không có quyền xem bài viết này');
     }
+
+    // Tăng view count async (không chờ, không throw)
+    if (post.status === 'PUBLISHED') {
+      this.repo.incrementView(post.id).catch(() => {});
+    }
+
     return post;
+  }
+
+  async getTopViewed(limit = 3) {
+    return this.repo.findTopViewed(limit);
+  }
+
+  async getRelated(postId: string, tags: string[], limit = 5) {
+    return this.repo.findRelated(postId, tags, limit);
   }
 
   async create(

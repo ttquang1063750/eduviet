@@ -16,6 +16,7 @@ const POST_LIST_SELECT = {
   coverImage: true,
   status: true,
   tags: true,
+  viewCount: true,
   publishedAt: true,
   author: { select: { id: true, fullName: true, avatarUrl: true } },
   _count: { select: { comments: true } },
@@ -97,6 +98,40 @@ export class BlogRepository {
 
   async softDelete(id: string) {
     return this.prisma.blogPost.update({ where: { id }, data: { deletedAt: new Date() } });
+  }
+
+  /** Tăng viewCount thêm 1 (atomic) */
+  async incrementView(id: string) {
+    return this.prisma.blogPost.update({
+      where: { id },
+      data: { viewCount: { increment: 1 } },
+      select: { id: true, viewCount: true },
+    });
+  }
+
+  /** Lấy top N bài viết được xem nhiều nhất (PUBLISHED) */
+  async findTopViewed(limit = 3) {
+    return this.prisma.blogPost.findMany({
+      where: { status: 'PUBLISHED', deletedAt: null },
+      select: POST_LIST_SELECT,
+      orderBy: { viewCount: 'desc' },
+      take: limit,
+    });
+  }
+
+  /** Lấy các bài viết liên quan theo tags, loại trừ bài hiện tại */
+  async findRelated(postId: string, tags: string[], limit = 5) {
+    return this.prisma.blogPost.findMany({
+      where: {
+        status: 'PUBLISHED',
+        deletedAt: null,
+        id: { not: postId },
+        tags: { hasSome: tags },
+      },
+      select: POST_LIST_SELECT,
+      orderBy: { publishedAt: 'desc' },
+      take: limit,
+    });
   }
 
   // Comments

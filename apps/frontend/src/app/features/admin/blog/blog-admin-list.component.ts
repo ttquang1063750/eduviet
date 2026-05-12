@@ -79,7 +79,7 @@ export class BlogAdminListComponent implements OnInit {
   loadPosts(): void {
     this.loading.set(true);
     this.blogService
-      .getAll({
+      .getAdminAll({
         page: this.page(),
         perPage: this.perPage,
         search: this.searchControl.value || undefined,

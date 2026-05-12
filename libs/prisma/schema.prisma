@@ -338,12 +338,14 @@ model BlogPost {
   publishedAt DateTime?     @map("published_at")
   comments    Comment[]
   tags        String[]
+  viewCount   Int           @default(0) @map("view_count")
   createdAt   DateTime      @default(now()) @map("created_at")
   updatedAt   DateTime      @updatedAt @map("updated_at")
   deletedAt   DateTime?     @map("deleted_at")
 
   @@index([authorId])
   @@index([status])
+  @@index([viewCount])
   @@map("blog_posts")
 }
 
@@ -409,6 +411,7 @@ model ChatMessage {
   sender    User     @relation("MessageSender", fields: [senderId], references: [id])
   content   String   @db.Text
   mediaUrl  String?  @map("media_url")
+  readBy    Json     @default("[]") @map("read_by")
   createdAt DateTime @default(now()) @map("created_at")
   editedAt  DateTime? @map("edited_at")
   deletedAt DateTime? @map("deleted_at")

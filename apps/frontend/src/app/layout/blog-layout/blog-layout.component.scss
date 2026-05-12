@@ -1,0 +1,94 @@
+.blog-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fa;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+.blog-header {
+  background: #fff;
+  border-bottom: 1px solid #e9ecef;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  &__inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: #1a1a2e;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.3px;
+
+    &:hover { opacity: 0.85; }
+  }
+
+  &__nav {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  &__nav-link {
+    text-decoration: none;
+    color: #555;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+
+    &:hover { color: #4A90E2; }
+
+    &--cta {
+      background: #4A90E2;
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+
+      &:hover {
+        background: #357abd;
+        color: #fff;
+      }
+    }
+  }
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
+
+.blog-main {
+  flex: 1;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 40px 24px;
+
+  @media (max-width: 768px) {
+    padding: 24px 16px;
+  }
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+
+.blog-footer {
+  background: #fff;
+  border-top: 1px solid #e9ecef;
+  text-align: center;
+  padding: 20px 24px;
+  font-size: 13px;
+  color: #888;
+}

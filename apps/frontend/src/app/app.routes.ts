@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
-import { authGuard, guestGuard } from './core/guards/auth.guard';
+import { authGuard, guestGuard, roleGuard } from './core/guards/auth.guard';
 import { MainLayoutComponent } from './layout/main-layout.component';
+import { BlogLayoutComponent } from './layout/blog-layout/blog-layout.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -16,6 +17,28 @@ export const routes: Routes = [
       { path: '', redirectTo: 'login', pathMatch: 'full' },
     ],
   },
+  // ── Blog routes (layout riêng, không cần đăng nhập) ─────────────────────
+  {
+    path: 'blog',
+    component: BlogLayoutComponent,
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/blog/components/blog-list.component').then(
+            (m) => m.BlogListComponent
+          ),
+      },
+      {
+        path: ':slug',
+        loadComponent: () =>
+          import('./features/blog/components/blog-detail.component').then(
+            (m) => m.BlogDetailComponent
+          ),
+      },
+    ],
+  },
+  // ── Protected routes (yêu cầu đăng nhập) ─────────────────────────────────
   {
     path: '',
     component: MainLayoutComponent,
@@ -72,27 +95,15 @@ export const routes: Routes = [
           },
         ],
       },
-      // ── Blog ─────────────────────────────────────────────────
+      // ── Student Dashboard ────────────────────────────────────────
       {
-        path: 'blog',
-        data: { breadcrumb: 'Blog' },
-        children: [
-          {
-            path: '',
-            loadComponent: () =>
-              import('./features/blog/components/blog-list.component').then(
-                (m) => m.BlogListComponent
-              ),
-          },
-          {
-            path: ':slug',
-            data: { breadcrumb: 'Bài viết', breadcrumbAlias: 'blog/:slug' },
-            loadComponent: () =>
-              import('./features/blog/components/blog-detail.component').then(
-                (m) => m.BlogDetailComponent
-              ),
-          },
-        ],
+        path: 'student',
+        data: { breadcrumb: 'Trang của tôi', breadcrumbAlias: 'student' },
+        canActivate: [roleGuard('STUDENT', 'SUPER_ADMIN', 'SCHOOL_ADMIN', 'HOMEROOM_TEACHER', 'SUBJECT_TEACHER')],
+        loadComponent: () =>
+          import('./features/student-dashboard/student-dashboard.component').then(
+            (m) => m.StudentDashboardComponent
+          ),
       },
       // ── Reports ─────────────────────────────────────────────────
       {

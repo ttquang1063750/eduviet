@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { tap, catchError, EMPTY, of, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type { AuthUser, LoginRequest, LoginResponse, UserRole } from '@eduviet/shared-types';
+import { PushNotificationService } from './push-notification.service';
 
 interface ApiResponse<T> {
   data: T;
@@ -13,6 +14,7 @@ interface ApiResponse<T> {
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private pushNotification = inject(PushNotificationService);
 
   private readonly API = '/api/auth';
 
@@ -55,6 +57,8 @@ export class AuthService {
         this._user.set(res.data.user);
         this._isLoading.set(false);
         this.router.navigate(['/dashboard']);
+        // Xin quyền push notification sau khi login thành công
+        void this.pushNotification.requestPermission();
       }),
       catchError((err) => {
         this._isLoading.set(false);

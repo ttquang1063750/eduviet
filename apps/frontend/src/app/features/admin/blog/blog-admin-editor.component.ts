@@ -138,7 +138,7 @@ export class BlogAdminEditorComponent implements OnInit {
           if (id && id !== 'new') {
             this.postId.set(id);
             this.isEditMode.set(true);
-            return this.blogService.getById(id);
+            return this.blogService.getAdminById(id);
           }
           return of(null);
         }),

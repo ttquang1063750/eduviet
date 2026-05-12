@@ -1,6 +1,6 @@
 # EduViet — Progress Tracker
 
-> Cập nhật lần cuối: 2026-05-11 (session 14 — School→Class→Student Flow + Angular Bugfixes)
+> Cập nhật lần cuối: 2026-05-12 (session 17 — Blog Overhaul: layout riêng + viewCount + related posts + admin fix)
 > Workflow: `/plan-task` → `/execute-step` (lặp) → `/check-point` → `/resume` → tiếp tục
 
 ---
@@ -105,7 +105,7 @@
 
 ## 🚧 Backlog (theo độ ưu tiên — cập nhật session 9)
 
-### P1 — Multi-Role RBAC ← NEXT
+### ✅ Tất cả P1–P5 đã hoàn thành (session 16)
 User.roles Json[] + title, migrate authorize(), JWT payload, Admin UI multi-select.
 Spec: docs/superpowers/specs/2026-05-10-question-bank-exercise-editor-design.md (Phase 0, steps 0-7)
 
@@ -479,3 +479,120 @@ Khi backend compiled chạy bằng `node dist/main.js`, Node.js không load đư
 | Private socket room `user:<userId>` | Standard pattern để push event tới user cụ thể qua Redis adapter (multi-instance safe) |
 | `room_invited` event khi tạo ONE_ON_ONE | Đảm bảo recipient tự join socket room mà không cần poll; không cần WebRTC signaling phức tạp |
 | Cascade delete room (members → messages → room) | Tránh FK constraint violation; không dùng soft-delete cho room vì không cần audit trail lịch sử room |
+
+---
+
+## Session 16 — 5 Tính năng mở rộng (2026-05-12)
+
+> Task: P1 Student Dashboard, P2 Chat File Upload, P3 Read Receipts, P4 Browser Notifications, P5 Test Coverage — **COMPLETED**
+
+### P1 — Student Dashboard
+
+| File | Mô tả |
+|------|-------|
+| `packages/shared-types/src/student.types.ts` | 4 interfaces: StudentLesson, StudentClass, StudentProgress, StudentDashboard |
+| `packages/shared-types/src/index.ts` | + export student.types |
+| `apps/backend/src/modules/students/students.routes.ts` | `GET /api/students/me/dashboard` — authenticate + authorize (student + teacher/admin roles) |
+| `apps/backend/src/modules/students/students.service.ts` | `getMyDashboard(userId)` — ClassEnrollment → grade → PUBLISHED lessons by grade (max 5/grade, take:50) |
+| `apps/backend/src/main.ts` | + register studentsRoutes tại `/api/students` |
+| `apps/frontend/src/app/core/services/student-dashboard.service.ts` | `getMyDashboard()` → GET /api/students/me/dashboard |
+| `apps/frontend/src/app/features/student-dashboard/student-dashboard.component.*` | 3 file, OnPush, signals; stat cards, class list, lesson rows, loading/error/empty states |
+| `apps/frontend/src/app/app.routes.ts` | + `/student` route với roleGuard |
+| `apps/frontend/src/app/layout/main-layout.component.*` | + `isStudent` computed; + "🎓 Trang của tôi" nav link |
+
+### P2 — Chat File Upload
+
+| File | Mô tả |
+|------|-------|
+| `apps/backend/src/modules/chat/chat.routes.ts` | `POST /rooms/:id/upload` — MIME filter (7 types), 10MB limit, MinIO upload, audit log |
+| `apps/backend/src/modules/chat/chat.service.ts` | + `isMember()` delegating to repo |
+| `apps/frontend/src/app/features/chat/chat.service.ts` | + `uploadFile(roomId, file)` FormData → MinIO URL |
+| `apps/frontend/src/app/features/chat/chat-widget/message-thread/message-thread.component.*` | Hidden file input #fileInput, 📎 attach button, upload progress bar; 3-case render: image preview / file link / text |
+
+### P3 — Read Receipts (Double Tick ✓ / ✓✓)
+
+| File | Mô tả |
+|------|-------|
+| `libs/prisma/schema.prisma` | + `readBy Json @default("[]")` trên ChatMessage |
+| `libs/prisma/migrations/20260512000001_message_read_by/migration.sql` | ALTER TABLE + JSONB column |
+| `apps/backend/src/modules/chat/chat.repository.ts` | + `markMessagesRead()` ($executeRaw `||` atomic), `findUnreadCount()` |
+| `apps/backend/src/modules/chat/chat.service.ts` | `markRead()` gọi thêm `markMessagesRead()` + audit CHAT_MESSAGES_READ |
+| `apps/backend/src/modules/chat/chat.gateway.ts` | `mark_read` emit `message_read` socket event |
+| `apps/backend/src/shared/utils/audit.ts` | + `CHAT_MESSAGES_READ`, `CHAT_ROOM_DELETED` |
+| `packages/shared-types/src/chat.types.ts` | + `readBy: string[]` trên ChatMessage |
+| `apps/frontend/src/app/features/chat/chat.service.ts` | + `socket.on('message_read')` → `handleMessagesRead()` cập nhật signal map |
+| `apps/frontend/src/app/features/chat/chat-widget/message-thread/message-thread.component.*` | + `isReadByOther()` helper; tick markup ✓/✓✓ trong bubble; `.tick` / `.tick--read` SCSS |
+
+### P4 — Browser Push Notifications
+
+| File | Mô tả |
+|------|-------|
+| `apps/frontend/src/app/core/services/push-notification.service.ts` | `requestPermission()` + `show()` — chỉ hiện khi `document.hidden === true` |
+| `apps/frontend/src/app/features/chat/chat.service.ts` | inject PushNotificationService; `show()` khi new_message từ người khác |
+| `apps/frontend/src/app/core/services/auth.service.ts` | `requestPermission()` sau khi login thành công |
+
+### P5 — Test Coverage
+
+| File | Test cases |
+|------|-----------|
+| `apps/backend/src/modules/questions/questions.service.spec.ts` | 12 cases: list/getById/create/update/delete (RBAC + 404 + happy path) |
+| `apps/backend/src/modules/schools/schools.service.spec.ts` | 11 cases: list/getById/create/update/delete + getProvinces/getDistricts |
+| `apps/backend/src/modules/classes/classes.service.spec.ts` | 12 cases: list/getById/create/update/delete + enroll/unenroll (409 duplicate + ChatRoom sync) |
+
+### Bugfixes trong session
+
+| File | Fix |
+|------|-----|
+| `student-dashboard.component.ts` | `authService.currentUser` → `authService.user` (property đúng) |
+
+---
+
+## Session 17 — Blog Overhaul: Layout + ViewCount + Related Posts + Admin Fix (2026-05-12)
+
+### Blog Layout riêng (không có sidebar/breadcrumb)
+
+| File | Mô tả |
+|------|-------|
+| `apps/frontend/src/app/layout/blog-layout/blog-layout.component.*` | Header nhỏ gọn (logo + nav + login/app link), `<router-outlet>`, footer — không có sidebar |
+| `apps/frontend/src/app/app.routes.ts` | `/blog` dùng `BlogLayoutComponent` (không có authGuard) thay vì `MainLayoutComponent` |
+
+**Root cause trước đó:** `/blog` nằm trong block `canActivate: [authGuard]` → người chưa đăng nhập bị redirect `/auth/login`.
+
+### Blog ViewCount + Top Viewed
+
+| File | Mô tả |
+|------|-------|
+| `libs/prisma/schema.prisma` | + `viewCount Int @default(0)` + `@@index([viewCount])` trên BlogPost |
+| `libs/prisma/migrations/20260512000002_blog_view_count/migration.sql` | ALTER TABLE + CREATE INDEX |
+| `apps/backend/src/modules/blog/blog.repository.ts` | + `incrementView()` atomic; `findTopViewed(limit)` ORDER BY viewCount DESC; `findRelated(postId, tags, limit)` hasSome tags |
+| `apps/backend/src/modules/blog/blog.service.ts` | `getBySlug()` gọi `incrementView()` fire-and-forget; + `getTopViewed()`; `getRelated()` |
+| `apps/backend/src/modules/blog/blog.routes.ts` | + `GET /top-viewed`; `GET /:id/related` |
+| `apps/frontend/src/app/core/services/blog.service.ts` | + `viewCount` field; `getTopViewed()`; `getRelated()` |
+
+### Blog Related Posts + Sidebar UI
+
+| File | Mô tả |
+|------|-------|
+| `apps/frontend/src/app/features/blog/components/blog-list.component.*` | 2-col layout (posts + sidebar); sidebar "🔥 Đọc nhiều nhất" top 3 với rank badge vàng/bạc/đồng |
+| `apps/frontend/src/app/features/blog/components/blog-detail.component.*` | 2-col layout (article + sidebar); related posts grid dưới nội dung; sidebar top-viewed; tag là link filter; `👁 viewCount` trong meta |
+
+### Admin Blog Fix — Dedicated Endpoint
+
+| File | Mô tả |
+|------|-------|
+| `apps/backend/src/modules/blog/blog.routes.ts` | + `GET /admin/posts` (authenticate bắt buộc, trả tất cả status); `GET /admin/posts/:id` |
+| `apps/frontend/src/app/core/services/blog.service.ts` | + `getAdminAll()` → `/api/blog/admin/posts`; `getAdminById()` → `/api/blog/admin/posts/:id` |
+| `apps/frontend/src/app/features/admin/blog/blog-admin-list.component.ts` | `getAll()` → `getAdminAll()` |
+| `apps/frontend/src/app/features/admin/blog/blog-admin-editor.component.ts` | `getById()` → `getAdminById()` |
+
+**Root cause:** `GET /api/blog` dùng `optionalAuthenticate` — khi token hết hạn, middleware im lặng bỏ qua (không trả 401 để interceptor retry) → admin bị xử lý như guest → `onlyPublished = true` → chỉ thấy PUBLISHED, không thấy DRAFT/REVIEW.
+
+### Architectural Decisions thêm mới
+
+| Quyết định | Lý do |
+|------------|-------|
+| `BlogLayoutComponent` tách riêng | Blog là trang public marketing — không cần sidebar app; layout nhẹ hơn, UX tốt hơn cho người đọc chưa đăng nhập |
+| `incrementView()` fire-and-forget | Không block response; nếu ghi viewCount fail thì người dùng không bị ảnh hưởng |
+| Admin endpoints riêng với `authenticate` bắt buộc | `optionalAuthenticate` không phù hợp cho admin — khi token hết hạn, guard sẽ im lặng treat as guest thay vì trigger 401→refresh flow |
+| Related posts dùng `hasSome` Prisma | Đơn giản, không cần full-text search; đủ relevance cho blog giáo dục |
+

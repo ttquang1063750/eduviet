@@ -30,14 +30,14 @@ apps/
   backend/           # Fastify API server
 
 packages/
-  shared-types/      # TypeScript types dùng chung FE+BE
+  shared-types/      # TypeScript types dùng chung FE+BE (User, BlogPost, Question, Chat...)
   shared-constants/  # Enums, constants dùng chung
-  email-templates/   # React Email templates (chưa implement)
+  email-templates/   # React Email templates ✅ (welcome, verify-email, reset-password)
 
 libs/
-  prisma/            # Prisma schema + migrations
-  redis/             # Redis client wrapper (chưa implement)
-  storage/           # MinIO client wrapper (chưa implement)
+  prisma/            # Prisma schema + migrations ✅
+  redis/             # Redis client wrapper ✅
+  storage/           # MinIO client wrapper (inline trong storage module)
 ```
 
 ## Cấu trúc thư mục chi tiết
@@ -55,25 +55,55 @@ eduviet/
 │   │   └── src/app/
 │   │       ├── core/        # Auth, interceptors, guards, breadcrumb service
 │   │       ├── shared/      # UI components dùng chung (breadcrumb, drawing-canvas)
+│   │       ├── core/
+│   │       │   ├── services/
+│   │       │   │   ├── auth.service.ts
+│   │       │   │   ├── blog.service.ts
+│   │       │   │   ├── chat.service.ts
+│   │       │   │   ├── push-notification.service.ts  # Browser Notification API
+│   │       │   │   └── ...
+│   │       │   ├── interceptors/
+│   │       │   ├── guards/
+│   │       │   └── utils/
 │   │       ├── features/    # Feature modules (lazy loaded)
 │   │       │   ├── auth/
 │   │       │   ├── dashboard/
+│   │       │   ├── student-dashboard/  # Dashboard cá nhân cho học sinh
 │   │       │   ├── lessons/
 │   │       │   ├── classes/
-│   │       │   ├── chat/    # (đang implement)
-│   │       │   ├── blog/
+│   │       │   ├── chat/
+│   │       │   ├── blog/               # BlogLayout, public access, no authGuard
 │   │       │   ├── admin/
-│   │       │   │   ├── exercises/   # exercise-editor (split panel)
-│               │   ├── questions/   # question-bank list & detail editor
-
+│   │       │   │   ├── exercises/      # exercise-editor (split panel)
+│   │       │   │   ├── questions/      # question-bank list & detail editor
+│   │       │   │   ├── blog/           # admin blog list + editor (admin endpoints)
+│   │       │   │   ├── users/
+│   │       │   │   ├── schools/
+│   │       │   │   ├── classes/
+│   │       │   │   └── subjects/
 │   │       │   └── reports/
-│   │       └── layout/      # MainLayoutComponent
+│   │       └── layout/
+│   │           ├── main-layout/        # MainLayoutComponent (sidebar + breadcrumb, authGuard)
+│   │           └── blog-layout/        # BlogLayoutComponent (sticky header, public, no sidebar)
 │   └── backend/
 │       └── src/
-│           ├── modules/     # auth, users, lessons, questions, schools, classes, blog, notifications, chat
-│           ├── plugins/     # prisma.plugin, redis.plugin, socket.plugin (đang implement)
+│           ├── modules/
+│           │   ├── auth/
+│           │   ├── users/
+│           │   ├── lessons/       # + question nested routes
+│           │   ├── questions/     # Question Bank
+│           │   ├── schools/
+│           │   ├── classes/
+│           │   ├── blog/          # + admin/posts, top-viewed, related, viewCount
+│           │   ├── notifications/
+│           │   ├── chat/
+│           │   ├── storage/       # MinIO upload
+│           │   ├── reports/       # + export Excel/PDF
+│           │   ├── subjects/
+│           │   └── geo/
+│           ├── plugins/     # prisma.plugin, redis.plugin, socket.plugin
 │           └── shared/
-│               ├── middleware/  # authenticate, authorize
+│               ├── middleware/  # authenticate, authorize, optionalAuthenticate
 │               ├── errors/      # AppError class
 │               └── utils/       # writeAuditLog
 ├── packages/

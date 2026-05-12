@@ -1,11 +1,25 @@
 import { FastifyPluginAsync } from 'fastify';
+import crypto from 'node:crypto';
+import path from 'node:path';
 import { authenticate } from '../../shared/middleware/authenticate.js';
+import { AppError } from '../../shared/errors/app-error.js';
+import { writeAuditLog } from '../../shared/utils/audit.js';
 import { ChatService } from './chat.service.js';
 import {
   getMessagesSchema,
   createOneOnOneSchema,
   editMessageSchema,
 } from './chat.schema.js';
+
+// MIME types cho phép upload trong chat
+const CHAT_ALLOWED_MIME = new Set<string>([
+  'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',       // .xlsx
+]);
+
+const MAX_CHAT_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export const chatRoutes: FastifyPluginAsync = async (app) => {
   const service = new ChatService(app.prisma);
@@ -104,6 +118,51 @@ export const chatRoutes: FastifyPluginAsync = async (app) => {
     const result = await service.deleteMessage(id, request.user.id);
     return reply.send({ data: result });
   });
+
+  // POST /rooms/:id/upload — Upload file/ảnh trong chat room
+  app.post(
+    '/rooms/:id/upload',
+    {
+      config: { rateLimit: { max: 30, timeWindow: '1 minute' } },
+    },
+    async (request, reply) => {
+      const { id: roomId } = request.params as { id: string };
+
+      // RBAC: phải là thành viên phòng
+      const isMember = await service.isMember(roomId, request.user.id);
+      if (!isMember) {
+        throw AppError.forbidden('Bạn không phải là thành viên của phòng chat này');
+      }
+
+      const data = await request.file({ limits: { fileSize: MAX_CHAT_FILE_SIZE } });
+      if (!data) throw AppError.badRequest('Không có file nào được gửi lên');
+
+      if (!CHAT_ALLOWED_MIME.has(data.mimetype)) {
+        throw AppError.badRequest(
+          'Loại file không được phép. Chỉ chấp nhận: ảnh (jpg/png/gif/webp), PDF, DOCX, XLSX'
+        );
+      }
+
+      const buffer = await data.toBuffer();
+      if (buffer.length > MAX_CHAT_FILE_SIZE) {
+        throw AppError.badRequest('File quá lớn. Kích thước tối đa là 10MB');
+      }
+
+      const ext = path.extname(data.filename) || `.${data.mimetype.split('/')[1]}`;
+      const key = `public/uploads/chat/${roomId}/${crypto.randomUUID()}${ext}`;
+      const url = await app.storage.upload(buffer, key, data.mimetype);
+
+      await writeAuditLog(app.prisma, {
+        userId: request.user.id,
+        action: 'FILE_UPLOADED',
+        resourceType: 'FILE',
+        resourceId: key,
+        details: { roomId, size: buffer.length, mimeType: data.mimetype },
+      });
+
+      return reply.send({ data: { url, key, size: buffer.length, mimeType: data.mimetype } });
+    }
+  );
 
   // POST /rooms/:id/mark-read — Đánh dấu đã đọc
   app.post('/rooms/:id/mark-read', async (request, reply) => {

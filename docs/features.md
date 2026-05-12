@@ -23,19 +23,27 @@
 - Enroll/unenroll students
 - Theo dõi danh sách lớp
 
-## 4. Live Chat ✅ (hoàn thành 2026-05-07)
+## 4. Live Chat ✅ (hoàn thành 2026-05-12)
 - Real-time via Socket.io v4, Redis Adapter (multi-instance)
 - 3 loại phòng: CLASS, TEACHER_PARENT, ONE_ON_ONE — phân quyền theo từng loại
 - Floating widget (FAB góc phải màn hình) — có mặt mọi trang
-- Tính năng: typing indicator, read receipts, sửa/xóa tin nhắn, upload file/ảnh (MinIO)
+- Tính năng: typing indicator, read receipts (double-tick ✓/✓✓ màu xanh), sửa/xóa tin nhắn, upload file/ảnh (MinIO)
+- Push notifications (Browser Notification API) — chỉ hiện khi tab bị ẩn (`document.hidden === true`), xin quyền sau khi login
 - Lưu lịch sử chat vào PostgreSQL, cursor pagination
 - ChatRoom CLASS tự tạo khi tạo lớp; member tự sync khi enroll/unenroll
+- Tạo cuộc hội thoại mới: nút ✏️ + search user + `getOrCreateOneOnOne()`
+- Xoá chat room: cascade BE + socket `room_deleted` broadcast
 
-## 5. Blog & Tin tức ✅
-- Danh sách bài viết + chi tiết
-- Comment & reply có nested threading
-- Moderator có thể ẩn/xóa comment
-- Phân quyền: CONTENT_CREATOR viết, CONTENT_APPROVER duyệt
+## 5. Blog & Tin tức ✅ (cập nhật 2026-05-12)
+- Layout riêng biệt: `BlogLayoutComponent` — sticky header, không có sidebar/breadcrumb, public access (không cần đăng nhập)
+- Danh sách bài viết với 2-column layout: main feed + sidebar top-viewed (huy hiệu vàng/bạc/đồng)
+- Chi tiết bài viết: related posts theo tag, sidebar top-3 bài xem nhiều nhất, viewCount (fire-and-forget increment)
+- Tag là link, click filter danh sách theo tag tương ứng
+- Comment & reply có nested threading; Moderator có thể ẩn/xóa comment
+- Phân quyền: CONTENT_CREATOR viết → gửi duyệt → CONTENT_APPROVER xuất bản
+- Admin endpoints riêng (`GET /admin/posts`, `GET /admin/posts/:id`) với bắt buộc `authenticate` — tránh bug optionalAuthenticate nuốt 401
+- Quill WYSIWYG editor + upload ảnh lên MinIO (tránh base64 bloat)
+- Tag autocomplete (Material Chips), slug auto-gen từ tiêu đề, preview slug
 
 ## 6. Thông báo ✅ (in-app + email)
 - In-app notifications với unread count
@@ -55,8 +63,14 @@
 - Classes CRUD — list + detail edit (refactored: 3 file, OnPush, signals)
 - Content moderation — PENDING/REVIEW lessons, approve/reject workflow (refactored: 3 file, OnPush, signals)
 
-## 9. Bảo mật ✅ (hoàn thành 2026-05-08)
+## 9. Student Dashboard ✅ (hoàn thành 2026-05-12)
+- Dashboard cá nhân cho học sinh: thông tin tài khoản, lớp học, thống kê nhanh
+- Sử dụng `authService.user` signal (không phải `currentUser`)
+- OnPush, signals, inject() pattern
+
+## 10. Bảo mật ✅ (hoàn thành 2026-05-08)
 - CSRF protection — `@fastify/csrf-protection` cho cookie endpoints
 - XSS defense in depth — `sanitize-html` (BE) + `DOMPurify` pipe (FE)
-- `optionalAuthenticate` middleware — blog public nhưng nhận biết role
+- `optionalAuthenticate` middleware — public routes nhận biết role (không ném 401)
+- `authenticate` bắt buộc cho mọi admin/write endpoint — tránh silent token expiry
 - `@fastify/csrf-protection` GET /auth/csrf-token endpoint cho FE

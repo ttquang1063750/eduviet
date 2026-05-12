@@ -41,6 +41,9 @@ export class MainLayoutComponent {
       'HOMEROOM_TEACHER', 'SUBJECT_TEACHER'
     )
   );
+  readonly isStudent = computed(() =>
+    this.authService.hasRole('STUDENT', 'HOMEROOM_TEACHER', 'SUBJECT_TEACHER', 'SUPER_ADMIN', 'SCHOOL_ADMIN')
+  );
 
   readonly userInitial = computed(() => {
     const parts = (this.user()?.fullName ?? '').split(' ');

@@ -10,6 +10,11 @@ export class ChatService {
     this.repo = new ChatRepository(prisma);
   }
 
+  /** Kiểm tra user có là thành viên phòng không */
+  async isMember(roomId: string, userId: string): Promise<boolean> {
+    return this.repo.isMember(roomId, userId);
+  }
+
   /** Lấy danh sách phòng chat của người dùng */
   async getRooms(userId: string) {
     const rooms = await this.repo.findRoomsByUser(userId);
@@ -113,9 +118,22 @@ export class ChatService {
     return deleted;
   }
 
-  /** Đánh dấu đã đọc */
+  /** Đánh dấu đã đọc — cập nhật lastReadAt (unread count) + readBy per message (read receipts) */
   async markRead(roomId: string, userId: string) {
-    await this.repo.markRead(roomId, userId);
+    // Chạy song song: cập nhật lastReadAt trên member + readBy trên messages
+    await Promise.all([
+      this.repo.markRead(roomId, userId),
+      this.repo.markMessagesRead(roomId, userId),
+    ]);
+
+    // Không throw nếu audit thất bại
+    await writeAuditLog(this.prisma, {
+      userId,
+      action: 'CHAT_MESSAGES_READ',
+      resourceType: 'CHAT',
+      resourceId: roomId,
+    });
+
     return { success: true };
   }
 

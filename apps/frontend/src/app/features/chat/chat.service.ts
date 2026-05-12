@@ -1,8 +1,9 @@
 import { Injectable, inject, signal, computed, effect } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { tap } from 'rxjs';
+import { tap, map } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { AuthService } from '../../core/services/auth.service';
+import { PushNotificationService } from '../../core/services/push-notification.service';
 import {
   ChatRoom,
   ChatMessage,
@@ -13,6 +14,7 @@ import {
 export class ChatService {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
+  private pushNotification = inject(PushNotificationService);
   private socket: Socket | null = null;
 
   private readonly API = '/api/chat';
@@ -132,6 +134,11 @@ export class ChatService {
       this.removeMessageFromState(deleted.id, deleted.roomId);
     });
 
+    // Read receipts — cập nhật readBy trên messages khi người khác đọc
+    this.socket.on('message_read', (data: { roomId: string; userId: string; at: string }) => {
+      this.handleMessagesRead(data.roomId, data.userId, new Date(data.at));
+    });
+
     this.socket.on('error', (err: unknown) => {
       console.error('[ChatService] Socket error:', err);
     });
@@ -199,6 +206,19 @@ export class ChatService {
     this.socket.emit('send_message', { roomId, content, mediaUrl });
   }
 
+  /** Upload file/ảnh vào chat room — trả về URL công khai trên MinIO */
+  uploadFile(roomId: string, file: File) {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+
+    return this.http
+      .post<{ data: { url: string; key: string; size: number; mimeType: string } }>(
+        `${this.API}/rooms/${roomId}/upload`,
+        formData
+      )
+      .pipe(map((res) => res.data));
+  }
+
   deleteRoom(roomId: string) {
     return this.http.delete<{ data: { roomId: string } }>(`${this.API}/rooms/${roomId}`).pipe(
       tap(() => {
@@ -242,6 +262,15 @@ export class ChatService {
       newMap.set(message.roomId, [message, ...roomMsgs]);
       return newMap;
     });
+
+    // Push notification khi document ở background và tin nhắn từ người khác
+    const currentUserId = this.authService.user()?.id;
+    if (message.senderId !== currentUserId) {
+      this.pushNotification.show(
+        message.sender.fullName,
+        message.content.startsWith('[FILE]') ? '📎 Đã gửi một file' : message.content,
+      );
+    }
 
     this._rooms.update((rooms) => {
       const index = rooms.findIndex((r) => r.id === message.roomId);
@@ -292,6 +321,29 @@ export class ChatService {
       const newMap = new Map(map);
       const msgs = newMap.get(updated.roomId) ?? [];
       newMap.set(updated.roomId, msgs.map(m => m.id === updated.id ? updated : m));
+      return newMap;
+    });
+  }
+
+  /** Cập nhật readBy trên messages khi nhận được message_read event từ server */
+  private handleMessagesRead(roomId: string, readerUserId: string, readAt: Date) {
+    this._messagesMap.update((map) => {
+      const msgs = map.get(roomId);
+      if (!msgs) return map;
+
+      const updated = msgs.map((msg) => {
+        // Chỉ update messages gửi trước thời điểm đọc và chưa có readerUserId trong readBy
+        if (
+          new Date(msg.createdAt) <= readAt &&
+          !msg.readBy?.includes(readerUserId)
+        ) {
+          return { ...msg, readBy: [...(msg.readBy ?? []), readerUserId] };
+        }
+        return msg;
+      });
+
+      const newMap = new Map(map);
+      newMap.set(roomId, updated);
       return newMap;
     });
   }

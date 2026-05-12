@@ -1,0 +1,35 @@
+<div class="blog-layout">
+  <!-- Header nhỏ gọn -->
+  <header class="blog-header">
+    <div class="blog-header__inner">
+      <a routerLink="/" class="blog-header__brand">
+        <svg viewBox="0 0 40 40" fill="none" width="32" height="32">
+          <rect width="40" height="40" rx="10" fill="#4A90E2"/>
+          <path d="M10 14h20M10 20h14M10 26h17" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="28" cy="26" r="7" fill="#FFD700" stroke="white" stroke-width="1.5"/>
+          <path d="M25 26l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>EduViet Blog</span>
+      </a>
+
+      <nav class="blog-header__nav">
+        <a routerLink="/blog" class="blog-header__nav-link">Tất cả bài viết</a>
+        @if (isLoggedIn()) {
+          <a routerLink="/dashboard" class="blog-header__nav-link">Ứng dụng</a>
+        } @else {
+          <a routerLink="/auth/login" class="blog-header__nav-link blog-header__nav-link--cta">Đăng nhập</a>
+        }
+      </nav>
+    </div>
+  </header>
+
+  <!-- Nội dung chính -->
+  <main class="blog-main">
+    <router-outlet />
+  </main>
+
+  <!-- Footer -->
+  <footer class="blog-footer">
+    <p>© {{ currentYear }} EduViet — Nền tảng học tập trực tuyến dành cho học sinh Việt Nam</p>
+  </footer>
+</div>

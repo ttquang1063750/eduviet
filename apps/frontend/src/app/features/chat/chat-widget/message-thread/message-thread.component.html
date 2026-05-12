@@ -1,15 +1,38 @@
 <div class="thread-container">
   <div class="messages-list" #scrollContainer>
-    <!-- Load more button có thể thêm ở đây nếu scroll lên top -->
-    
+
     @for (msg of chatService.activeRoomMessages().slice().reverse(); track msg.id) {
       <div class="message-wrapper" [class.is-mine]="msg.senderId === currentUserId()">
         @if (msg.senderId !== currentUserId()) {
           <div class="sender-name">{{ msg.sender.fullName }}</div>
         }
         <div class="message-bubble">
-          <p class="content">{{ msg.content }}</p>
+
+          @if (msg.mediaUrl && !msg.content.startsWith('[FILE]')) {
+            <!-- Ảnh: hiển thị preview -->
+            <a [href]="msg.mediaUrl" target="_blank" rel="noopener" class="img-link">
+              <img [src]="msg.mediaUrl" [alt]="msg.content" class="media-img" loading="lazy" />
+            </a>
+            @if (msg.content) {
+              <p class="content">{{ msg.content }}</p>
+            }
+          } @else if (msg.mediaUrl && msg.content.startsWith('[FILE]')) {
+            <!-- File đính kèm: link tải xuống -->
+            <a [href]="msg.mediaUrl" target="_blank" rel="noopener" class="file-link">
+              <span class="file-icon">📎</span>
+              <span class="file-name">{{ msg.content.slice(7) }}</span>
+            </a>
+          } @else {
+            <!-- Tin nhắn văn bản thông thường -->
+            <p class="content">{{ msg.content }}</p>
+          }
+
           <span class="time">{{ msg.createdAt | date:'HH:mm' }}</span>
+          @if (msg.senderId === currentUserId()) {
+            <span class="tick" [class.tick--read]="isReadByOther(msg)" [title]="isReadByOther(msg) ? 'Đã xem' : 'Đã gửi'">
+              {{ isReadByOther(msg) ? '✓✓' : '✓' }}
+            </span>
+          }
         </div>
       </div>
     } @empty {
@@ -28,7 +51,37 @@
     }
   </div>
 
+  <!-- Upload progress -->
+  @if (isUploading()) {
+    <div class="upload-progress">
+      <span class="upload-progress__text">Đang tải file lên...</span>
+      <div class="upload-progress__bar">
+        <div class="upload-progress__fill"></div>
+      </div>
+    </div>
+  }
+
+  <!-- Hidden file input -->
+  <input
+    #fileInput
+    type="file"
+    [accept]="acceptedMime"
+    class="hidden-file-input"
+    (change)="onFileSelected($event)"
+  />
+
   <form class="message-input" (ngSubmit)="sendMessage()">
+    <!-- Attach button -->
+    <button
+      type="button"
+      class="btn-attach"
+      [disabled]="isUploading()"
+      (click)="attachFile()"
+      title="Đính kèm file"
+    >
+      📎
+    </button>
+
     <input
       type="text"
       name="message"
@@ -37,8 +90,12 @@
       (input)="onTyping($event)"
       placeholder="Nhập tin nhắn..."
       autocomplete="off"
+      [disabled]="isUploading()"
     >
-    <button type="submit" [disabled]="!messageContent().trim()">
+    <button
+      type="submit"
+      [disabled]="!messageContent().trim() || isUploading()"
+    >
       <span class="icon-send">➤</span>
     </button>
   </form>

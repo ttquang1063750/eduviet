@@ -27,6 +27,7 @@ export interface BlogListItem {
   coverImage: string | null;
   status: BlogStatus;
   tags: string[];
+  viewCount: number;
   publishedAt: string | null;
   author: BlogAuthor;
   _count: { comments: number };
@@ -76,6 +77,17 @@ export class BlogService {
     return this.http.get<PaginatedResponse<BlogListItem>>(this.API, { params });
   }
 
+  /** Dành cho admin/editor — dùng endpoint riêng với authenticate bắt buộc, trả tất cả status */
+  getAdminAll(filter: BlogFilter = {}): Observable<PaginatedResponse<BlogListItem>> {
+    let params = new HttpParams();
+    Object.entries(filter).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params = params.set(key, String(value));
+      }
+    });
+    return this.http.get<PaginatedResponse<BlogListItem>>(`${this.API}/admin/posts`, { params });
+  }
+
   getTags(limit = 20): Observable<string[]> {
     return this.http
       .get<ApiResponse<string[]>>(`${this.API}/tags`, { params: { limit: String(limit) } })
@@ -90,6 +102,13 @@ export class BlogService {
     // Backend uses slug as URL param, but we can also pass ID
     return this.http
       .get<ApiResponse<BlogPost>>(`${this.API}/${id}`)
+      .pipe(map((res) => res.data));
+  }
+
+  /** Dành cho admin editor — dùng endpoint admin/posts/:id để bắt buộc authenticate */
+  getAdminById(id: string): Observable<BlogPost> {
+    return this.http
+      .get<ApiResponse<BlogPost>>(`${this.API}/admin/posts/${id}`)
       .pipe(map((res) => res.data));
   }
 
@@ -136,5 +155,21 @@ export class BlogService {
 
   deleteComment(commentId: string): Observable<void> {
     return this.http.delete<void>(`${this.API}/comments/${commentId}`);
+  }
+
+  getTopViewed(limit = 3): Observable<BlogListItem[]> {
+    return this.http
+      .get<ApiResponse<BlogListItem[]>>(`${this.API}/top-viewed`, { params: { limit: String(limit) } })
+      .pipe(map((res) => res.data));
+  }
+
+  getRelated(postId: string, tags: string[], limit = 5): Observable<BlogListItem[]> {
+    const params: Record<string, string> = {
+      tags: tags.join(','),
+      limit: String(limit),
+    };
+    return this.http
+      .get<ApiResponse<BlogListItem[]>>(`${this.API}/${postId}/related`, { params })
+      .pipe(map((res) => res.data));
   }
 }
