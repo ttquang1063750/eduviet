@@ -123,20 +123,6 @@
   gap: 1rem;
   margin-top: 2rem;
 
-  .page-btn {
-    width: 32px;
-    height: 32px;
-    border: 1px solid var(--border-color);
-    background: white;
-    border-radius: 8px;
-    cursor: pointer;
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
-
   .page-info {
     font-size: 0.875rem;
     font-weight: 500;
@@ -151,9 +137,12 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 
   .empty-icon {
-    font-size: 3rem;
+    font-size: 3rem !important;
+    width: 3rem !important;
+    height: 3rem !important;
     display: block;
-    margin-bottom: 1rem;
+    margin: 0 auto 1rem;
+    color: var(--text-secondary);
   }
 
   p {

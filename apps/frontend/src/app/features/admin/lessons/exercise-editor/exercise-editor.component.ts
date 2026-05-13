@@ -15,13 +15,14 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { getApiErrorMessage } from '../../../../core/utils/http-error';
 import { QuestionFormComponent } from './question-form/question-form.component';
 import { QuestionBankPickerComponent } from './question-bank-picker/question-bank-picker.component';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 type PanelMode = 'list' | 'create' | 'edit' | 'generate';
 
 @Component({
   selector: 'app-exercise-editor',
   standalone: true,
-  imports: [DragDropModule, QuestionFormComponent, QuestionBankPickerComponent],
+  imports: [DragDropModule, QuestionFormComponent, QuestionBankPickerComponent, MatTooltipModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './exercise-editor.component.html',
   styleUrl: './exercise-editor.component.scss',

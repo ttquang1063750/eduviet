@@ -100,3 +100,21 @@ h5 {
 .mat-mdc-row:hover .mat-mdc-cell {
   background: #f8fafc;
 }
+
+/* ─── Sidebar collapsed: center nav icons ──────────────────────────────────────
+   ViewEncapsulation ngăn component SCSS vào .mdc-list-item__* bên trong
+   mat-list-item (là child component riêng của Angular Material).
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.sidebar.collapsed .mat-mdc-list-item {
+  // Remove horizontal padding so icon centres in 80px
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  justify-content: center !important;
+}
+
+.sidebar.collapsed .mdc-list-item__start {
+  // Remove trailing margin so icon sits centred with no gap
+  margin-inline-end: 0 !important;
+  margin-inline-start: 0 !important;
+}

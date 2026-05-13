@@ -78,7 +78,7 @@
               </td>
               <td class="date text-muted">{{ post.createdAt | date:'dd/MM/yyyy' }}</td>
               <td class="col-actions">
-                <button mat-icon-button [matMenuTriggerFor]="menu" title="Thao tác">
+                <button mat-icon-button [matMenuTriggerFor]="menu" matTooltip="Thao tác">
                   <mat-icon>more_vert</mat-icon>
                 </button>
                 <mat-menu #menu="matMenu">

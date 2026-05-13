@@ -18,7 +18,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-13 — session 20)
+## Trạng thái hiện tại (cập nhật 2026-05-13 — session 22)
 
 ### ✅ Đã hoàn thành
 
@@ -145,6 +145,25 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ `blog.service.ts` (FE) — `getTopViewed()`, `getRelated()`, `viewCount` in BlogListItem interface
 
 
+
+#### Session 22 — Sidebar Collapsible: icon-only mode (2026-05-13)
+- ✅ `core/utils/name-initials.ts` — `getInitials()`: "Nguyễn Văn A" → "NVA" (tối đa 3 ký tự)
+- ✅ `main-layout.component.ts` — `collapsed` signal (localStorage init) + `toggleSidebar()` + `userInitials` computed + MatButtonModule
+- ✅ `main-layout.component.html` — `[style.width]` 80px↔260px + toggle button (menu/menu_open) + `[matTooltip]` per nav item + `[style.display]` trên span[matListItemTitle] + NVA initials trong avatar
+- ✅ `main-layout.component.scss` — `transition: width 250ms ease` + overflow:hidden + collapsed brand (column) + collapsed user-card (centered, font-size 0.625rem)
+- ✅ `styles.scss` — global `.sidebar.collapsed` icon centering (padding:0, justify-content:center)
+
+#### Session 21 — Angular Material Cleanup: matTooltip + mat-icon + mat-button (2026-05-13)
+- ✅ `MatTooltipModule` thêm vào 8 component: content-admin-list, blog-admin-list, blog-admin-editor, subjects-admin, users-admin, users-admin-detail, lesson-admin-list, questions-admin, exercise-editor
+- ✅ Tất cả `title=` trên `mat-icon-button` → `matTooltip=` (9 chỗ trên 8 file)
+- ✅ Emoji buttons trong lesson-admin-list → `<mat-icon>`: ✏️→edit, 🧩→quiz, 📤→send
+- ✅ Emoji buttons trong questions-admin → `<mat-icon>`: ✏️→edit, 🗑️→delete
+- ✅ `<span>＋</span>` trong lesson-admin-list + questions-admin header → `<mat-icon>add</mat-icon>`
+- ✅ `<button class="page-btn">` pagination trong lesson-admin-list + questions-admin → `mat-stroked-button`
+- ✅ `<button class="btn btn-primary">` empty-state trong cả 2 component → `mat-flat-button`
+- ✅ Empty-state emoji spans → `<mat-icon class="empty-icon">` với SCSS adjusted (3rem × 3rem)
+- ✅ `<h1>👥 Quản lý người dùng</h1>` → xóa emoji thừa
+- ✅ Stale `.page-btn` SCSS xóa khỏi lesson-admin-list.component.scss + questions-admin.component.scss
 
 #### Session 20 — UI Refactor: Breadcrumb + Shared SCSS (2026-05-13)
 - 🐛 Fix `BreadcrumbService` — `snapshot.data` → `routeConfig?.data` (ngăn kế thừa label từ route cha, root cause của dual navigation)

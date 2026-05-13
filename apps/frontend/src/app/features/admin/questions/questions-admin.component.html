@@ -4,7 +4,7 @@
     <p class="page-subtitle">Quản lý toàn bộ câu hỏi — {{ total() }} câu hỏi</p>
   </div>
   <button mat-flat-button (click)="openCreate()">
-    <span>＋</span> Tạo câu hỏi
+    <mat-icon>add</mat-icon> Tạo câu hỏi
   </button>
 </div>
 
@@ -62,9 +62,11 @@
   <div class="loading-state">Đang tải...</div>
 } @else if (questions().length === 0) {
   <div class="empty-state">
-    <span class="empty-icon">🗂️</span>
+    <mat-icon class="empty-icon">folder_open</mat-icon>
     <p>Chưa có câu hỏi nào.</p>
-    <button class="btn btn-primary" (click)="openCreate()">Tạo câu hỏi đầu tiên</button>
+    <button mat-flat-button (click)="openCreate()">
+      <mat-icon>add</mat-icon> Tạo câu hỏi đầu tiên
+    </button>
   </div>
 } @else {
   <div class="table-container">
@@ -98,8 +100,12 @@
             </td>
             <td class="col-subject">{{ subjectMap()[q.subjectId] ?? '—' }}</td>
             <td class="col-actions">
-              <button mat-icon-button title="Chỉnh sửa" (click)="openEdit(q)">✏️</button>
-              <button mat-icon-button color="warn" title="Xoá" (click)="deleteQuestion(q)">🗑️</button>
+              <button mat-icon-button matTooltip="Chỉnh sửa" (click)="openEdit(q)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" matTooltip="Xoá" (click)="deleteQuestion(q)">
+                <mat-icon>delete</mat-icon>
+              </button>
             </td>
           </tr>
         }
@@ -110,9 +116,13 @@
   <!-- Phân trang -->
   @if (totalPages() > 1) {
     <div class="pagination">
-      <button class="page-btn" [disabled]="page() === 1" (click)="goToPage(page() - 1)">‹</button>
+      <button mat-stroked-button [disabled]="page() === 1" (click)="goToPage(page() - 1)">
+        <mat-icon>chevron_left</mat-icon> Trước
+      </button>
       <span class="page-info">{{ page() }} / {{ totalPages() }}</span>
-      <button class="page-btn" [disabled]="page() === totalPages()" (click)="goToPage(page() + 1)">›</button>
+      <button mat-stroked-button [disabled]="page() === totalPages()" (click)="goToPage(page() + 1)">
+        Sau <mat-icon>chevron_right</mat-icon>
+      </button>
     </div>
   }
 }

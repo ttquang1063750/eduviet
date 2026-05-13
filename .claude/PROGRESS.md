@@ -1,6 +1,6 @@
 # EduViet — Progress Tracker
 
-> Cập nhật lần cuối: 2026-05-12 (session 18 — Admin Refactor + Search Fix)
+> Cập nhật lần cuối: 2026-05-13 (session 22 — Sidebar Collapsible)
 > Workflow: `/plan-task` → `/execute-step` (lặp) → `/check-point` → `/resume` → tiếp tục
 
 ---
@@ -166,9 +166,42 @@ Fix Class Search bug in BE+FE.
 
 ---
 
+
+## Session 21 — Angular Material Cleanup: matTooltip + mat-icon + mat-button (2026-05-13)
+
+| File | Thay đổi |
+|------|----------|
+| `content-admin-list.component.ts/html` | `MatTooltipModule` + `title=` → `matTooltip=` |
+| `blog-admin-list.component.ts/html` | `MatTooltipModule` + `title=` → `matTooltip=` |
+| `blog-admin-editor.component.ts/html` | `MatTooltipModule` + `title=` → `matTooltip=` |
+| `subjects-admin.component.ts/html` | `MatTooltipModule` + `title=` → `matTooltip=` |
+| `users-admin.component.ts/html` | `MatTooltipModule` + `title=` → `matTooltip=`; xóa emoji 👥 |
+| `users-admin-detail.component.ts/html` | `MatTooltipModule` + `title=` → `matTooltip=` |
+| `classes-admin-detail.component.html` | `title=` → `matTooltip=` (đã có module) |
+| `lesson-admin-list.component.ts/html/scss` | `MatTooltipModule`; emoji ✏️🧩📤 → `<mat-icon>`; ＋ → `add`; page-btn → `mat-stroked-button`; empty-state → `mat-flat-button` + `<mat-icon class="empty-icon">`; xóa stale `.page-btn` SCSS |
+| `questions-admin.component.ts/html/scss` | `MatTooltipModule`; emoji ✏️🗑️ → `<mat-icon>`; ＋ → `add`; page-btn → `mat-stroked-button`; empty-state → `mat-flat-button` + `<mat-icon class="empty-icon">`; xóa stale `.page-btn` SCSS |
+| `exercise-editor.component.ts/html` | `MatTooltipModule` + `title=` → `matTooltip=` |
+| `main-layout.component.html/ts/scss` | Refactor sang `mat-sidenav-container`, `mat-nav-list`, `mat-icon`, `routerLinkActive [activated]`; emoji → Material icon names |
+| `CLAUDE.md` | Cập nhật session 21 |
+
+**Kết quả:** 0 `title=` còn lại trên `mat-icon-button`. 0 emoji buttons còn lại trong admin. Tất cả pagination + empty-state dùng Material buttons.
+
+
+## Session 22 — Sidebar Collapsible: icon-only mode (2026-05-13)
+
+| File | Thay đổi |
+|------|----------|
+| `core/utils/name-initials.ts` | **Tạo mới** — `getInitials(fullName)`: lấy chữ đầu mỗi từ, tối đa 3 ký tự ("Nguyễn Văn A" → "NVA") |
+| `layout/main-layout.component.ts` | + `collapsed` signal (localStorage init) + `toggleSidebar()` + `userInitials` computed + MatButtonModule import |
+| `layout/main-layout.component.html` | `[style.width]` binding (80px/260px) + `[class.collapsed]` + toggle button (menu/menu_open) + `[matTooltip]` trên mỗi nav item + `[style.display]` trên span[matListItemTitle] + user-card initials NVA |
+| `layout/main-layout.component.scss` | `transition: width 250ms ease` + overflow:hidden + .sidebar-brand--collapsed (column layout) + .toggle-btn styles + .user-card--collapsed (center, font 0.625rem) |
+| `styles.scss` | Global: `.sidebar.collapsed .mat-mdc-list-item` icon centering (padding:0, justify-content:center, margin:0 trên mdc-list-item__start) |
+
+**Kết quả:** Sidebar toggle giữa 260px (full) ↔ 80px (icon-only). State persist qua localStorage. Tooltip hiện khi collapsed. Avatar hiện NVA thay vì A khi thu gọn.
+
 ## 🚧 Backlog mới (2026-05-13)
 
-### P1 — UI Refactor: Breadcrumb + Shared SCSS + Angular Material
+### ~~P1 — UI Refactor: Breadcrumb + Shared SCSS + Angular Material~~ ✅ COMPLETED (session 20–21)
 
 #### Vấn đề
 - `BreadcrumbService` dùng `child.snapshot.data['breadcrumb']` → Angular kế thừa data từ route cha xuống mọi child route → sub-route `/admin/schools/:id/classes` tự inherit label 'Trường học' → sinh entry trùng trên main breadcrumb → các component con phải tự làm inline `<nav class="breadcrumb">` riêng để bù (xuất hiện 2 navigation cùng lúc).
@@ -203,7 +236,7 @@ Fix Class Search bug in BE+FE.
 
 ---
 
-### P2 — Sidebar Collapsible: icon-only mode
+### ~~P2 — Sidebar Collapsible: icon-only mode~~ ✅ COMPLETED (session 22)
 
 #### Mô tả
 Sidebar hiện tại luôn full-width. Cần thêm toggle:
