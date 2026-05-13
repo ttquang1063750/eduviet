@@ -1,25 +1,21 @@
 <div class="classes-page">
 
-  <!-- Breadcrumb -->
-  <nav class="breadcrumb">
-    <a class="breadcrumb__link" routerLink="/admin/schools">Trường học</a>
-    <mat-icon class="breadcrumb__sep">chevron_right</mat-icon>
-    <a class="breadcrumb__link" [routerLink]="baseUrl">{{ schoolName() || 'Trường' }}</a>
-    <mat-icon class="breadcrumb__sep">chevron_right</mat-icon>
-    <span class="breadcrumb__current">Lớp học</span>
-  </nav>
-
   <!-- Admin card -->
   <div class="admin-card">
 
     <!-- Toolbar -->
     <div class="toolbar">
-      <h2 class="toolbar__title">
-        Lớp học
-        @if (total() > 0) {
-          <span class="count-badge">{{ total() }}</span>
+      <div class="toolbar__title-group">
+        <h2 class="toolbar__title">
+          Lớp học
+          @if (total() > 0) {
+            <span class="count-badge">{{ total() }}</span>
+          }
+        </h2>
+        @if (schoolName()) {
+          <span class="toolbar__subtitle">{{ schoolName() }}</span>
         }
-      </h2>
+      </div>
       <div class="toolbar__actions">
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field">
           <mat-label>Tìm lớp</mat-label>

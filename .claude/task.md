@@ -1,139 +1,199 @@
-# Active Task: Refactor Schools & Classes Admin — mat-table + nested routes
+# Active Task: UI Refactor — Breadcrumb + Shared SCSS + Angular Material
 
 ## Mục tiêu
-Chuyển toàn bộ giao diện quản trị trường/lớp/học sinh sang Angular Material Table (`mat-table`) và tổ chức lại routes theo cấu trúc phân cấp: School → Classes → Students. Tách edit form ra khỏi list page.
+1. Fix bug `BreadcrumbService` kế thừa label từ route cha → xóa được dual navigation
+2. Xóa inline `<nav class="breadcrumb">` ở 3 school sub-components, dùng service thay thế
+3. Extract SCSS trùng lặp vào shared partial `_admin-shared.scss`
+4. Replace HTML element thuần bằng Angular Material component trên toàn admin
 
-## Trạng thái: COMPLETED
-Bắt đầu: 2026-05-12
-Step hiện tại: 17 — [FE] classes-admin-list.component.html — mat-table
-
----
-
-## Phase 1 — Schools List → mat-table
-
-- [x] 1. [FE] `schools-admin-list.component.ts` — thêm MatTableModule, MatSortModule; signal `displayedColumns`; thêm `onDelete(school)` + inject ConfirmService/ToastService
-- [x] 2. [FE] `schools-admin-list.component.html` — toolbar trên cùng (search + geo filter + nút "Tạo trường mới"); `<mat-table>` với columns: name, code, address, actions (nút edit → `/schools/:id`, nút classes → `/schools/:id/classes`, nút delete)
-- [x] 3. [FE] `schools-admin-list.component.scss` — table styles, action buttons inline
+## Trạng thái: IN_PROGRESS
+Bắt đầu: 2026-05-13
+Step hiện tại: 13 — main-layout: mat-sidenav + mat-nav-list + mat-icon
 
 ---
 
-## Phase 2 — Schools Detail — edit school only (bỏ class list)
+## Phase 1 — Fix BreadcrumbService (root cause)
 
-- [x] 4. [FE] `schools-admin-detail.component.ts` — xóa ClassesService, schoolClasses signal, loadClasses(), goToCreateClass(); giữ form + save + delete
-- [x] 5. [FE] `schools-admin-detail.component.html` — xóa toàn bộ section classes; chỉ giữ school form + nút Save/Delete
+- [x] 1. `breadcrumb.service.ts` — đổi `child.snapshot.data['breadcrumb']` → `child.snapshot.routeConfig?.data?.['breadcrumb']` để ngăn kế thừa từ ancestor; cập nhật `breadcrumb.component.ts` `getIcon()` map đủ tất cả routes
 
----
+## Phase 2 — Thêm breadcrumb data vào routes
 
-## Phase 3 — Routes restructure
+- [x] 2. `schools-admin.routes.ts` — thêm `data: { breadcrumb: '...' }`:
+  - `''` → không cần (cha đã có 'Trường học')
+  - `'new'` → `{ breadcrumb: 'Thêm trường mới' }`
+  - `':id'` → `{ breadcrumb: 'Chỉnh sửa trường' }`
+  - `':id/classes'` → `{ breadcrumb: 'Lớp học' }`
+  - `':id/classes/new'` → `{ breadcrumb: 'Tạo lớp mới' }`
+  - `':id/classes/:classId'` → `{ breadcrumb: 'Chỉnh sửa lớp' }`
+  - `':id/classes/:classId/students'` → `{ breadcrumb: 'Học sinh' }`
 
-- [x] 6. [FE] `schools-admin.routes.ts` — thêm routes con:
-  - `':id/classes'` → `SchoolClassesListComponent` (lazy)
-  - `':id/classes/new'` → `SchoolClassDetailComponent` (lazy)
-  - `':id/classes/:classId'` → `SchoolClassDetailComponent` (lazy)
-  - `':id/classes/:classId/students'` → `SchoolClassStudentsComponent` (lazy)
+## Phase 3 — Xóa inline nav, dùng BreadcrumbService.setLabel()
 
----
+- [x] 3. `school-classes-list` (ts + html + scss):
+  - ts: inject BreadcrumbService; sau khi `schoolsService.findById()` thành công → `breadcrumbService.setLabel('/admin/schools/' + id, school.name)`
+  - html: xóa toàn bộ `<nav class="breadcrumb">...</nav>`
+  - scss: xóa block `.breadcrumb { ... }`
 
-## Phase 4 — School Classes List (trang mới)
+- [x] 4. `school-class-detail` (ts + html + scss):
+  - ts: inject BreadcrumbService; sau load school → setLabel school; sau load class → setLabel class URL
+  - html: xóa `<nav class="breadcrumb">`
+  - scss: xóa `.breadcrumb`
 
-- [x] 7. [FE] Tạo `school-classes-list.component.ts` — inject ClassesService; `schoolId` từ `ActivatedRoute params`; load classes filter theo schoolId; mat-table signals; `onDelete(cls)` + ConfirmService
-- [x] 8. [FE] Tạo `school-classes-list.component.html` — header breadcrumb "Trường X / Lớp học"; toolbar + nút "Tạo lớp mới"; `<mat-table>` columns: name, grade, academicYear, homeroomTeacher, studentCount, actions (edit → `../:classId`, students → `../:classId/students`, delete)
-- [x] 9. [FE] Tạo `school-classes-list.component.scss`
+- [x] 5. `school-class-students` (ts + html + scss):
+  - ts: inject BreadcrumbService; setLabel sau khi load
+  - html: xóa `<nav class="breadcrumb">`
+  - scss: xóa `.breadcrumb`
 
----
+## Phase 4 — Shared SCSS partial
 
-## Phase 5 — School Class Detail (trang mới — edit/create class)
+- [x] 6. Tạo `src/app/styles/_admin-shared.scss`:
+  ```scss
+  // Admin card wrapper
+  .admin-card { background: white; border-radius: 12px; ... }
 
-- [x] 10. [FE] Tạo `school-class-detail.component.ts` — adapt từ `classes-admin-detail`; `schoolId` pre-fill từ route param `/:id`; sau save navigate về `../` (classes list); không có students section
-- [x] 11. [FE] Tạo `school-class-detail.component.html` — form: name, grade, academicYear, homeroomTeacherId (autocomplete); nút Save + Delete + Back
-- [x] 12. [FE] Tạo `school-class-detail.component.scss`
+  // Toolbar
+  .toolbar { display: flex; justify-content: space-between; ... }
+  .toolbar__title { ... }
+  .toolbar__actions { ... }
 
----
+  // Count badge
+  .count-badge { ... }
 
-## Phase 6 — School Class Students (trang mới)
+  // mat-table common
+  .table-wrapper { overflow-x: auto; }
+  // header cell uppercase style — dùng :host ::ng-deep hoặc global
+  .mat-mdc-header-cell { font-weight: 600; text-transform: uppercase; ... }
 
-- [x] 13. [FE] Tạo `school-class-students.component.ts` — inject ClassesService; `classId` từ route; load students + mat-table; search panel "Thêm học sinh" (reuse pattern từ classes-admin-detail hiện có); onRemove + onAdd
-- [x] 14. [FE] Tạo `school-class-students.component.html` — header breadcrumb 3 cấp; toolbar + "Thêm học sinh" toggle panel; `<mat-table>` columns: avatar, name, email, actions (remove); search panel với infinite scroll
-- [x] 15. [FE] Tạo `school-class-students.component.scss`
+  // Empty state
+  .no-data-row { display: block; }
+  .no-data-cell { display: flex; align-items: center; justify-content: center; ... }
 
----
+  // Pagination
+  .pagination { display: flex; justify-content: center; ... }
 
-## Phase 7 — Global Classes List → mat-table
+  // Actions column
+  .actions-header, .actions-cell { width: 140px; text-align: right; ... }
 
-- [x] 16. [FE] `classes-admin-list.component.ts` — thêm MatTableModule; `displayedColumns`; thêm `onDelete(cls)`; "Edit" navigate → `/admin/schools/:schoolId/classes/:id`
-- [x] 17. [FE] `classes-admin-list.component.html` — replace với `<mat-table>`; columns: name, grade, school, academicYear, actions (edit → school-scoped URL, delete); chú ý: không có nút "Tạo mới" (phải vào qua school)
-- [x] 18. [FE] `classes-admin-list.component.scss`
+  // Form layout (detail pages)
+  .form-card { background: white; border-radius: 12px; ... }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; ... }
+  .form-actions { display: flex; gap: 1rem; padding-top: 1.5rem; ... }
+
+  // Detail page header
+  .detail-header { display: flex; justify-content: space-between; ... }
+  ```
+
+- [x] 7. `schools-admin-list.component.scss` — thêm `@use '../../../styles/admin-shared' as shared;` (hoặc forward), xóa: `.admin-card`, `.toolbar`, `.toolbar__*`, `.count-badge`, `.table-wrapper`, `.mat-mdc-header-cell`, `.actions-header/.actions-cell`, `.no-data-row/.no-data-cell`, `.pagination` — chỉ giữ class riêng của file: `.schools-layout`, `.geo-panel`, `.schools-table`, `.code-badge`, `.school-name`, `.address-text`, `.search-field`
+
+- [x] 8. `school-classes-list.component.scss` — tương tự, chỉ giữ: `.classes-page`, `.classes-table`, `.grade-badge`, `.teacher-name`, `.no-teacher`, `.student-count`, `.search-field`
+
+- [x] 9. `school-class-students.component.scss` — chỉ giữ: `.students-page`, `.add-panel`, `.panel-loading`, `.panel-empty`, `.student-result`, `.students-table`, `.avatar*`, `.student-name/email`
+
+- [x] 10. `school-class-detail.component.scss` — chỉ giữ: `.detail-page`, `.teacher-email`
+
+- [x] 11. `classes-admin-list.component.scss` — chỉ giữ: `.classes-table`, `.class-name`, `.grade-badge`, `.school-link`, `.student-count`, `.search-field`, `.create-hint`, `.loading-bar`
+
+- [x] 12. `schools-admin-detail.component.scss` — chỉ giữ: `.detail-page`
+
+## Phase 5 — Replace HTML thuần → Angular Material
+
+- [ ] 13. `main-layout.component` (html + ts + scss):
+  - `<nav class="sidebar">` → `<mat-sidenav-container>` + `<mat-sidenav>` + `<mat-sidenav-content>`
+  - `<ul class="nav-list">` + `<li class="nav-item">` → `<mat-nav-list>` + `<mat-list-item>` + `[routerLink]`
+  - `<span class="nav-icon">emoji</span>` → `<mat-icon>icon_name</mat-icon>` (map emoji → Material icon name)
+  - `<button class="logout-btn">` → `<button mat-list-item color="warn">`
+  - Emoji map: 🏠→home, 📚→menu_book, 🎓→school, 📰→article, 📊→bar_chart, 👥→group, 🏛️→account_balance, 🏫→domain, 📐→calculate, ✏️→edit, 🗂️→folder_open, 📖→book, ✅→fact_check, 🚪→logout
+
+- [ ] 14. Admin features — scan các component trong `features/admin/` còn dùng HTML element thuần:
+  - `<button>` không có mat-directive → thêm `mat-button` / `mat-icon-button` / `mat-flat-button`
+  - `<select>` thuần → `<mat-select>` trong `<mat-form-field>`
+  - `<input type="text">` không có `matInput` → thêm `matInput`
+  - Tooltip thuần (`title="..."`) → `[matTooltip]="..."`
 
 ---
 
 ## Context quan trọng
 
-### Route params
-- `schools/:id` → `schoolId` dùng `ActivatedRoute.snapshot.paramMap.get('id')`
-- `schools/:id/classes/:classId` → cả `schoolId` lẫn `classId` cần thiết
-- Dùng `this.route.parent!.snapshot.paramMap.get('id')` để lấy schoolId trong component con
-
-### mat-table pattern (Angular Material)
+### BreadcrumbService fix
 ```typescript
-// imports
-import { MatTableModule } from '@angular/material/table';
-import { MatSortModule } from '@angular/material/sort';
+// TRƯỚC (bug — kế thừa từ cha):
+let label = child.snapshot.data['breadcrumb'];
 
-// component
-displayedColumns = ['name', 'code', 'address', 'actions'];
-dataSource = signal<School[]>([]);
-
-// template
-<mat-table [dataSource]="dataSource()">
-  <ng-container matColumnDef="name">
-    <mat-header-cell *matHeaderCellDef>Tên trường</mat-header-cell>
-    <mat-cell *matCellDef="let row">{{ row.name }}</mat-cell>
-  </ng-container>
-  <ng-container matColumnDef="actions">
-    <mat-header-cell *matHeaderCellDef></mat-header-cell>
-    <mat-cell *matCellDef="let row">
-      <button mat-icon-button [routerLink]="[row.id]"><mat-icon>edit</mat-icon></button>
-      <button mat-icon-button [routerLink]="[row.id, 'classes']"><mat-icon>school</mat-icon></button>
-      <button mat-icon-button color="warn" (click)="onDelete(row)"><mat-icon>delete</mat-icon></button>
-    </mat-cell>
-  </ng-container>
-  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-  <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
-</mat-table>
+// SAU (chỉ lấy data của route hiện tại):
+let label = child.snapshot.routeConfig?.data?.['breadcrumb'] as string | undefined;
 ```
 
-### Lazy loading trong routes
+### setLabel pattern
 ```typescript
-{
-  path: ':id/classes',
-  loadComponent: () =>
-    import('./school-classes-list.component').then(m => m.SchoolClassesListComponent),
-  title: 'Lớp học',
-},
+// Sau khi load school:
+this.breadcrumbService.setLabel(`/admin/schools/${schoolId}`, school.name);
+// Sau khi load class:
+this.breadcrumbService.setLabel(`/admin/schools/${schoolId}/classes/${classId}`, cls.name);
 ```
 
-### Quy tắc bắt buộc
-- OnPush, inject(), signals, @if/@for
-- 3 file riêng (ts/html/scss)
-- ConfirmService cho delete (không dùng confirm() browser)
-- Breadcrumb data trong route nếu cần
-- Không có any
+### mat-sidenav-container pattern
+```html
+<mat-sidenav-container class="app-layout">
+  <mat-sidenav mode="side" opened class="sidebar">
+    <mat-nav-list>
+      <a mat-list-item routerLink="/dashboard" routerLinkActive="active">
+        <mat-icon matListItemIcon>home</mat-icon>
+        <span matListItemTitle>Tổng quan</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+  <mat-sidenav-content class="main-content">
+    <app-breadcrumb />
+    <router-outlet />
+  </mat-sidenav-content>
+</mat-sidenav-container>
+```
+
+### _admin-shared.scss — dùng @use hoặc global
+Vì Angular scoped styles, các class mat-table như `.mat-mdc-header-cell` cần dùng `::ng-deep` hoặc đặt trong `styles.scss` global. Cân nhắc đặt table styles vào `styles.scss` global thay vì partial.
+
+### Emoji → Material icon mapping (step 13)
+| Emoji | Material Icon |
+|-------|--------------|
+| 🏠 | home |
+| 📚 | menu_book |
+| 🎓 | school |
+| 📰 | article |
+| 📊 | bar_chart |
+| 👥 | group |
+| 🏛️ | account_balance |
+| 🏫 | domain |
+| 📐 | calculate |
+| ✏️ | edit_note |
+| 🗂️ | folder_open |
+| 📖 | book |
+| ✅ | fact_check |
+| 🚪 | logout |
 
 ## Files đã tạo/sửa
-(Điền khi thực thi)
+- `apps/frontend/src/app/core/services/breadcrumb.service.ts` — fix routeConfig?.data
+- `apps/frontend/src/app/shared/components/breadcrumb/breadcrumb.component.ts` — update getIcon() map
+- `apps/frontend/src/app/features/admin/schools/schools-admin.routes.ts` — thêm data breadcrumb 6 routes
+- `apps/frontend/src/app/features/admin/schools/school-classes-list.component.html` — xóa inline nav, thêm toolbar subtitle
+- `apps/frontend/src/app/features/admin/schools/school-classes-list.component.scss` — xóa .breadcrumb, thêm __title-group/__subtitle
+- `apps/frontend/src/app/features/admin/schools/school-class-detail.component.html` — xóa inline nav
+- `apps/frontend/src/app/features/admin/schools/school-class-detail.component.scss` — xóa .breadcrumb block
+- `apps/frontend/src/app/features/admin/schools/school-class-students.component.html` — xóa inline nav, thêm subtitle
+- `apps/frontend/src/app/features/admin/schools/school-class-students.component.scss` — xóa .breadcrumb, thêm __title-group/__subtitle
+- `apps/frontend/src/app/styles/_admin-shared.scss` — tạo mới: admin-card, toolbar, count-badge, table-wrapper, no-data, pagination, detail-header, form-card/grid/actions
+- `apps/frontend/src/styles.scss` — thêm global mat-table header/row hover styles
+- `apps/frontend/src/app/features/admin/schools/schools-admin-list.component.scss` — @use partial, xóa 7 duplicated blocks (80 dòng → 65 dòng)
 
 ## Bước tiếp theo sau task này
-Không còn backlog kỹ thuật — nhận feature request mới từ stakeholders.
+P2 — Sidebar Collapsible (80px min mode, icon-only, initials)
 
 ---
 
-## Snapshot (checkpoint 2026-05-12 — giữa task)
-- **Đã xong: 15/18 steps** — Phase 1–6 hoàn thành
-- Phase 1: schools-admin-list → mat-table ✅
-- Phase 2: schools-admin-detail → edit only ✅
-- Phase 3: routes restructure (4 nested routes) ✅
-- Phase 4: SchoolClassesListComponent (mat-table) ✅
-- Phase 5: SchoolClassDetailComponent (edit class) ✅
-- Phase 6: SchoolClassStudentsComponent (mat-table + add panel) ✅
-- **Còn lại: Phase 7** — steps 16–18 (classes-admin-list → mat-table)
-- **Tiếp theo:** `/execute-step` để làm step 16
+## Snapshot (checkpoint 2026-05-13 — giữa task)
+- **Đã xong: 12/14 steps** — Phase 1–4 hoàn thành
+- Phase 1: Fix BreadcrumbService inheritance bug ✅
+- Phase 2: schools-admin.routes.ts breadcrumb data ✅
+- Phase 3: Xóa 3 inline nav (school-classes-list, school-class-detail, school-class-students) ✅
+- Phase 4: _admin-shared.scss + @use vào 6 SCSS files (−550 dòng duplicate) ✅
+- **Còn lại: Phase 5** — steps 13–14 (main-layout mat-sidenav + admin HTML replace)
+- **Tiếp theo:** `/resume` rồi `/execute-step` để làm step 13

@@ -163,3 +163,86 @@ Fix Class Search bug in BE+FE.
 
 **Root cause:** Angular Material dùng content projection để render icon/spinner bên trong button. Control flow `@if` chặn projection này, gây warning và có thể render sai.  
 **Fix pattern:** Render cả hai element, dùng `[style.display]="condition ? '' : 'none'"` để ẩn/hiện.
+
+---
+
+## 🚧 Backlog mới (2026-05-13)
+
+### P1 — UI Refactor: Breadcrumb + Shared SCSS + Angular Material
+
+#### Vấn đề
+- `BreadcrumbService` dùng `child.snapshot.data['breadcrumb']` → Angular kế thừa data từ route cha xuống mọi child route → sub-route `/admin/schools/:id/classes` tự inherit label 'Trường học' → sinh entry trùng trên main breadcrumb → các component con phải tự làm inline `<nav class="breadcrumb">` riêng để bù (xuất hiện 2 navigation cùng lúc).
+- `.admin-card`, `.toolbar`, `.count-badge`, `.table-wrapper`, `.no-data-cell`, `.pagination`, `.form-card`, `.form-grid` bị copy-paste qua 5+ component SCSS.
+- Nhiều element HTML thuần (`<div>`, `<nav>`, `<span>`) nên được thay bằng Angular Material component tương đương.
+
+#### Steps (12 steps)
+
+**Phase 1 — Fix BreadcrumbService**
+- [ ] 1. `breadcrumb.service.ts` — đổi sang `child.snapshot.routeConfig?.data?.['breadcrumb']` (không kế thừa từ cha); cập nhật `getIcon()` map đủ routes trong `breadcrumb.component.ts`
+
+**Phase 2 — Thêm breadcrumb data vào routes**
+- [ ] 2. `schools-admin.routes.ts` — thêm `data: { breadcrumb: '...' }` cho tất cả 7 routes
+
+**Phase 3 — Xóa inline nav, dùng BreadcrumbService.setLabel() cho dynamic labels**
+- [ ] 3. `school-classes-list` (ts + html + scss) — inject BreadcrumbService, `setLabel('/admin/schools/:id', schoolName)` sau khi load; xóa `<nav class="breadcrumb">`
+- [ ] 4. `school-class-detail` (ts + html + scss) — tương tự, setLabel school + class
+- [ ] 5. `school-class-students` (ts + html + scss) — tương tự
+
+**Phase 4 — Shared SCSS partial**
+- [ ] 6. Tạo `src/app/styles/_admin-shared.scss` — extract: `.admin-card`, `.toolbar`, `.toolbar__*`, `.count-badge`, `.table-wrapper`, `.no-data-cell`, `.pagination`, `.form-card`, `.form-grid`
+- [ ] 7. `schools-admin-list.component.scss` — `@use` partial, xóa duplicates
+- [ ] 8. `school-classes-list.component.scss` — `@use` partial, xóa duplicates
+- [ ] 9. `school-class-students.component.scss` — `@use` partial, xóa duplicates
+- [ ] 10. `school-class-detail.component.scss` — `@use` partial, xóa duplicates
+- [ ] 11. `classes-admin-list.component.scss` — `@use` partial, xóa duplicates
+- [ ] 12. `schools-admin-detail.component.scss` — `@use` partial, xóa duplicates
+
+**Phase 5 — Force replace elements bằng Angular Material**
+- [ ] 13. Scan toàn bộ `features/admin/` — thay `<button>` thuần bằng `mat-button/mat-icon-button`, `<input>` bằng `<mat-form-field>+matInput`, `<select>` bằng `<mat-select>`, badge/chip bằng `mat-chip`/`mat-badge`, tooltip bằng `matTooltip`, progress bằng `mat-progress-bar`/`mat-spinner`
+- [ ] 14. Scan `features/` (non-admin) — cùng pattern, ưu tiên form controls và action buttons
+
+---
+
+### P2 — Sidebar Collapsible: icon-only mode
+
+#### Mô tả
+Sidebar hiện tại luôn full-width. Cần thêm toggle:
+- **Expanded** (default): width hiện tại, hiện đầy đủ icon + label + user info
+- **Collapsed/min**: width = 80px, chỉ hiện icon của từng nav item, user avatar + chữ viết tắt tên (vd: "Nguyễn Văn A" → "NVA"), tooltip khi hover để xem full label
+- Toggle button (hamburger/chevron) ở header sidebar
+- State lưu vào `localStorage` để giữ qua reload
+
+#### Files cần sửa
+- `layout/main-layout.component.ts` — signal `sidebarCollapsed`, logic tạo initials từ fullName
+- `layout/main-layout.component.html` — bind `[class.collapsed]`, ẩn/hiện label text, hiện initials thay username
+- `layout/main-layout.component.scss` — `.sidebar` width transition, `.collapsed` overrides (width 80px, hide text, center icons)
+- `core/utils/name-initials.ts` (mới) — pure function `getInitials(fullName: string): string` ("Nguyễn Văn A" → "NVA")
+
+---
+
+## Session 20 — UI Refactor: Breadcrumb + Shared SCSS (2026-05-13)
+
+### Phase 1–4: Breadcrumb fix + SCSS de-duplication ✅
+
+| File | Thay đổi |
+|------|----------|
+| `breadcrumb.service.ts` | Fix inheritance bug: `snapshot.data` → `routeConfig?.data` |
+| `breadcrumb.component.ts` | Cập nhật `getIcon()` map đủ tất cả routes |
+| `schools-admin.routes.ts` | Thêm `data: { breadcrumb }` cho 6 routes |
+| `school-classes-list` (html+scss) | Xóa inline `<nav class="breadcrumb">`, thêm toolbar subtitle |
+| `school-class-detail` (html+scss) | Xóa inline nav |
+| `school-class-students` (html+scss) | Xóa inline nav, thêm toolbar subtitle "Lớp · Trường" |
+| `styles/_admin-shared.scss` | Tạo mới — 10 pattern dùng chung (181 dòng) |
+| `styles.scss` | Thêm global `.mat-mdc-header-cell` + `.mat-mdc-row:hover` |
+| `schools-admin-list.component.scss` | `@use` partial, 172→65 dòng |
+| `school-classes-list.component.scss` | `@use` partial, 173→52 dòng |
+| `school-class-students.component.scss` | `@use` partial, 236→113 dòng |
+| `school-class-detail.component.scss` | `@use` partial, 72→12 dòng |
+| `classes-admin-list.component.scss` | `@use` partial, 189→87 dòng |
+| `schools-admin-detail.component.scss` | `@use` partial, 65→7 dòng |
+
+**Tổng:** ~550 dòng CSS duplicate đã xóa. Breadcrumb giờ hiện đúng context từ route data, không còn dual navigation.
+
+### 🚧 Còn lại (Phase 5 — chưa làm)
+- Step 13: `main-layout.component` → `mat-sidenav-container` + `mat-nav-list` + `mat-icon` (thay emoji)
+- Step 14: Scan admin features, replace HTML element thuần bằng Angular Material

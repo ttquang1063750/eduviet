@@ -1,16 +1,5 @@
 <div class="detail-page">
 
-  <!-- Breadcrumb -->
-  <nav class="breadcrumb">
-    <a class="breadcrumb__link" routerLink="/admin/schools">Trường học</a>
-    <mat-icon class="breadcrumb__sep">chevron_right</mat-icon>
-    <a class="breadcrumb__link" [routerLink]="backUrl">Lớp học</a>
-    <mat-icon class="breadcrumb__sep">chevron_right</mat-icon>
-    <span class="breadcrumb__current">
-      {{ isEditMode() ? 'Chỉnh sửa lớp' : 'Tạo lớp mới' }}
-    </span>
-  </nav>
-
   <!-- Header -->
   <div class="detail-header">
     <div class="detail-header__left">

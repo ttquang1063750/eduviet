@@ -1,99 +1,13 @@
+@use '../../../styles/admin-shared';
+
 .detail-page {
   padding: 1.5rem;
   max-width: 680px;
   margin: 0 auto;
 }
 
-// ─── Breadcrumb ───────────────────────────────────────────────────────────────
-
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  margin-bottom: 1rem;
-  font-size: 0.875rem;
-
-  &__link {
-    color: var(--color-primary, #6366f1);
-    text-decoration: none;
-    &:hover { text-decoration: underline; }
-  }
-
-  &__sep {
-    font-size: 1rem;
-    width: 1rem;
-    height: 1rem;
-    color: var(--text-secondary, #94a3b8);
-  }
-
-  &__current {
-    color: var(--text-secondary, #64748b);
-    font-weight: 500;
-  }
-}
-
-// ─── Header ──────────────────────────────────────────────────────────────────
-
-.detail-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-
-  &__left {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  &__title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin: 0;
-  }
-}
-
-// ─── Form card ───────────────────────────────────────────────────────────────
-
-.form-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--border-color);
-  padding: 1.75rem;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.25rem;
-  margin-bottom: 1.5rem;
-
-  .full-width {
-    grid-column: span 2;
-  }
-}
-
-mat-form-field {
-  width: 100%;
-}
-
 .teacher-email {
   font-size: 0.75rem;
   color: var(--text-secondary, #94a3b8);
   margin-left: 0.5rem;
-}
-
-// ─── Actions ─────────────────────────────────────────────────────────────────
-
-.form-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border-color);
-
-  .delete-btn {
-    margin-left: auto;
-  }
 }

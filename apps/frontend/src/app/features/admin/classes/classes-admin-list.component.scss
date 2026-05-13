@@ -1,51 +1,8 @@
+@use '../../../styles/admin-shared';
+
+// Override: admin-card có margin ngoài 1.5rem (classes list không có wrapper page)
 .admin-card {
   margin: 1.5rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--border-color);
-  overflow: hidden;
-}
-
-// ─── Toolbar ─────────────────────────────────────────────────────────────────
-
-.toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border-color);
-  flex-wrap: wrap;
-  gap: 1rem;
-
-  &__title {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin: 0;
-  }
-
-  &__actions {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-}
-
-.count-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-primary, #6366f1);
-  color: white;
-  border-radius: 12px;
-  padding: 0 8px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  min-width: 22px;
-  height: 22px;
 }
 
 .search-field {
@@ -86,26 +43,11 @@
   100% { background-position: -200% 0; }
 }
 
-// ─── mat-table ───────────────────────────────────────────────────────────────
-
-.table-wrapper {
-  overflow-x: auto;
-}
+// ─── mat-table (component-specific) ──────────────────────────────────────────
 
 .classes-table {
   width: 100%;
-
-  .mat-mdc-header-cell {
-    font-weight: 600;
-    color: var(--text-secondary, #64748b);
-    font-size: 0.8125rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  .mat-mdc-row:hover .mat-mdc-cell {
-    background: #f8fafc;
-  }
+  // .mat-mdc-header-cell + .mat-mdc-row:hover → styles.scss global
 }
 
 .class-name {
@@ -148,41 +90,8 @@
   }
 }
 
+// Override shared .actions-header/.actions-cell (130px — 2 action buttons)
 .actions-header,
 .actions-cell {
   width: 130px;
-  text-align: right;
-  justify-content: flex-end;
-}
-
-// ─── Empty state ─────────────────────────────────────────────────────────────
-
-.no-data-row { display: block; }
-
-.no-data-cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 3rem 1rem;
-  color: var(--text-secondary, #94a3b8);
-  font-size: 0.9375rem;
-
-  mat-icon { font-size: 1.25rem; width: 1.25rem; height: 1.25rem; }
-}
-
-// ─── Phân trang ──────────────────────────────────────────────────────────────
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.25rem 1.5rem;
-  border-top: 1px solid var(--border-color);
-
-  .page-info {
-    font-size: 0.875rem;
-    color: var(--text-secondary, #64748b);
-  }
 }

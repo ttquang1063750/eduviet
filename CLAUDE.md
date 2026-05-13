@@ -18,7 +18,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-13 — session 19)
+## Trạng thái hiện tại (cập nhật 2026-05-13 — session 20)
 
 ### ✅ Đã hoàn thành
 
@@ -145,6 +145,14 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ `blog.service.ts` (FE) — `getTopViewed()`, `getRelated()`, `viewCount` in BlogListItem interface
 
 
+
+#### Session 20 — UI Refactor: Breadcrumb + Shared SCSS (2026-05-13)
+- 🐛 Fix `BreadcrumbService` — `snapshot.data` → `routeConfig?.data` (ngăn kế thừa label từ route cha, root cause của dual navigation)
+- ✅ `schools-admin.routes.ts` — thêm `data: { breadcrumb }` cho 6 nested routes
+- ✅ Xóa inline `<nav class="breadcrumb">` khỏi 3 school sub-components; thêm toolbar subtitle hiển thị tên trường/lớp
+- ✅ Tạo `src/app/styles/_admin-shared.scss` — 10 shared patterns (admin-card, toolbar, count-badge, table, empty-state, pagination, form-card, form-grid)
+- ✅ `styles.scss` — global `.mat-mdc-header-cell` + `.mat-mdc-row:hover` styles
+- ✅ 6 component SCSS files `@use` partial — xóa ~550 dòng CSS duplicate
 #### Session 19 — Bug Fix: Angular Material Content Projection (2026-05-13)
 - 🐛 Fix `school-class-students.component.html` — thay `@if` bên trong `<button mat-stroked-button>` và `<button mat-icon-button>` bằng `[style.display]` → fix Angular compiler warning `controlFlowPreventingContentProjection`
 #### Các module lớn trước đó

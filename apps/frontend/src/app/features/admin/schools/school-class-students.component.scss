@@ -1,84 +1,7 @@
+@use '../../../styles/admin-shared';
+
 .students-page {
   padding: 1.5rem;
-}
-
-// ─── Breadcrumb ───────────────────────────────────────────────────────────────
-
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  margin-bottom: 1.25rem;
-  font-size: 0.875rem;
-
-  &__link {
-    color: var(--color-primary, #6366f1);
-    text-decoration: none;
-    &:hover { text-decoration: underline; }
-  }
-
-  &__sep {
-    font-size: 1rem;
-    width: 1rem;
-    height: 1rem;
-    color: var(--text-secondary, #94a3b8);
-  }
-
-  &__current {
-    color: var(--text-secondary, #64748b);
-    font-weight: 500;
-  }
-}
-
-// ─── Admin card ───────────────────────────────────────────────────────────────
-
-.admin-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--border-color);
-  overflow: hidden;
-}
-
-// ─── Toolbar ─────────────────────────────────────────────────────────────────
-
-.toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border-color);
-  flex-wrap: wrap;
-  gap: 1rem;
-
-  &__title {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin: 0;
-  }
-
-  &__actions {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-}
-
-.count-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-primary, #6366f1);
-  color: white;
-  border-radius: 12px;
-  padding: 0 8px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  min-width: 22px;
-  height: 22px;
 }
 
 // ─── Add student panel ────────────────────────────────────────────────────────
@@ -174,26 +97,11 @@
   }
 }
 
-// ─── mat-table ───────────────────────────────────────────────────────────────
-
-.table-wrapper {
-  overflow-x: auto;
-}
+// ─── mat-table (component-specific) ──────────────────────────────────────────
 
 .students-table {
   width: 100%;
-
-  .mat-mdc-header-cell {
-    font-weight: 600;
-    color: var(--text-secondary, #64748b);
-    font-size: 0.8125rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  .mat-mdc-row:hover .mat-mdc-cell {
-    background: #f8fafc;
-  }
+  // .mat-mdc-header-cell + .mat-mdc-row:hover → styles.scss global
 }
 
 .avatar-header,
@@ -226,26 +134,8 @@
   color: var(--text-secondary, #64748b);
 }
 
+// Override shared .actions-header/.actions-cell (60px thay 140px — chỉ 1 nút)
 .actions-header,
 .actions-cell {
   width: 60px;
-  text-align: right;
-  justify-content: flex-end;
-}
-
-// ─── Empty state ─────────────────────────────────────────────────────────────
-
-.no-data-row { display: block; }
-
-.no-data-cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 3rem 1rem;
-  color: var(--text-secondary, #94a3b8);
-  font-size: 0.9rem;
-  text-align: center;
-
-  mat-icon { font-size: 1.25rem; width: 1.25rem; height: 1.25rem; }
 }

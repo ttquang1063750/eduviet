@@ -83,3 +83,20 @@ h5 {
 @view-transition {
   navigation: auto;
 }
+
+/* ─── Admin mat-table global styles ────────────────────────────────────────────
+   Đặt ở đây vì Angular ViewEncapsulation ngăn component SCSS scope vào
+   .mat-mdc-* classes bên trong mat-table (là child component riêng).
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.mat-mdc-header-cell {
+  font-weight: 600 !important;
+  color: var(--text-secondary, #64748b) !important;
+  font-size: 0.8125rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mat-mdc-row:hover .mat-mdc-cell {
+  background: #f8fafc;
+}

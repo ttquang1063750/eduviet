@@ -1,31 +1,21 @@
 <div class="students-page">
 
-  <!-- Breadcrumb -->
-  <nav class="breadcrumb">
-    <a class="breadcrumb__link" routerLink="/admin/schools">Trường học</a>
-    <mat-icon class="breadcrumb__sep">chevron_right</mat-icon>
-    <a class="breadcrumb__link" [routerLink]="classesUrl()">
-      {{ schoolName() || 'Trường' }}
-    </a>
-    <mat-icon class="breadcrumb__sep">chevron_right</mat-icon>
-    <a class="breadcrumb__link" [routerLink]="backUrl()">
-      {{ className() || 'Lớp' }}
-    </a>
-    <mat-icon class="breadcrumb__sep">chevron_right</mat-icon>
-    <span class="breadcrumb__current">Học sinh</span>
-  </nav>
-
   <!-- Admin card -->
   <div class="admin-card">
 
     <!-- Toolbar -->
     <div class="toolbar">
-      <h2 class="toolbar__title">
-        Học sinh
-        @if (enrollments().length > 0) {
-          <span class="count-badge">{{ enrollments().length }}</span>
+      <div class="toolbar__title-group">
+        <h2 class="toolbar__title">
+          Học sinh
+          @if (enrollments().length > 0) {
+            <span class="count-badge">{{ enrollments().length }}</span>
+          }
+        </h2>
+        @if (className()) {
+          <span class="toolbar__subtitle">{{ className() }}{{ schoolName() ? ' · ' + schoolName() : '' }}</span>
         }
-      </h2>
+      </div>
       <div class="toolbar__actions">
         <a mat-stroked-button [routerLink]="backUrl()">
           <mat-icon>edit</mat-icon> Chỉnh sửa lớp

@@ -7,16 +7,19 @@ export const SCHOOLS_ADMIN_ROUTES: Route[] = [
     path: '',
     component: SchoolsAdminListComponent,
     title: 'Quản lý trường học',
+    // Không cần breadcrumb — cha (app.routes.ts) đã có label 'Trường học'
   },
   {
     path: 'new',
     component: SchoolsAdminDetailComponent,
     title: 'Thêm trường mới',
+    data: { breadcrumb: 'Thêm trường mới' },
   },
   {
     path: ':id',
     component: SchoolsAdminDetailComponent,
     title: 'Chỉnh sửa trường',
+    data: { breadcrumb: 'Chỉnh sửa trường' },
   },
   {
     path: ':id/classes',
@@ -25,6 +28,7 @@ export const SCHOOLS_ADMIN_ROUTES: Route[] = [
         (m) => m.SchoolClassesListComponent,
       ),
     title: 'Lớp học của trường',
+    data: { breadcrumb: 'Lớp học' },
   },
   {
     path: ':id/classes/new',
@@ -33,6 +37,7 @@ export const SCHOOLS_ADMIN_ROUTES: Route[] = [
         (m) => m.SchoolClassDetailComponent,
       ),
     title: 'Tạo lớp học mới',
+    data: { breadcrumb: 'Tạo lớp mới' },
   },
   {
     path: ':id/classes/:classId',
@@ -41,6 +46,7 @@ export const SCHOOLS_ADMIN_ROUTES: Route[] = [
         (m) => m.SchoolClassDetailComponent,
       ),
     title: 'Chỉnh sửa lớp học',
+    data: { breadcrumb: 'Chỉnh sửa lớp' },
   },
   {
     path: ':id/classes/:classId/students',
@@ -49,5 +55,6 @@ export const SCHOOLS_ADMIN_ROUTES: Route[] = [
         (m) => m.SchoolClassStudentsComponent,
       ),
     title: 'Danh sách học sinh',
+    data: { breadcrumb: 'Học sinh' },
   },
 ];
