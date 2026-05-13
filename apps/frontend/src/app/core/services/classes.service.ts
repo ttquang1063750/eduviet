@@ -27,6 +27,7 @@ export interface ClassFilter {
   schoolId?: string;
   grade?: number;
   academicYear?: string;
+  search?: string;
 }
 
 export interface CreateClassRequest {

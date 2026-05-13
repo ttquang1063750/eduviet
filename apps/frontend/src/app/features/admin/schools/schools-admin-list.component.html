@@ -29,68 +29,103 @@
   }
 
   <main class="schools-layout__content">
-    <div class="admin-container">
-      <div class="header-actions">
-        <h2>Quản lý trường học</h2>
-        <a mat-flat-button routerLink="new">
-          <mat-icon>add</mat-icon> Thêm trường mới
-        </a>
+    <div class="admin-card">
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <h2 class="toolbar__title">Quản lý trường học</h2>
+        <div class="toolbar__actions">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field">
+            <mat-label>Tìm kiếm</mat-label>
+            <input matInput [formControl]="searchControl" placeholder="Tên trường, mã trường..." />
+            <mat-icon matPrefix>search</mat-icon>
+          </mat-form-field>
+          @if (selectedGeo()) {
+            <mat-chip-set>
+              <mat-chip (removed)="clearGeoFilter()">
+                {{ selectedGeoLabel() }}
+                <button matChipRemove><mat-icon>cancel</mat-icon></button>
+              </mat-chip>
+            </mat-chip-set>
+          }
+          <a mat-flat-button routerLink="new">
+            <mat-icon>add</mat-icon> Tạo trường mới
+          </a>
+        </div>
       </div>
 
-      <div class="filters">
-        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field">
-          <mat-label>Tìm kiếm trường</mat-label>
-          <input
-            matInput
-            [formControl]="searchControl"
-            placeholder="Tên trường, mã trường..."
-          />
-          <mat-icon matPrefix>search</mat-icon>
-        </mat-form-field>
+      <!-- mat-table -->
+      <div class="table-wrapper">
+        <mat-table [dataSource]="schools()" class="schools-table">
 
-        @if (selectedGeo()) {
-          <mat-chip-set>
-            <mat-chip (removed)="clearGeoFilter()">
-              {{ selectedGeoLabel() }}
-              <button matChipRemove>
-                <mat-icon>cancel</mat-icon>
+          <!-- Cột: Mã trường -->
+          <ng-container matColumnDef="code">
+            <mat-header-cell *matHeaderCellDef>Mã</mat-header-cell>
+            <mat-cell *matCellDef="let school">
+              <code class="code-badge">{{ school.code }}</code>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Cột: Tên trường -->
+          <ng-container matColumnDef="name">
+            <mat-header-cell *matHeaderCellDef>Tên trường</mat-header-cell>
+            <mat-cell *matCellDef="let school">
+              <span class="school-name">{{ school.name }}</span>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Cột: Địa chỉ -->
+          <ng-container matColumnDef="address">
+            <mat-header-cell *matHeaderCellDef>Địa chỉ</mat-header-cell>
+            <mat-cell *matCellDef="let school">
+              <span class="address-text">{{ school.address || '—' }}</span>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Cột: Hành động -->
+          <ng-container matColumnDef="actions">
+            <mat-header-cell *matHeaderCellDef class="actions-header"></mat-header-cell>
+            <mat-cell *matCellDef="let school" class="actions-cell">
+              <button
+                mat-icon-button
+                [routerLink]="[school.id, 'classes']"
+                matTooltip="Xem lớp học"
+                color="primary"
+              >
+                <mat-icon>school</mat-icon>
               </button>
-            </mat-chip>
-          </mat-chip-set>
-        }
+              <button
+                mat-icon-button
+                [routerLink]="[school.id]"
+                matTooltip="Chỉnh sửa trường"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                color="warn"
+                matTooltip="Xóa trường"
+                (click)="onDelete(school)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+
+          <!-- Empty state -->
+          <tr class="mat-row no-data-row" *matNoDataRow>
+            <td class="mat-cell no-data-cell" [attr.colspan]="displayedColumns.length">
+              <mat-icon>search_off</mat-icon>
+              <span>Không tìm thấy trường nào.</span>
+            </td>
+          </tr>
+        </mat-table>
       </div>
 
-      <div class="table-container">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Mã</th>
-              <th>Tên trường</th>
-              <th>Địa chỉ</th>
-              <th class="col-actions">Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (school of schools(); track school.id) {
-              <tr>
-                <td><code class="code-badge">{{ school.code }}</code></td>
-                <td><strong>{{ school.name }}</strong></td>
-                <td>{{ school.address }}</td>
-                <td class="col-actions">
-                  <button mat-icon-button [routerLink]="[school.id]" title="Chỉnh sửa">
-                    <mat-icon>edit</mat-icon>
-                  </button>
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="4" class="text-center">Không tìm thấy trường nào.</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-
+      <!-- Phân trang -->
       @if (total() > perPage) {
         <div class="pagination">
           <button
@@ -100,7 +135,7 @@
           >
             <mat-icon>chevron_left</mat-icon> Trước
           </button>
-          <span class="page-info">Trang {{ page() }} / {{ totalPages() }}</span>
+          <span class="page-info">Trang {{ page() }} / {{ totalPages() }} ({{ total() }} trường)</span>
           <button
             mat-stroked-button
             [disabled]="page() >= totalPages()"
@@ -110,6 +145,7 @@
           </button>
         </div>
       }
+
     </div>
   </main>
 </div>

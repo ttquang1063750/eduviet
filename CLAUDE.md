@@ -18,7 +18,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-12 — session 17)
+## Trạng thái hiện tại (cập nhật 2026-05-13 — session 19)
 
 ### ✅ Đã hoàn thành
 
@@ -49,7 +49,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 | `blog` | ✅ BlogLayout + viewCount + top-viewed sidebar | ✅ related posts + top-viewed | ✅ | ✅ |
 | `student-dashboard` | ✅ | — | — | ✅ |
 | `admin/users` | ✅ CRUD complete | ✅ CRUD complete | ✅ | ✅ |
-| `admin/schools` | ✅ | ✅ + danh sách lớp | — | ✅ |
+| `admin/schools` | ✅ mat-table + nested routes | ✅ edit only | — | ✅ |
 | `admin/classes` | ✅ | ✅ + quản lý học sinh | — | ✅ |
 | `admin/content` | ✅ | — | — | ✅ |
 | `admin/subjects` | ✅ grid + modal CRUD + AI suggest | — | ✅ | ✅ |
@@ -144,6 +144,9 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ `blog-list.component.*` — 2-column layout, top-viewed sidebar, viewCount `👁` display
 - ✅ `blog.service.ts` (FE) — `getTopViewed()`, `getRelated()`, `viewCount` in BlogListItem interface
 
+
+#### Session 19 — Bug Fix: Angular Material Content Projection (2026-05-13)
+- 🐛 Fix `school-class-students.component.html` — thay `@if` bên trong `<button mat-stroked-button>` và `<button mat-icon-button>` bằng `[style.display]` → fix Angular compiler warning `controlFlowPreventingContentProjection`
 #### Các module lớn trước đó
 - ✅ Live Chat (Socket.io v4, Redis adapter, RBAC per room)
 - ✅ Storage Module (MinIO)

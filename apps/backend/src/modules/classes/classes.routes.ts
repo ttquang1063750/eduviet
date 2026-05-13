@@ -24,6 +24,7 @@ const listClassSchema = z.object({
   schoolId: z.string().uuid().optional(),
   grade: z.coerce.number().int().min(1).max(12).optional(),
   academicYear: z.string().optional(),
+  search: z.string().optional(),
 });
 
 export const classesRoutes: FastifyPluginAsync = async (app) => {

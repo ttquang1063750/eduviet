@@ -6,16 +6,48 @@ export const SCHOOLS_ADMIN_ROUTES: Route[] = [
   {
     path: '',
     component: SchoolsAdminListComponent,
-    title: 'Manage Schools',
+    title: 'Quản lý trường học',
   },
   {
     path: 'new',
     component: SchoolsAdminDetailComponent,
-    title: 'New School',
+    title: 'Thêm trường mới',
   },
   {
     path: ':id',
     component: SchoolsAdminDetailComponent,
-    title: 'Edit School',
+    title: 'Chỉnh sửa trường',
+  },
+  {
+    path: ':id/classes',
+    loadComponent: () =>
+      import('./school-classes-list.component').then(
+        (m) => m.SchoolClassesListComponent,
+      ),
+    title: 'Lớp học của trường',
+  },
+  {
+    path: ':id/classes/new',
+    loadComponent: () =>
+      import('./school-class-detail.component').then(
+        (m) => m.SchoolClassDetailComponent,
+      ),
+    title: 'Tạo lớp học mới',
+  },
+  {
+    path: ':id/classes/:classId',
+    loadComponent: () =>
+      import('./school-class-detail.component').then(
+        (m) => m.SchoolClassDetailComponent,
+      ),
+    title: 'Chỉnh sửa lớp học',
+  },
+  {
+    path: ':id/classes/:classId/students',
+    loadComponent: () =>
+      import('./school-class-students.component').then(
+        (m) => m.SchoolClassStudentsComponent,
+      ),
+    title: 'Danh sách học sinh',
   },
 ];

@@ -1,63 +1,125 @@
-<div class="admin-container">
-  <div class="header-actions">
-    <h2>Quản lý lớp học</h2>
-    <a mat-flat-button routerLink="new" color="primary">
-      <mat-icon>add</mat-icon> Thêm lớp mới
-    </a>
+<div class="admin-card">
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <h2 class="toolbar__title">
+      Tất cả lớp học
+      @if (total() > 0) {
+        <span class="count-badge">{{ total() }}</span>
+      }
+    </h2>
+    <div class="toolbar__actions">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field">
+        <mat-label>Tìm lớp</mat-label>
+        <input matInput [formControl]="searchControl" placeholder="Tên lớp..." />
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
+      <span class="create-hint" matTooltip="Tạo lớp mới qua trang Trường học → Lớp học">
+        <mat-icon>info_outline</mat-icon>
+        Tạo lớp qua trang Trường học
+      </span>
+    </div>
   </div>
 
-  <div class="filters">
-    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field">
-      <mat-label>Tìm kiếm lớp học</mat-label>
-      <input
-        matInput
-        [formControl]="searchControl"
-        placeholder="Tên lớp..."
-      >
-      <mat-icon matPrefix>search</mat-icon>
-    </mat-form-field>
+  <!-- Progress bar -->
+  @if (loading()) {
+    <div class="loading-bar"></div>
+  }
+
+  <!-- mat-table -->
+  <div class="table-wrapper">
+    <mat-table [dataSource]="classes()" class="classes-table">
+
+      <!-- Cột: Tên lớp -->
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef>Tên lớp</mat-header-cell>
+        <mat-cell *matCellDef="let cls">
+          <span class="class-name">{{ cls.name }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Cột: Khối -->
+      <ng-container matColumnDef="grade">
+        <mat-header-cell *matHeaderCellDef>Khối</mat-header-cell>
+        <mat-cell *matCellDef="let cls">
+          <span class="grade-badge">{{ cls.grade }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Cột: Trường -->
+      <ng-container matColumnDef="school">
+        <mat-header-cell *matHeaderCellDef>Trường</mat-header-cell>
+        <mat-cell *matCellDef="let cls">
+          <a
+            class="school-link"
+            [routerLink]="['/admin/schools', cls.school.id, 'classes']"
+            matTooltip="Xem lớp học của trường này"
+          >
+            {{ cls.school.name }}
+          </a>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Cột: Năm học -->
+      <ng-container matColumnDef="academicYear">
+        <mat-header-cell *matHeaderCellDef>Năm học</mat-header-cell>
+        <mat-cell *matCellDef="let cls">{{ cls.academicYear }}</mat-cell>
+      </ng-container>
+
+      <!-- Cột: Học sinh -->
+      <ng-container matColumnDef="students">
+        <mat-header-cell *matHeaderCellDef>HS</mat-header-cell>
+        <mat-cell *matCellDef="let cls">
+          <span class="student-count">
+            <mat-icon>people</mat-icon>{{ cls._count.enrollments }}
+          </span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Cột: Hành động -->
+      <ng-container matColumnDef="actions">
+        <mat-header-cell *matHeaderCellDef class="actions-header"></mat-header-cell>
+        <mat-cell *matCellDef="let cls" class="actions-cell">
+          <button
+            mat-icon-button
+            matTooltip="Danh sách học sinh"
+            color="primary"
+            (click)="onViewStudents(cls)"
+          >
+            <mat-icon>people</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            matTooltip="Chỉnh sửa lớp"
+            (click)="onEdit(cls)"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            matTooltip="Xóa lớp"
+            color="warn"
+            (click)="onDelete(cls)"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+
+      <!-- Empty state -->
+      <tr class="mat-row no-data-row" *matNoDataRow>
+        <td class="mat-cell no-data-cell" [attr.colspan]="displayedColumns.length">
+          <mat-icon>class</mat-icon>
+          <span>Không tìm thấy lớp nào.</span>
+        </td>
+      </tr>
+    </mat-table>
   </div>
 
-  <div class="table-container">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Tên lớp</th>
-          <th>Trường</th>
-          <th>Giáo viên chủ nhiệm</th>
-          <th class="col-actions">Hành động</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (cls of classes(); track cls.id) {
-          <tr>
-            <td><strong>{{ cls.name }}</strong></td>
-            <td class="text-muted">{{ cls.school.name }}</td>
-            <td>
-              @if (cls.homeroomTeacher) {
-                <div class="user-chip">
-                  <span class="user-avatar">{{ cls.homeroomTeacher.fullName.at(-1) }}</span>
-                  {{ cls.homeroomTeacher.fullName }}
-                </div>
-              } @else {
-                <span class="text-muted italic">Chưa phân công</span>
-              }
-            </td>
-            <td class="col-actions">
-              <button mat-icon-button [routerLink]="[cls.id]" title="Chỉnh sửa">
-                <mat-icon>edit</mat-icon>
-              </button>
-            </td>
-          </tr>
-        } @empty {
-          <tr>
-            <td colspan="4" class="text-center py-8 text-muted">Không tìm thấy lớp nào.</td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-
+  <!-- Phân trang -->
   @if (total() > perPage) {
     <div class="pagination">
       <button
@@ -67,7 +129,7 @@
       >
         <mat-icon>chevron_left</mat-icon> Trước
       </button>
-      <span class="page-info">Trang {{ page() }} / {{ totalPages() }}</span>
+      <span class="page-info">Trang {{ page() }} / {{ totalPages() }} ({{ total() }} lớp)</span>
       <button
         mat-stroked-button
         [disabled]="page() >= totalPages()"
@@ -77,4 +139,5 @@
       </button>
     </div>
   }
+
 </div>

@@ -1,0 +1,133 @@
+<div class="detail-page">
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb">
+    <a class="breadcrumb__link" routerLink="/admin/schools">Trường học</a>
+    <mat-icon class="breadcrumb__sep">chevron_right</mat-icon>
+    <a class="breadcrumb__link" [routerLink]="backUrl">Lớp học</a>
+    <mat-icon class="breadcrumb__sep">chevron_right</mat-icon>
+    <span class="breadcrumb__current">
+      {{ isEditMode() ? 'Chỉnh sửa lớp' : 'Tạo lớp mới' }}
+    </span>
+  </nav>
+
+  <!-- Header -->
+  <div class="detail-header">
+    <div class="detail-header__left">
+      <a mat-icon-button [routerLink]="backUrl" matTooltip="Quay lại">
+        <mat-icon>arrow_back</mat-icon>
+      </a>
+      <h2 class="detail-header__title">
+        {{ isEditMode() ? 'Chỉnh sửa lớp học' : 'Tạo lớp học mới' }}
+      </h2>
+    </div>
+    @if (isEditMode()) {
+      <a
+        mat-stroked-button
+        [routerLink]="[...backUrl, classId(), 'students']"
+      >
+        <mat-icon>people</mat-icon> Danh sách học sinh
+      </a>
+    }
+  </div>
+
+  <!-- Form card -->
+  <div class="form-card">
+    <form [formGroup]="classForm" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+
+        <!-- Tên lớp -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Tên lớp</mat-label>
+          <input matInput formControlName="name" placeholder="Ví dụ: 10A1, 12B3..." required />
+          <mat-error>Tên lớp là bắt buộc</mat-error>
+        </mat-form-field>
+
+        <!-- Khối -->
+        <mat-form-field appearance="outline">
+          <mat-label>Khối</mat-label>
+          <mat-select formControlName="grade">
+            @for (g of grades; track g) {
+              <mat-option [value]="g">Khối {{ g }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>Vui lòng chọn khối</mat-error>
+        </mat-form-field>
+
+        <!-- Năm học -->
+        <mat-form-field appearance="outline">
+          <mat-label>Năm học</mat-label>
+          <input matInput formControlName="academicYear" placeholder="2025-2026" required />
+          <mat-error>Năm học là bắt buộc</mat-error>
+        </mat-form-field>
+
+        <!-- Giáo viên chủ nhiệm (autocomplete) -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Giáo viên chủ nhiệm</mat-label>
+          <input
+            matInput
+            [value]="teacherSearch()"
+            (input)="onTeacherInput($event)"
+            [matAutocomplete]="teacherAuto"
+            placeholder="Tìm theo tên..."
+          />
+          <mat-icon matPrefix>person</mat-icon>
+          @if (loadingTeachers()) {
+            <mat-spinner matSuffix diameter="16" />
+          }
+          <mat-autocomplete
+            #teacherAuto="matAutocomplete"
+            (optionSelected)="selectTeacher($event.option.value)"
+            [displayWith]="displayTeacher"
+          >
+            @for (teacher of teachers(); track teacher.id) {
+              <mat-option [value]="teacher">
+                {{ teacher.fullName }}
+                <span class="teacher-email">{{ teacher.email }}</span>
+              </mat-option>
+            }
+            @if (teachers().length === 0 && !loadingTeachers()) {
+              <mat-option disabled>Không tìm thấy giáo viên</mat-option>
+            }
+          </mat-autocomplete>
+          <mat-hint>Không bắt buộc — có thể cập nhật sau</mat-hint>
+        </mat-form-field>
+
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          [disabled]="classForm.invalid || saving()"
+        >
+          @if (saving()) {
+            <mat-spinner diameter="18" />
+          } @else {
+            <mat-icon>save</mat-icon>
+          }
+          {{ isEditMode() ? 'Cập nhật' : 'Tạo lớp' }}
+        </button>
+
+        <a mat-stroked-button [routerLink]="backUrl">
+          Hủy
+        </a>
+
+        @if (isEditMode()) {
+          <button
+            mat-stroked-button
+            color="warn"
+            type="button"
+            (click)="onDelete()"
+            class="delete-btn"
+          >
+            <mat-icon>delete</mat-icon> Xóa lớp
+          </button>
+        }
+      </div>
+    </form>
+  </div>
+
+</div>
