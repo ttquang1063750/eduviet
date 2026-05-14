@@ -2,13 +2,12 @@ import {
   ApplicationConfig,
   provideZonelessChangeDetection,
   provideBrowserGlobalErrorListeners,
-  APP_INITIALIZER,
-  ENVIRONMENT_INITIALIZER,
+  provideAppInitializer,
+  provideEnvironmentInitializer,
   inject,
 } from '@angular/core';
 import { provideRouter, withComponentInputBinding, withViewTransitions } from '@angular/router';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideMarkdown, MARKED_EXTENSIONS, SANITIZE } from 'ngx-markdown';
 import { provideQuillConfig } from 'ngx-quill';
 import { HttpClient } from '@angular/common/http';
@@ -25,19 +24,15 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding(), withViewTransitions()),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
-    provideAnimationsAsync(),
-    {
-      provide: APP_INITIALIZER,
-      useFactory: (authService: AuthService) => () => authService.init(),
-      deps: [AuthService],
-      multi: true,
-    },
+    // authService.init() chạy trước khi app render (await Promise)
+    provideAppInitializer(() => {
+      const authService = inject(AuthService);
+      return authService.init();
+    }),
     // Eager-instantiate ChatService ngay khi app start để effect() tự connect socket khi user đăng nhập
-    {
-      provide: ENVIRONMENT_INITIALIZER,
-      useValue: () => inject(ChatService),
-      multi: true,
-    },
+    provideEnvironmentInitializer(() => {
+      inject(ChatService);
+    }),
     // SANITIZE token — cần thiết để KaTeX render HTML/SVG không bị Angular sanitizer cắt
     provideMarkdown({
       loader: HttpClient,

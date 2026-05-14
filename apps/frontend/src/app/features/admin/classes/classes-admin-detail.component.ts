@@ -14,8 +14,7 @@ import { UsersService } from '../../../core/services/users.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
 import { School, User } from '@eduviet/shared-types';
-import { switchMap, tap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { of, Subject } from 'rxjs';
+import { of, Subject, switchMap, tap, debounceTime, distinctUntilChanged } from 'rxjs';
 import { getApiErrorMessage } from '../../../core/utils/http-error';
 
 import { MatButtonModule } from '@angular/material/button';

@@ -18,7 +18,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-13 — session 22)
+## Trạng thái hiện tại (cập nhật 2026-05-14 — session 23)
 
 ### ✅ Đã hoàn thành
 
@@ -218,6 +218,17 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ `main-layout.component.html` — thêm "🗂️ Ngân hàng câu hỏi" link (isAdmin || isContentRole)
 - ✅ `features/admin/questions/questions-admin.component` — Question Bank admin page (filter, paginate, CRUD modal)
 - ✅ `chat.types.ts` — `role` → `roles` (multi-role fix)
+
+
+#### Session 23 — Bug fixes + Deprecated API cleanup (2026-05-14)
+- ✅ `AppError.validation()` — thêm static method HTTP 422 (fix runtime TypeError)
+- ✅ ESM/CJS fix — xóa `import.meta.url` khỏi `reports.service.ts`, dùng CJS `__dirname`
+- ✅ PDF font tiếng Việt — fixed (hệ quả của ESM/CJS fix trên)
+- ✅ `Lesson.reviewerId` — thêm vào shared-types interface
+- ✅ Deprecated API cleanup toàn bộ FE: `APP_INITIALIZER`, `ENVIRONMENT_INITIALIZER`, `rxjs/operators`, `CommonModule`, `@Input/@Output`, `@ViewChild`, `$any()`, `provideAnimations*`
+- ✅ Lint fixes: unused imports, `any` casts, unused args
+- ✅ Sidebar polish: `var(--mat-sys-primary)` theme color, border-radius removed, icon centering fix
+- ✅ `rules.md` — thêm section "❌ Deprecated — TUYỆT ĐỐI KHÔNG DÙNG" với examples
 
 ### 🚧 Còn lại (theo độ ưu tiên)
 - **Không còn backlog kỹ thuật tồn đọng.** Tất cả P1–P3 đã hoàn thành.

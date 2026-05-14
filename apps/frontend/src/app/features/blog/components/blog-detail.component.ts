@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit, ChangeDetectionStrategy, computed } 
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { switchMap, forkJoin, of } from 'rxjs';
+import { switchMap } from 'rxjs';
 import { BlogService, BlogPost, BlogListItem, Comment } from '../../../core/services/blog.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { SafeHtmlPipe } from '../../../shared/pipes/safe-html.pipe';

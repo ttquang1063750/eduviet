@@ -12,7 +12,7 @@ import { SchoolsService } from '../../../core/services/schools.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
 import { School } from '@eduviet/shared-types';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { GeoTreeComponent, GeoNodeSelected } from '../../../shared/components/geo-tree/geo-tree.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { getApiErrorMessage } from '../../../core/utils/http-error';

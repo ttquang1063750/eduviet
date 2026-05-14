@@ -11,8 +11,7 @@ import { SchoolsService } from '../../../core/services/schools.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { School } from '@eduviet/shared-types';
-import { switchMap, tap } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { of, switchMap, tap } from 'rxjs';
 import { getApiErrorMessage } from '../../../core/utils/http-error';
 
 import { MatButtonModule } from '@angular/material/button';

@@ -10,7 +10,25 @@ html {
                   theme-type: light,
           ),
           typography: (brand-family: "'Inter', sans-serif",
-        plain-family: "'Inter', sans-serif",
-      ),
-      density: -3));
+                  plain-family: "'Inter', sans-serif",
+          ),
+          density: -3));
+
+  @include mat.button-overrides(
+          (
+                  filled-container-shape: 4px,
+                  outlined-container-shape: 4px,
+                  outlined-label-text-color: var(--mat-sys-on-surface-variant),
+                  protected-container-shape: 4px,
+                  text-container-shape: 4px,
+                  text-label-text-color: var(--mat-sys-on-surface-variant),
+                  tonal-container-shape: 4px,
+          )
+  );
+
+  @include mat.icon-button-overrides(
+          (
+                  state-layer-color: var(--mat-sys-primary),
+          )
+  );
 }

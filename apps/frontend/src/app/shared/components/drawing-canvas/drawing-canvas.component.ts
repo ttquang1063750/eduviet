@@ -1,7 +1,7 @@
 import {
   Component,
   ElementRef,
-  ViewChild,
+  viewChild,
   input,
   output,
   signal,
@@ -36,7 +36,7 @@ interface HistoryEntry {
 export class DrawingCanvasComponent implements AfterViewInit, OnDestroy, OnChanges {
   private zone = inject(NgZone);
 
-  @ViewChild('canvasContainer') containerRef!: ElementRef<HTMLDivElement>;
+  containerRef = viewChild.required<ElementRef<HTMLDivElement>>('canvasContainer');
 
   // ── Inputs / Outputs ──────────────────────────────────────────────────────
   backgroundImageUrl = input<string | null>(null);
@@ -92,7 +92,7 @@ export class DrawingCanvasComponent implements AfterViewInit, OnDestroy, OnChang
   // ── Stage initialisation ──────────────────────────────────────────────────
 
   private initStage(): void {
-    const el = this.containerRef.nativeElement;
+    const el = this.containerRef().nativeElement;
     const width = el.offsetWidth || 680;
     const height = Math.round(width * 0.6); // 5:3 aspect ratio
     el.style.height = `${height}px`;

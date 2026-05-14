@@ -2,10 +2,9 @@ import { PrismaClient } from '@prisma/client';
 import { ReportsRepository } from './reports.repository.js';
 import ExcelJS from 'exceljs';
 import PDFDocument from 'pdfkit';
-import { fileURLToPath } from 'url';
 import path from 'path';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// CJS context: __dirname is injected automatically by Node — no import.meta needed
 const FONTS_DIR = path.join(__dirname, '../../assets/fonts');
 const FONT_REGULAR = path.join(FONTS_DIR, 'LiberationSans-Regular.ttf');
 const FONT_BOLD    = path.join(FONTS_DIR, 'LiberationSans-Bold.ttf');

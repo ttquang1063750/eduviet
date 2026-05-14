@@ -64,23 +64,109 @@ export class FooComponent {
 - **KHÔNG dùng** `alert()`, `confirm()`, `prompt()` của trình duyệt.
   - Dùng `ConfirmService.confirm()` (trả về `Promise<boolean>`) cho các hộp thoại xác nhận.
 
+### ❌ Deprecated — TUYỆT ĐỐI KHÔNG DÙNG (Angular 19+)
+
+#### App/Environment initializers
+```typescript
+// ❌ SAI — deprecated từ Angular v19
+{ provide: APP_INITIALIZER, useFactory: ..., deps: [...], multi: true }
+{ provide: ENVIRONMENT_INITIALIZER, useValue: () => inject(Svc), multi: true }
+
+// ✅ ĐÚNG
+provideAppInitializer(() => {
+  const svc = inject(MyService);
+  return svc.init(); // có thể trả về Promise hoặc Observable
+})
+provideEnvironmentInitializer(() => {
+  inject(MyService); // eager-init, không await
+})
+```
+
+#### RxJS import path
+```typescript
+// ❌ SAI — legacy path từ RxJS 6, sẽ bị xóa trong RxJS 8
+import { map, switchMap } from 'rxjs/operators';
+
+// ✅ ĐÚNG — import trực tiếp từ 'rxjs' (RxJS 7+)
+import { map, switchMap } from 'rxjs';
+```
+
+#### Input/Output decorators
+```typescript
+// ❌ SAI — legacy decorator style
+@Input() title: string = '';
+@Output() saved = new EventEmitter<void>();
+
+// ✅ ĐÚNG — signal-based API (Angular 17+)
+title = input<string>('');
+saved = output<void>();
+```
+
+#### ViewChild/ViewChildren decorators
+```typescript
+// ❌ SAI — legacy decorator style
+@ViewChild('canvas') canvasRef!: ElementRef;
+@ViewChildren(MyComp) items!: QueryList<MyComp>;
+
+// ✅ ĐÚNG — signal-based API (Angular 17+)
+canvasRef = viewChild.required<ElementRef>('canvas');
+// dùng: this.canvasRef().nativeElement
+```
+
+#### Template $any()
+```typescript
+// ❌ SAI — bypass type system, vi phạm no-any
+@for (item of $any(list); track item.id)
+
+// ✅ ĐÚNG — non-null assertion khi @if đã guard, hoặc ?? []
+@for (item of list!; track item.id)
+@for (item of list ?? []; track item.id)
+```
+
+#### Các NgModule đã thay bằng providers
+```typescript
+// ❌ SAI
+imports: [CommonModule, BrowserModule, HttpClientModule, BrowserAnimationsModule]
+
+// ✅ ĐÚNG — dùng providers trong app.config.ts
+provideHttpClient(withFetch(), withInterceptors([...]))
+provideAnimationsAsync()
+// CommonModule không cần trong standalone components (dùng built-in @if/@for)
+```
+
 ### UI/UX Standards (Angular Material 3)
 - **TẤT CẢ** các thành phần UI (input, button, select, checkbox, radio...) PHẢI dùng **Angular Material Design 3**.
-- **Theme**: Sử dụng Material 3 với **High Density** (`density: -5  // valid: 0 → -5; form-field 36px tại -5`).
+- **Theme**: Sử dụng Material 3 với **High Density** (`density: -3`).
+- **Màu**: Dùng CSS custom properties từ theme — `var(--mat-sys-primary)`, `var(--mat-sys-on-primary)`, v.v. KHÔNG hardcode màu hex khi có token tương đương.
 - **Quy định Component**:
   - Form Fields: Dùng `mat-form-field` với `appearance="outline"`.
   - Buttons: `mat-flat-button` cho hành động chính, `mat-stroked-button` cho hành động phụ, `mat-icon-button` cho thao tác nhanh.
   - Phân trang & Bảng: Dùng `mat-table` và `mat-paginator`.
+  - Tooltip: `matTooltip` — KHÔNG dùng attribute `title=` trên Material components.
+  - Icons: `<mat-icon>` — KHÔNG dùng emoji làm icon trong UI.
 - **KHÔNG** tự viết CSS cho các input/button cơ bản trừ khi cần tinh chỉnh layout đặc thù.
-- Luôn ưu tiên dùng các biến màu của Material theme (Primary, Secondary, Tertiary, Warn).
 
 ## Prisma / Database
 - UUID primary key: `@id @default(uuid())`.
 - Timestamps: `createdAt`, `updatedAt`, `deletedAt` (soft delete).
 - Tên bảng: `@@map("snake_case_plural")`.
 - Index cho mọi FK và field thường filter.
+- **KHÔNG dùng** `rejectOnNotFound` (removed Prisma v4), `$use()` middleware (deprecated), `findOne()` (removed Prisma v3).
 
 ## TypeScript chung
 - Không dùng `any`.
 - Không dùng `as unknown as X` trừ khi thực sự cần thiết (comment lý do).
+- Không dùng `as any` để workaround type lỗi — fix type đúng cách (thêm field vào interface, dùng type guard, v.v.).
 - Shared types đặt trong `packages/shared-types/src/`.
+- Unused args phải prefix `_` (vd: `_event`, `_q`) để ESLint không báo lỗi.
+
+
+#### Animation providers — không cần, không dùng
+```typescript
+// ❌ SAI — deprecated từ v20.2, project không dùng animations
+provideAnimations()
+provideAnimationsAsync()
+
+// ✅ ĐÚNG — không cần provider nào, Angular Material dùng CSS transitions
+// Không import gì từ @angular/platform-browser/animations
+```

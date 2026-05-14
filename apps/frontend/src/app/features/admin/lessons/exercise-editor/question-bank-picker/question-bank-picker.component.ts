@@ -1,11 +1,10 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
   inject,
-  Input,
+  input,
   OnInit,
-  Output,
+  output,
   signal,
 } from '@angular/core';
 import type { Question, QuestionFilter, QuestionType } from '@eduviet/shared-types';
@@ -22,11 +21,11 @@ import { ToastService } from '../../../../../core/services/toast.service';
   styleUrl: './question-bank-picker.component.scss',
 })
 export class QuestionBankPickerComponent implements OnInit {
-  @Input() subjectId = '';
-  @Input() existingIds: Set<string> = new Set();
+  subjectId = input<string>('');
+  existingIds = input<Set<string>>(new Set());
 
-  @Output() added = new EventEmitter<Question[]>();
-  @Output() closed = new EventEmitter<void>();
+  added = output<Question[]>();
+  closed = output<void>();
 
   private questionsService = inject(QuestionsService);
   private toastService = inject(ToastService);
@@ -84,7 +83,7 @@ export class QuestionBankPickerComponent implements OnInit {
   private load() {
     this.loading.set(true);
     const filter: QuestionFilter = {
-      subjectId: this.subjectId,
+      subjectId: this.subjectId(),
       page: this.currentPage(),
       perPage: 20,
     };
@@ -118,7 +117,7 @@ export class QuestionBankPickerComponent implements OnInit {
   }
 
   isAlreadyAdded(id: string) {
-    return this.existingIds.has(id);
+    return this.existingIds().has(id);
   }
 
   isSelected(id: string) {

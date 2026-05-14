@@ -1,11 +1,11 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ConfirmService } from '../../../core/services/confirm.service';
 
 @Component({
   selector: 'app-confirm',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './confirm.component.html',
   styleUrl: './confirm.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -2,17 +2,20 @@
 
 .app-layout {
   height: 100vh;
-  background: #f8fafc;
+  background: var(--mat-sys-surface-container-low, #f8fafc);
 }
 
 // ─── Sidebar (mat-sidenav override) ──────────────────────────────────────────
 
 .sidebar {
   width: 260px;
-  background: #1a237e !important;
+  // Follow Material theme primary colour — set in material-theme.scss via mat.theme()
+  background: var(--mat-sys-primary) !important;
   display: flex;
   flex-direction: column;
   border-right: none !important;
+  border-radius: 0 !important;    // remove M3 sidenav default border-radius
+  --mat-sidenav-container-shape: 0; // override M3 shape token
   transition: width 250ms ease;
   overflow: hidden; // prevent icon/text bleed during transition
 }
@@ -96,7 +99,7 @@
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  color: #1a237e;
+  color: var(--mat-sys-primary); // initials colour follows theme
   font-size: 1rem;
   flex-shrink: 0;
   cursor: default;
@@ -132,7 +135,10 @@
   flex: 1;
   padding: 0.25rem 0 !important;
 
-  // mat-list-item text + icon colors
+  // Align icon left edge with the logo in .sidebar-brand (padding-left: 1rem)
+  --mat-list-list-item-leading-icon-start-space: 1rem;
+
+  // mat-list-item text + icon colours — on-primary surface = white
   --mat-list-list-item-label-text-color: rgba(255, 255, 255, 0.75);
   --mat-list-list-item-leading-icon-color: rgba(255, 255, 255, 0.6);
 
@@ -167,6 +173,7 @@
 
 .logout-list {
   padding: 0.25rem 0 1rem !important;
+  --mat-list-list-item-leading-icon-start-space: 1rem; // align with nav-list
   --mat-list-list-item-label-text-color: rgba(255, 255, 255, 0.7);
   --mat-list-list-item-leading-icon-color: rgba(255, 255, 255, 0.5);
 
@@ -182,5 +189,5 @@
 
 .main-content {
   padding: 0 2rem 2rem;
-  background: #f8fafc;
+  background: var(--mat-sys-surface-container-low, #f8fafc);
 }

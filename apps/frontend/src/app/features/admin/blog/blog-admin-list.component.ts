@@ -12,7 +12,7 @@ import { BlogService, BlogListItem, BlogStatus } from '../../../core/services/bl
 import { getApiErrorMessage } from '../../../core/utils/http-error';
 import { ToastService } from '../../../core/services/toast.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { DatePipe } from '@angular/common';
 
 const STATUS_LABELS: Record<BlogStatus, string> = {

@@ -1,8 +1,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { tap, catchError, EMPTY, of, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { tap, catchError, EMPTY, of, Observable, map } from 'rxjs';
 import type { AuthUser, LoginRequest, LoginResponse, UserRole } from '@eduviet/shared-types';
 import { PushNotificationService } from './push-notification.service';
 

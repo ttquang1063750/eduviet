@@ -12,7 +12,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { QuillModule } from 'ngx-quill';
 import { LessonsService } from '../../../../core/services/lessons.service';
 import { SubjectsService } from '../../../../core/services/subjects.service';
@@ -29,7 +29,7 @@ import { MatSelectModule } from '@angular/material/select';
 @Component({
   selector: 'app-lesson-admin-editor',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, QuillModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule],
+  imports: [ReactiveFormsModule, RouterLink, QuillModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './lesson-admin-editor.component.html',
   styleUrl: './lesson-admin-editor.component.scss',
@@ -112,7 +112,7 @@ export class LessonAdminEditorComponent implements OnInit {
           difficulty: lesson.difficulty,
           theory: lesson.theory,
           estimatedMinutes: lesson.estimatedMinutes,
-          reviewerId: (lesson as any).reviewerId || null,
+          reviewerId: lesson.reviewerId ?? null,
         });
         this.loading.set(false);
       },
