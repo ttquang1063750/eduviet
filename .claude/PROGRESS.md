@@ -1,6 +1,6 @@
 # EduViet — Progress Tracker
 
-> Cập nhật lần cuối: 2026-05-14 (session 23 — Bug fixes + Deprecated API cleanup)
+> Cập nhật lần cuối: 2026-05-15 (checkpoint sau session 23)
 > Workflow: `/plan-task` → `/execute-step` (lặp) → `/check-point` → `/resume` → tiếp tục
 
 ---
@@ -53,6 +53,7 @@
 | `modules/chat/` | routes + service + repository + spec |
 | `modules/storage/storage.routes.ts` | POST /api/storage/upload |
 | `modules/reports/` | routes + service + repository + Excel/PDF export + LiberationSans font |
+| `modules/students/` | routes + service — `GET /me/dashboard` cho học sinh |
 | `assets/fonts/LiberationSans-*.ttf` | Font TTF nhúng PDF — hỗ trợ tiếng Việt đầy đủ dấu |
 
 ### Frontend (`apps/frontend/src/app/`)
