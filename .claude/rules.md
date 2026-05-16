@@ -146,6 +146,22 @@ provideAnimationsAsync()
   - Icons: `<mat-icon>` — KHÔNG dùng emoji làm icon trong UI.
 - **KHÔNG** tự viết CSS cho các input/button cơ bản trừ khi cần tinh chỉnh layout đặc thù.
 
+### i18n bắt buộc cho mọi UI mới
+- **TẤT CẢ** text hiển thị cho user — text node, attribute (placeholder, aria-label, title, alt, matTooltip), và string trong TS (toast, confirm, error message) — PHẢI có marker i18n:
+  ```html
+  <!-- ✅ ĐÚNG — text node -->
+  <h2 i18n="@@login.title">Chào mừng trở lại</h2>
+
+  <!-- ✅ ĐÚNG — attribute -->
+  <input i18n-placeholder="@@login.email_placeholder" placeholder="example@eduviet.vn" />
+
+  <!-- ✅ ĐÚNG — TS dynamic message -->
+  this.toast.error($localize`:@@common.error:Đã có lỗi xảy ra`);
+  ```
+- **ID convention**: `@@<feature>.<context>.<key>` (vd `@@admin.users.delete_confirm`). Strings tái sử dụng → `@@common.<key>` (vd `@@common.save`, `@@common.cancel`, `@@common.delete`).
+- **KHÔNG bỏ qua** binding `{{ }}`, comment, ký tự đặc biệt — chỉ text có chữ cái cần i18n.
+- **Workflow**: sau khi tạo/sửa template → gọi `/i18n-check <file>` để verify. Nếu `@angular/localize` đã install → BẮT BUỘC pass trước khi commit.
+
 ## Prisma / Database
 - UUID primary key: `@id @default(uuid())`.
 - Timestamps: `createdAt`, `updatedAt`, `deletedAt` (soft delete).

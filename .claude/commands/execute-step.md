@@ -23,6 +23,7 @@ description: Đọc .claude/task.md, thực thi bước [ ] đầu tiên chưa l
    - [ ] State dùng `signal()` / `computed()` / `input()` / `output()`
    - [ ] Control flow: `@if` / `@for` — không `*ngIf` / `*ngFor`
    - [ ] Không dùng `alert()` / `confirm()` / `prompt()` — dùng `ToastService` / `ConfirmService`
+   - [ ] **i18n**: gọi `/i18n-check <file>` để báo cáo text/attribute chưa có marker. Nếu i18n đã setup (`@angular/localize` installed) → BẮT BUỘC fix mọi violation trước khi đánh dấu done. Nếu chưa setup → ghi nhận trong task.md note để fix lúc rollout i18n.
 
 6. **Cập nhật task.md**:
    - Đánh dấu step vừa làm: `[ ]` → `[x]`.
