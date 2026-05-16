@@ -20,7 +20,12 @@
       "Bash(awk '{print $9}')",
       "Bash(chmod +x /Users/qtang/Desktop/landing/eduviet/start-dev.sh)",
       "Bash(npx ng *)",
-      "Bash(curl -s http://localhost:4200/)"
+      "Bash(curl -s http://localhost:4200/)",
+      "Bash(gh run *)",
+      "Bash(which gh *)",
+      "Bash(brew install *)",
+      "Bash(gh --version)",
+      "Bash(gh auth *)"
     ],
     "additionalDirectories": [
       "/Users/qtang/Desktop/landing/.claude"

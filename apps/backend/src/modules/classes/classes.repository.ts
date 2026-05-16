@@ -6,6 +6,7 @@ export interface ClassFilters {
   schoolId?: string;
   grade?: number;
   academicYear?: string;
+  search?: string;
 }
 
 const CLASS_SELECT = {
@@ -23,7 +24,7 @@ export class ClassesRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   async findMany(filters: ClassFilters) {
-    const { page, perPage, schoolId, grade, academicYear } = filters;
+    const { page, perPage, schoolId, grade, academicYear, search } = filters;
     const skip = (page - 1) * perPage;
 
     const where: Prisma.ClassWhereInput = {
@@ -31,6 +32,15 @@ export class ClassesRepository {
       ...(schoolId ? { schoolId } : {}),
       ...(grade ? { grade } : {}),
       ...(academicYear ? { academicYear } : {}),
+      ...(search
+        ? {
+            OR: [
+              { name: { contains: search, mode: 'insensitive' } },
+              { academicYear: { contains: search, mode: 'insensitive' } },
+              { school: { name: { contains: search, mode: 'insensitive' } } },
+            ],
+          }
+        : {}),
     };
 
     const [classes, total] = await Promise.all([

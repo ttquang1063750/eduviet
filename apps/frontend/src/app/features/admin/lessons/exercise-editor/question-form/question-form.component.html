@@ -1,10 +1,10 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="question-form material-form">
   <div class="form-header">
-    <h3>{{ question ? 'Chỉnh sửa câu hỏi' : 'Tạo câu hỏi mới' }}</h3>
+    <h3>{{ question() ? 'Chỉnh sửa câu hỏi' : 'Tạo câu hỏi mới' }}</h3>
   </div>
 
   <!-- Type selector (chỉ hiện khi tạo mới) -->
-  @if (!question) {
+  @if (!question()) {
     <div class="type-selector-container">
       <label class="field-label">Loại câu hỏi <span class="required">*</span></label>
       <div class="type-grid">
@@ -23,7 +23,7 @@
     </div>
   } @else {
     <div class="type-badge-row">
-      <span class="type-badge">{{ questionTypeLabels[question!.type] }}</span>
+      <span class="type-badge">{{ questionTypeLabels[question()!.type] }}</span>
     </div>
   }
 
@@ -179,11 +179,11 @@
       type="submit"
       mat-flat-button
       color="primary"
-      [disabled]="form.invalid || saving() || isSaving"
+      [disabled]="form.invalid || saving() || isSaving()"
     >
-      @if (saving() || isSaving) {
+      @if (saving() || isSaving()) {
         Đang lưu...
-      } @else if (question) {
+      } @else if (question()) {
         Lưu thay đổi
       } @else {
         Tạo & thêm vào bài

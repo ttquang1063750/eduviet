@@ -83,3 +83,61 @@ h5 {
 @view-transition {
   navigation: auto;
 }
+
+/* ─── Admin mat-table global styles ────────────────────────────────────────────
+   Đặt ở đây vì Angular ViewEncapsulation ngăn component SCSS scope vào
+   .mat-mdc-* classes bên trong mat-table (là child component riêng).
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.mat-mdc-header-cell {
+  font-weight: 600 !important;
+  color: var(--text-secondary, #64748b) !important;
+  font-size: 0.8125rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mat-mdc-row:hover .mat-mdc-cell {
+  background: #f8fafc;
+}
+
+/* ─── Sidebar: remove M3 border-radius ────────────────────────────────────────
+   Material M3 thêm border-radius vào mat-sidenav qua --mat-sidenav-container-shape.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.sidebar.mat-drawer {
+  --mat-sidenav-container-shape: 0;
+  border-radius: 0 !important;
+}
+
+/* ─── Sidebar collapsed: center nav icons ──────────────────────────────────────
+   Dùng CSS custom properties của Material (cascade vào tất cả mat-list-item con)
+   + override trực tiếp MDC flex host để icon được canh giữa trong 80px.
+   ViewEncapsulation ngăn component SCSS scope vào bên trong mat-list-item.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* 1. Custom properties cascade vào mọi mat-list-item bên trong sidebar khi collapsed */
+.sidebar.collapsed {
+  --mat-list-list-item-leading-icon-start-space: 0px;
+  --mat-list-list-item-leading-icon-end-space: 0px;
+}
+
+/* 2. MDC host element (= <a> / <div> của mat-list-item) — clear padding, center flex */
+.sidebar.collapsed .mdc-list-item {
+  padding-inline-start: 0 !important;
+  padding-inline-end: 0 !important;
+  justify-content: center !important;
+}
+
+/* 3. Icon container — clear margins so it sits dead-centre */
+.sidebar.collapsed .mdc-list-item__start {
+  margin-inline-start: 0 !important;
+  margin-inline-end: 0 !important;
+}
+
+/* 4. Content wrapper still has flex: 1 even when empty — collapse it */
+.sidebar.collapsed .mdc-list-item__content {
+  flex: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+}

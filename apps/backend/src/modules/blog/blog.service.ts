@@ -149,7 +149,7 @@ export class BlogService {
     return this.repo.update(id, cleanData);
   }
 
-  async delete(id: string, actorId: string) {
+  async delete(id: string, _actorId: string) {
     const post = await this.repo.findById(id);
     if (!post) throw AppError.notFound('Bài viết');
     await this.repo.softDelete(id);

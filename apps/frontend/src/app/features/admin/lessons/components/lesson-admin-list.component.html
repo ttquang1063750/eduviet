@@ -4,7 +4,7 @@
     <p class="page-subtitle">Tạo, chỉnh sửa và quản lý nội dung bài học — {{ total() }} bài học</p>
   </div>
   <button mat-flat-button (click)="openCreate()">
-    <span>＋</span> Tạo bài học mới
+    <mat-icon>add</mat-icon> Tạo bài học mới
   </button>
 </div>
 
@@ -59,9 +59,11 @@
   <div class="loading-state">Đang tải...</div>
 } @else if (lessons().length === 0) {
   <div class="empty-state">
-    <span class="empty-icon">📚</span>
+    <mat-icon class="empty-icon">menu_book</mat-icon>
     <p>Chưa có bài học nào phù hợp.</p>
-    <button class="btn btn-primary" (click)="openCreate()">Tạo bài học đầu tiên</button>
+    <button mat-flat-button (click)="openCreate()">
+      <mat-icon>add</mat-icon> Tạo bài học đầu tiên
+    </button>
   </div>
 } @else {
   <div class="table-container">
@@ -100,10 +102,16 @@
             </td>
             <td class="col-actions">
               <div class="action-buttons">
-                <button mat-icon-button title="Sửa nội dung" (click)="openEdit(l)">✏️</button>
-                <button mat-icon-button title="Biên soạn câu hỏi" (click)="openExercises(l)">🧩</button>
+                <button mat-icon-button matTooltip="Sửa nội dung" (click)="openEdit(l)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button matTooltip="Biên soạn câu hỏi" (click)="openExercises(l)">
+                  <mat-icon>quiz</mat-icon>
+                </button>
                 @if (l.status === 'DRAFT' || l.status === 'REJECTED') {
-                  <button mat-icon-button title="Gửi duyệt" (click)="submitReview(l)">📤</button>
+                  <button mat-icon-button matTooltip="Gửi duyệt" (click)="submitReview(l)">
+                    <mat-icon>send</mat-icon>
+                  </button>
                 }
               </div>
             </td>
@@ -116,9 +124,13 @@
   <!-- Phân trang -->
   @if (totalPages() > 1) {
     <div class="pagination">
-      <button class="page-btn" [disabled]="page() === 1" (click)="goToPage(page() - 1)">‹</button>
+      <button mat-stroked-button [disabled]="page() === 1" (click)="goToPage(page() - 1)">
+        <mat-icon>chevron_left</mat-icon> Trước
+      </button>
       <span class="page-info">{{ page() }} / {{ totalPages() }}</span>
-      <button class="page-btn" [disabled]="page() === totalPages()" (click)="goToPage(page() + 1)">›</button>
+      <button mat-stroked-button [disabled]="page() === totalPages()" (click)="goToPage(page() + 1)">
+        Sau <mat-icon>chevron_right</mat-icon>
+      </button>
     </div>
   }
 }

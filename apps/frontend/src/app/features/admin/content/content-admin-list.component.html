@@ -35,7 +35,7 @@
                     <button mat-stroked-button color="warn" (click)="reject(item.id)">
                       <mat-icon>close</mat-icon> Từ chối
                     </button>
-                    <a mat-icon-button [routerLink]="['/blog', item.slug]" target="_blank" title="Xem trước">
+                    <a mat-icon-button [routerLink]="['/blog', item.slug]" target="_blank" matTooltip="Xem trước">
                       <mat-icon>visibility</mat-icon>
                     </a>
                   </div>

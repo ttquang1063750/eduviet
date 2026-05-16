@@ -19,26 +19,6 @@ export interface UserFilters {
   search?: string;
 }
 
-// Internal type for DB results with decrypted PII
-interface UserDbRaw {
-  id: string;
-  email: string;
-  phone: string | null;
-  email_hash: string;
-  phone_hash: string | null;
-  password_hash: string;
-  full_name: string;
-  avatar_url: string | null;
-  roles: unknown;  // JSONB — parse to UserRole[]
-  title: string | null;
-  is_active: boolean;
-  is_verified: boolean;
-  school_id: string | null;
-  created_at: Date;
-  updated_at: Date;
-  deleted_at: Date | null;
-}
-
 export class UsersRepository {
   private readonly ENCRYPTION_KEY = process.env.DB_ENCRYPTION_KEY!;
 

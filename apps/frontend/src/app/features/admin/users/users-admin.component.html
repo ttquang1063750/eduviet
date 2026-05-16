@@ -1,6 +1,6 @@
 <div class="page">
   <div class="page-header">
-    <h1>👥 Quản lý người dùng</h1>
+    <h1>Quản lý người dùng</h1>
     <button mat-flat-button (click)="openCreateModal()">
       <mat-icon>add</mat-icon> Thêm người dùng
     </button>
@@ -71,7 +71,7 @@
                 </td>
                 <td class="text-muted">{{ user.createdAt | date: 'dd/MM/yyyy' }}</td>
                 <td class="col-actions">
-                  <button mat-icon-button (click)="editUser(user.id)" title="Sửa">
+                  <button mat-icon-button (click)="editUser(user.id)" matTooltip="Sửa">
                     <mat-icon>edit</mat-icon>
                   </button>
                 </td>

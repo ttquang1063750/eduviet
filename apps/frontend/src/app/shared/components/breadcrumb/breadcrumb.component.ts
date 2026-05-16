@@ -16,12 +16,30 @@ export class BreadcrumbComponent {
 
   getIcon(label: string): string {
     const icons: Record<string, string> = {
+      // Chung
       'Tổng quan': '🏠',
       'Bài học': '📚',
-      'Chi tiết': '📖',
-      'Người dùng': '👥',
+      'Blog': '📰',
+      'Báo cáo': '📊',
+      'Trang của tôi': '🎓',
+      // Admin top-level
       'Admin': '🛡️',
+      'Người dùng': '👥',
+      'Trường học': '🏛️',
+      'Lớp học': '🏫',
+      'Môn học': '📐',
+      'Blog (quản trị)': '✏️',
+      'Ngân hàng câu hỏi': '🗂️',
+      'Quản lý bài học': '📖',
+      'Kiểm duyệt': '✅',
+      // Detail / action pages
+      'Chi tiết': '📋',
+      'Thêm trường mới': '➕',
+      'Chỉnh sửa trường': '✏️',
+      'Tạo lớp mới': '➕',
+      'Chỉnh sửa lớp': '✏️',
+      'Học sinh': '👤',
     };
-    return icons[label] || '📍';
+    return icons[label] ?? '📍';
   }
 }

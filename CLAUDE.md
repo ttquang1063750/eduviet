@@ -18,7 +18,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-12 — session 17)
+## Trạng thái hiện tại (cập nhật 2026-05-15 — checkpoint sau session 23)
 
 ### ✅ Đã hoàn thành
 
@@ -38,6 +38,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 | `chat` | ✅ | ✅ | ✅ | ✅ |
 | `storage` | ✅ | — | — | — |
 | `reports` | ✅ + export | ✅ + export | ✅ | — |
+| `students` | ✅ `/me/dashboard` | ✅ | — | — |
 
 #### Frontend features (`apps/frontend/src/app/features/`)
 | Feature | List | Detail | Service | Routes |
@@ -49,7 +50,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 | `blog` | ✅ BlogLayout + viewCount + top-viewed sidebar | ✅ related posts + top-viewed | ✅ | ✅ |
 | `student-dashboard` | ✅ | — | — | ✅ |
 | `admin/users` | ✅ CRUD complete | ✅ CRUD complete | ✅ | ✅ |
-| `admin/schools` | ✅ | ✅ + danh sách lớp | — | ✅ |
+| `admin/schools` | ✅ mat-table + nested routes | ✅ edit only | — | ✅ |
 | `admin/classes` | ✅ | ✅ + quản lý học sinh | — | ✅ |
 | `admin/content` | ✅ | — | — | ✅ |
 | `admin/subjects` | ✅ grid + modal CRUD + AI suggest | — | ✅ | ✅ |
@@ -144,6 +145,36 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ `blog-list.component.*` — 2-column layout, top-viewed sidebar, viewCount `👁` display
 - ✅ `blog.service.ts` (FE) — `getTopViewed()`, `getRelated()`, `viewCount` in BlogListItem interface
 
+
+
+#### Session 22 — Sidebar Collapsible: icon-only mode (2026-05-13)
+- ✅ `core/utils/name-initials.ts` — `getInitials()`: "Nguyễn Văn A" → "NVA" (tối đa 3 ký tự)
+- ✅ `main-layout.component.ts` — `collapsed` signal (localStorage init) + `toggleSidebar()` + `userInitials` computed + MatButtonModule
+- ✅ `main-layout.component.html` — `[style.width]` 80px↔260px + toggle button (menu/menu_open) + `[matTooltip]` per nav item + `[style.display]` trên span[matListItemTitle] + NVA initials trong avatar
+- ✅ `main-layout.component.scss` — `transition: width 250ms ease` + overflow:hidden + collapsed brand (column) + collapsed user-card (centered, font-size 0.625rem)
+- ✅ `styles.scss` — global `.sidebar.collapsed` icon centering (padding:0, justify-content:center)
+
+#### Session 21 — Angular Material Cleanup: matTooltip + mat-icon + mat-button (2026-05-13)
+- ✅ `MatTooltipModule` thêm vào 8 component: content-admin-list, blog-admin-list, blog-admin-editor, subjects-admin, users-admin, users-admin-detail, lesson-admin-list, questions-admin, exercise-editor
+- ✅ Tất cả `title=` trên `mat-icon-button` → `matTooltip=` (9 chỗ trên 8 file)
+- ✅ Emoji buttons trong lesson-admin-list → `<mat-icon>`: ✏️→edit, 🧩→quiz, 📤→send
+- ✅ Emoji buttons trong questions-admin → `<mat-icon>`: ✏️→edit, 🗑️→delete
+- ✅ `<span>＋</span>` trong lesson-admin-list + questions-admin header → `<mat-icon>add</mat-icon>`
+- ✅ `<button class="page-btn">` pagination trong lesson-admin-list + questions-admin → `mat-stroked-button`
+- ✅ `<button class="btn btn-primary">` empty-state trong cả 2 component → `mat-flat-button`
+- ✅ Empty-state emoji spans → `<mat-icon class="empty-icon">` với SCSS adjusted (3rem × 3rem)
+- ✅ `<h1>👥 Quản lý người dùng</h1>` → xóa emoji thừa
+- ✅ Stale `.page-btn` SCSS xóa khỏi lesson-admin-list.component.scss + questions-admin.component.scss
+
+#### Session 20 — UI Refactor: Breadcrumb + Shared SCSS (2026-05-13)
+- 🐛 Fix `BreadcrumbService` — `snapshot.data` → `routeConfig?.data` (ngăn kế thừa label từ route cha, root cause của dual navigation)
+- ✅ `schools-admin.routes.ts` — thêm `data: { breadcrumb }` cho 6 nested routes
+- ✅ Xóa inline `<nav class="breadcrumb">` khỏi 3 school sub-components; thêm toolbar subtitle hiển thị tên trường/lớp
+- ✅ Tạo `src/app/styles/_admin-shared.scss` — 10 shared patterns (admin-card, toolbar, count-badge, table, empty-state, pagination, form-card, form-grid)
+- ✅ `styles.scss` — global `.mat-mdc-header-cell` + `.mat-mdc-row:hover` styles
+- ✅ 6 component SCSS files `@use` partial — xóa ~550 dòng CSS duplicate
+#### Session 19 — Bug Fix: Angular Material Content Projection (2026-05-13)
+- 🐛 Fix `school-class-students.component.html` — thay `@if` bên trong `<button mat-stroked-button>` và `<button mat-icon-button>` bằng `[style.display]` → fix Angular compiler warning `controlFlowPreventingContentProjection`
 #### Các module lớn trước đó
 - ✅ Live Chat (Socket.io v4, Redis adapter, RBAC per room)
 - ✅ Storage Module (MinIO)
@@ -188,6 +219,17 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ `main-layout.component.html` — thêm "🗂️ Ngân hàng câu hỏi" link (isAdmin || isContentRole)
 - ✅ `features/admin/questions/questions-admin.component` — Question Bank admin page (filter, paginate, CRUD modal)
 - ✅ `chat.types.ts` — `role` → `roles` (multi-role fix)
+
+
+#### Session 23 — Bug fixes + Deprecated API cleanup (2026-05-14)
+- ✅ `AppError.validation()` — thêm static method HTTP 422 (fix runtime TypeError)
+- ✅ ESM/CJS fix — xóa `import.meta.url` khỏi `reports.service.ts`, dùng CJS `__dirname`
+- ✅ PDF font tiếng Việt — fixed (hệ quả của ESM/CJS fix trên)
+- ✅ `Lesson.reviewerId` — thêm vào shared-types interface
+- ✅ Deprecated API cleanup toàn bộ FE: `APP_INITIALIZER`, `ENVIRONMENT_INITIALIZER`, `rxjs/operators`, `CommonModule`, `@Input/@Output`, `@ViewChild`, `$any()`, `provideAnimations*`
+- ✅ Lint fixes: unused imports, `any` casts, unused args
+- ✅ Sidebar polish: `var(--mat-sys-primary)` theme color, border-radius removed, icon centering fix
+- ✅ `rules.md` — thêm section "❌ Deprecated — TUYỆT ĐỐI KHÔNG DÙNG" với examples
 
 ### 🚧 Còn lại (theo độ ưu tiên)
 - **Không còn backlog kỹ thuật tồn đọng.** Tất cả P1–P3 đã hoàn thành.

@@ -23,6 +23,7 @@ export interface Lesson {
   status: ContentStatus;
   randomizeQuestions: boolean;
   lessonQuestions: LessonQuestion[];
+  reviewerId: string | null;
   publishedAt: string | null;
   createdAt: string;
 }

@@ -2,13 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
-  Input,
-  OnChanges,
-  Output,
-  EventEmitter,
+  input,
+  output,
   signal,
-  SimpleChanges,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import type { Question, CreateQuestionRequest, UpdateQuestionRequest, QuestionType } from '@eduviet/shared-types';
@@ -46,13 +44,13 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './question-form.component.html',
   styleUrl: './question-form.component.scss',
 })
-export class QuestionFormComponent implements OnChanges {
-  @Input() question: Question | null = null;
-  @Input() subjectId = '';
-  @Input() isSaving = false;
+export class QuestionFormComponent {
+  question = input<Question | null>(null);
+  subjectId = input<string>('');
+  isSaving = input<boolean>(false);
 
-  @Output() saved = new EventEmitter<Question>();
-  @Output() cancelled = new EventEmitter<void>();
+  saved = output<Question>();
+  cancelled = output<void>();
 
   private fb = inject(FormBuilder);
   private questionsService = inject(QuestionsService);
@@ -111,14 +109,15 @@ export class QuestionFormComponent implements OnChanges {
     tags: [''],
   });
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['question']) {
+  constructor() {
+    effect(() => {
+      this.question(); // react to question input changes
       this.resetForm();
-    }
+    });
   }
 
   private resetForm() {
-    const q = this.question;
+    const q = this.question();
     if (q) {
       this.selectedType.set(q.type as QuestionType);
       this.form.patchValue({
@@ -227,7 +226,7 @@ export class QuestionFormComponent implements OnChanges {
       : [];
 
     const payload: CreateQuestionRequest & Partial<{ id: string }> = {
-      subjectId: this.subjectId,
+      subjectId: this.subjectId(),
       type: type as never,
       content: formVal.content,
       correctAnswer,
@@ -241,7 +240,7 @@ export class QuestionFormComponent implements OnChanges {
 
     this.saving.set(true);
 
-    if (this.question) {
+    if (this.question()) {
       const updatePayload: UpdateQuestionRequest = {
         content: payload.content,
         correctAnswer: payload.correctAnswer,
@@ -252,7 +251,7 @@ export class QuestionFormComponent implements OnChanges {
         difficulty: payload.difficulty,
         tags: payload.tags,
       };
-      this.questionsService.update(this.question.id, updatePayload).subscribe({
+      this.questionsService.update(this.question()!.id, updatePayload).subscribe({
         next: (res) => {
           this.saving.set(false);
           this.saved.emit(res.data);

@@ -8,12 +8,10 @@ import {
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SchoolsService } from '../../../core/services/schools.service';
-import { ClassesService, ClassItem } from '../../../core/services/classes.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { School } from '@eduviet/shared-types';
-import { switchMap, tap } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { of, switchMap, tap } from 'rxjs';
 import { getApiErrorMessage } from '../../../core/utils/http-error';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -21,7 +19,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-schools-admin-detail',
@@ -34,7 +32,7 @@ import { MatChipsModule } from '@angular/material/chips';
     MatInputModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatChipsModule,
+    MatTooltipModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './schools-admin-detail.component.html',
@@ -45,7 +43,6 @@ export class SchoolsAdminDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private schoolsService = inject(SchoolsService);
-  private classesService = inject(ClassesService);
   private confirmService = inject(ConfirmService);
   private toastService = inject(ToastService);
 
@@ -60,10 +57,7 @@ export class SchoolsAdminDetailComponent implements OnInit {
 
   schoolId = signal<string | null>(null);
   isEditMode = signal(false);
-
-  // Classes in this school
-  schoolClasses = signal<ClassItem[]>([]);
-  loadingClasses = signal(false);
+  saving = signal(false);
 
   ngOnInit(): void {
     this.route.paramMap.pipe(
@@ -72,7 +66,6 @@ export class SchoolsAdminDetailComponent implements OnInit {
         this.schoolId.set(id);
         this.isEditMode.set(!!id);
         if (id) {
-          this.loadClasses(id);
           return this.schoolsService.findById(id);
         }
         return of(null);
@@ -83,26 +76,6 @@ export class SchoolsAdminDetailComponent implements OnInit {
         }
       }),
     ).subscribe();
-  }
-
-  loadClasses(schoolId: string): void {
-    this.loadingClasses.set(true);
-    this.classesService.getAll({ schoolId, perPage: 100 }).subscribe({
-      next: (res) => {
-        this.schoolClasses.set(res.data);
-        this.loadingClasses.set(false);
-      },
-      error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err, 'Không thể tải danh sách lớp'));
-        this.loadingClasses.set(false);
-      },
-    });
-  }
-
-  goToCreateClass(): void {
-    void this.router.navigate(['/admin/classes', 'new'], {
-      queryParams: { schoolId: this.schoolId() },
-    });
   }
 
   onSubmit(): void {
@@ -122,8 +95,16 @@ export class SchoolsAdminDetailComponent implements OnInit {
       ? this.schoolsService.update(this.schoolId()!, formData)
       : this.schoolsService.create(formData);
 
-    operation.subscribe(() => {
-      this.router.navigate(['/admin/schools']);
+    this.saving.set(true);
+    operation.subscribe({
+      next: () => {
+        this.toastService.success(this.isEditMode() ? 'Đã cập nhật trường học' : 'Đã tạo trường học');
+        void this.router.navigate(['/admin/schools']);
+      },
+      error: (err: unknown) => {
+        this.toastService.error(getApiErrorMessage(err, 'Lưu thất bại'));
+        this.saving.set(false);
+      },
     });
   }
 
@@ -137,8 +118,14 @@ export class SchoolsAdminDetailComponent implements OnInit {
     });
 
     if (confirmed) {
-      this.schoolsService.delete(this.schoolId()!).subscribe(() => {
-        this.router.navigate(['/admin/schools']);
+      this.schoolsService.delete(this.schoolId()!).subscribe({
+        next: () => {
+          this.toastService.success('Đã xóa trường học');
+          void this.router.navigate(['/admin/schools']);
+        },
+        error: (err: unknown) => {
+          this.toastService.error(getApiErrorMessage(err, 'Xóa thất bại'));
+        },
       });
     }
   }

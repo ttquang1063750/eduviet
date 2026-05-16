@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { filter } from 'rxjs';
 
 export interface BreadcrumbItem {
   label: string;
@@ -49,17 +49,20 @@ export class BreadcrumbService {
       }
 
       const fullUrl = `/${url.join('/')}`;
-      let label = child.snapshot.data['breadcrumb'];
+
+      // Dùng routeConfig?.data thay vì snapshot.data để tránh kế thừa label từ route cha.
+      // snapshot.data là merged data của tất cả ancestor → gây duplicate breadcrumb entry.
+      const ownData = child.snapshot.routeConfig?.data;
+      let label = ownData?.['breadcrumb'] as string | undefined;
 
       // Check for dynamic label override
       if (this._dynamicLabels.has(fullUrl)) {
         label = this._dynamicLabels.get(fullUrl);
-      } else if (child.snapshot.data['breadcrumbAlias'] && this._dynamicLabels.has(child.snapshot.data['breadcrumbAlias'])) {
-        label = this._dynamicLabels.get(child.snapshot.data['breadcrumbAlias']);
+      } else if (ownData?.['breadcrumbAlias'] && this._dynamicLabels.has(ownData['breadcrumbAlias'] as string)) {
+        label = this._dynamicLabels.get(ownData['breadcrumbAlias'] as string);
       }
 
       // Chỉ push nếu label tồn tại VÀ url này chưa có trong danh sách.
-      // Angular kế thừa data từ route cha xuống child path:'' → tránh duplicate.
       const alreadyAdded = breadcrumbs.some((b) => b.url === fullUrl);
       if (label && !alreadyAdded) {
         breadcrumbs.push({ label, url: fullUrl });

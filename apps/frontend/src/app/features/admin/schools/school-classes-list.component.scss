@@ -1,0 +1,53 @@
+@use '../../../styles/admin-shared';
+
+.classes-page {
+  padding: 1.5rem;
+}
+
+.search-field {
+  width: 220px;
+}
+
+// ─── mat-table (component-specific) ──────────────────────────────────────────
+
+.classes-table {
+  width: 100%;
+  // .mat-mdc-header-cell + .mat-mdc-row:hover → styles.scss global
+}
+
+.class-name {
+  font-weight: 500;
+}
+
+.grade-badge {
+  display: inline-block;
+  background: #eff6ff;
+  color: #3b82f6;
+  border-radius: 6px;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.teacher-name {
+  font-size: 0.875rem;
+}
+
+.no-teacher {
+  color: var(--text-secondary, #94a3b8);
+}
+
+.student-count {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 600;
+  color: var(--color-primary, #6366f1);
+  font-size: 0.875rem;
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+  }
+}

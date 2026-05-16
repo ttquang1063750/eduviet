@@ -23,7 +23,8 @@ const mockLesson = {
   createdAt: new Date(),
   updatedAt: new Date(),
   deletedAt: null,
-  exercises: [],
+  randomizeQuestions: false,
+  lessonQuestions: [] as Array<{ questionId: string; question: Record<string, unknown>; orderIndex: number }>,
 };
 
 const mockPrisma = {
@@ -66,7 +67,7 @@ describe('LessonsService', () => {
       mockPrisma.lesson.findMany.mockResolvedValue([]);
       mockPrisma.lesson.count.mockResolvedValue(0);
 
-      await service.list({ page: 1, perPage: 12 }, 'SUPER_ADMIN');
+      await service.list({ page: 1, perPage: 12 }, ['SUPER_ADMIN']);
 
       const findManyCall = mockPrisma.lesson.findMany.mock.calls[0][0];
       expect(findManyCall.where.status.in).toContain('DRAFT');
@@ -100,7 +101,7 @@ describe('LessonsService', () => {
     });
 
     it('throw Forbidden khi bài học DRAFT và user không có quyền', async () => {
-      mockPrisma.lesson.findUnique.mockResolvedValue({ ...mockLesson, status: 'DRAFT', exercises: [] });
+      mockPrisma.lesson.findUnique.mockResolvedValue({ ...mockLesson, status: 'DRAFT' });
 
       await expect(service.getBySlug('some-slug')).rejects.toMatchObject({
         statusCode: 403,
@@ -108,19 +109,25 @@ describe('LessonsService', () => {
       });
     });
 
-    it('ẩn correctAnswer trong exercises khi trả về', async () => {
-      const lessonWithExercise = {
+    it('ẩn correctAnswer trong questions khi trả về cho student', async () => {
+      const lessonWithQuestion = {
         ...mockLesson,
         status: 'PUBLISHED' as const,
-        exercises: [
-          { id: 'ex-1', question: 'Câu hỏi 1', correctAnswer: 'A', explanation: '...', orderIndex: 0 },
+        lessonQuestions: [
+          {
+            questionId: 'q-1',
+            orderIndex: 0,
+            question: { id: 'q-1', stem: 'Câu hỏi 1', correctAnswer: 'A', explanation: '...' },
+          },
         ],
       };
-      mockPrisma.lesson.findUnique.mockResolvedValue(lessonWithExercise);
+      mockPrisma.lesson.findUnique.mockResolvedValue(lessonWithQuestion);
 
-      const result = await service.getBySlug('some-slug');
+      const result = (await service.getBySlug('some-slug')) as unknown as {
+        lessonQuestions: Array<{ question: Record<string, unknown> }>;
+      };
 
-      expect(result.exercises[0]).not.toHaveProperty('correctAnswer');
+      expect(result.lessonQuestions[0].question).not.toHaveProperty('correctAnswer');
     });
   });
 

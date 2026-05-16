@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "postinstall": "pnpm --filter @eduviet/prisma generate",
     "dev": "concurrently \"pnpm dev:be\" \"pnpm dev:fe\"",
     "dev:be": "pnpm --filter @eduviet/backend dev",
     "dev:fe": "pnpm --filter @eduviet/frontend dev",

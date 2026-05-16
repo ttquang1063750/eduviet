@@ -24,7 +24,7 @@ export interface UpdateUserData {
   phone?: string;
   isActive?: boolean;
   roles?: UserRole[];
-  title?: string;
+  title?: string | null;
 }
 
 export class UsersService {

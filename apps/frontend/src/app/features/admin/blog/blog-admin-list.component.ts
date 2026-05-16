@@ -12,7 +12,7 @@ import { BlogService, BlogListItem, BlogStatus } from '../../../core/services/bl
 import { getApiErrorMessage } from '../../../core/utils/http-error';
 import { ToastService } from '../../../core/services/toast.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { DatePipe } from '@angular/common';
 
 const STATUS_LABELS: Record<BlogStatus, string> = {
@@ -30,11 +30,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-blog-admin-list',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule, DatePipe, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule, MatMenuModule],
+  imports: [RouterLink, ReactiveFormsModule, DatePipe, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule, MatMenuModule, MatTooltipModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './blog-admin-list.component.html',
   styleUrl: './blog-admin-list.component.scss',

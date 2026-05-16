@@ -1,0 +1,13 @@
+@use '../../../styles/admin-shared';
+
+.detail-page {
+  padding: 1.5rem;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.teacher-email {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #94a3b8);
+  margin-left: 0.5rem;
+}

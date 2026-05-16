@@ -68,7 +68,7 @@ export class QuestionEditorComponent implements OnInit {
     });
   }
 
-  onSaved(q: Question) {
+  onSaved(_q: Question) {
     this.toastService.success(
       this.isEdit() ? 'Đã cập nhật câu hỏi' : 'Đã tạo câu hỏi mới'
     );

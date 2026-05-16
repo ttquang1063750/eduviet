@@ -1,150 +1,193 @@
+// ─── App shell ───────────────────────────────────────────────────────────────
+
 .app-layout {
-  display: flex;
-  min-height: 100vh;
-  background: #f8fafc;
+  height: 100vh;
+  background: var(--mat-sys-surface-container-low, #f8fafc);
 }
 
-// ─── Sidebar ─────────────────────────────────────────────────────────────────
+// ─── Sidebar (mat-sidenav override) ──────────────────────────────────────────
 
 .sidebar {
   width: 260px;
-  background: #1a237e;
+  // Follow Material theme primary colour — set in material-theme.scss via mat.theme()
+  background: var(--mat-sys-primary) !important;
   display: flex;
   flex-direction: column;
-  padding: 1.5rem 1rem;
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100vh;
-  overflow-y: auto;
-  z-index: 100;
+  border-right: none !important;
+  border-radius: 0 !important;    // remove M3 sidenav default border-radius
+  --mat-sidenav-container-shape: 0; // override M3 shape token
+  transition: width 250ms ease;
+  overflow: hidden; // prevent icon/text bleed during transition
 }
+
+// ─── Brand ───────────────────────────────────────────────────────────────────
 
 .sidebar-brand {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0 0.5rem;
-  margin-bottom: 1.5rem;
+  padding: 1.25rem 1rem 0.75rem;
+
+  // Collapsed: stack logo + toggle vertically, centered
+  &--collapsed {
+    flex-direction: column;
+    align-items: center;
+    padding: 0.75rem 0;
+    gap: 0.25rem;
+
+    .toggle-btn {
+      margin-left: 0;
+    }
+  }
 }
 
 .brand-logo svg {
   width: 40px;
   height: 40px;
+  flex-shrink: 0;
 }
 
 .brand-text {
   font-size: 1.5rem;
   font-weight: 800;
   color: white;
+  flex: 1;
+  white-space: nowrap;
 }
+
+// ─── Toggle button ───────────────────────────────────────────────────────────
+
+.toggle-btn {
+  color: rgba(255, 255, 255, 0.65);
+  flex-shrink: 0;
+  margin-left: auto; // push to right in expanded mode
+
+  &:hover {
+    color: white;
+  }
+
+  // mat-icon-button uses currentColor for the icon
+  --mat-icon-button-icon-color: currentColor;
+}
+
+// ─── User card ────────────────────────────────────────────────────────────────
 
 .user-card {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.875rem;
+  padding: 0.75rem 1rem;
+  margin: 0 0.5rem 0.5rem;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  margin-bottom: 1.5rem;
+  transition: padding 250ms ease;
+
+  // Collapsed: center avatar, no side padding
+  &--collapsed {
+    justify-content: center;
+    padding: 0.5rem 0.25rem;
+    margin: 0 0.25rem 0.5rem;
+  }
 }
 
 .user-avatar {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   background: linear-gradient(135deg, #ffd700, #ff8c00);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  color: #1a237e;
-  font-size: 1.1rem;
+  color: var(--mat-sys-primary); // initials colour follows theme
+  font-size: 1rem;
   flex-shrink: 0;
+  cursor: default;
+
+  // Collapsed: 3-letter initials need smaller font
+  .user-card--collapsed & {
+    font-size: 0.625rem;
+    letter-spacing: 0.02em;
+  }
+}
+
+.user-info {
+  min-width: 0;
 }
 
 .user-name {
   font-weight: 600;
   color: white;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .user-role {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: rgba(255, 255, 255, 0.6);
 }
 
+// ─── Nav list (mat-nav-list override) ────────────────────────────────────────
+
 .nav-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  padding: 0.25rem 0 !important;
+
+  // Align icon left edge with the logo in .sidebar-brand (padding-left: 1rem)
+  --mat-list-list-item-leading-icon-start-space: 1rem;
+
+  // mat-list-item text + icon colours — on-primary surface = white
+  --mat-list-list-item-label-text-color: rgba(255, 255, 255, 0.75);
+  --mat-list-list-item-leading-icon-color: rgba(255, 255, 255, 0.6);
+
+  // Hover
+  .mat-mdc-list-item:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    --mat-list-list-item-label-text-color: white;
+    --mat-list-list-item-leading-icon-color: white;
+  }
+
+  // Active (routerLinkActive [activated]="true")
+  .mat-mdc-list-item.mdc-list-item--activated {
+    background: rgba(255, 255, 255, 0.18) !important;
+    --mat-list-list-item-label-text-color: white;
+    --mat-list-list-item-leading-icon-color: white;
+  }
 }
 
-.nav-link {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  color: rgba(255, 255, 255, 0.75);
-  text-decoration: none;
-  border-radius: 10px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background 0.15s, color 0.15s;
-}
-
-.nav-link.active,
-.nav-link:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
-}
-
-.nav-icon {
-  font-size: 1.1rem;
-}
-
+// Section title (non-clickable mat-list-item used as label)
 .nav-section-title {
-  list-style: none;
-  padding: 1rem 1rem 0.25rem;
-  font-size: 0.7rem;
-  font-weight: 700;
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.35) !important;
+  pointer-events: none;
+  height: 36px !important;
+  padding-top: 0.75rem !important;
 }
 
-.logout-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 10px;
-  color: rgba(255, 255, 255, 0.75);
-  cursor: pointer;
-  font-size: 0.9rem;
-  width: 100%;
-  transition: background 0.15s;
+// ─── Logout list ─────────────────────────────────────────────────────────────
 
-  &:hover {
-    background: rgba(239, 68, 68, 0.3);
-    color: white;
+.logout-list {
+  padding: 0.25rem 0 1rem !important;
+  --mat-list-list-item-leading-icon-start-space: 1rem; // align with nav-list
+  --mat-list-list-item-label-text-color: rgba(255, 255, 255, 0.7);
+  --mat-list-list-item-leading-icon-color: rgba(255, 255, 255, 0.5);
+
+  .logout-item:hover {
+    background: rgba(239, 68, 68, 0.25) !important;
+    --mat-list-list-item-label-text-color: white;
+    --mat-list-list-item-leading-icon-color: white;
+    cursor: pointer;
   }
 }
 
 // ─── Main content ─────────────────────────────────────────────────────────────
 
 .main-content {
-  flex: 1;
-  margin-left: 260px;
-  padding: 0 2rem 2rem; // Removed top padding, breadcrumb will handle it
-  min-height: 100vh;
+  padding: 0 2rem 2rem;
+  background: var(--mat-sys-surface-container-low, #f8fafc);
 }

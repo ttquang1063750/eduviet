@@ -16,11 +16,12 @@ import { BlogPost } from '@eduviet/shared-types';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-content-admin-list',
   standalone: true,
-  imports: [RouterLink, DatePipe, MatButtonModule, MatIconModule, MatCardModule],
+  imports: [RouterLink, DatePipe, MatButtonModule, MatIconModule, MatCardModule, MatTooltipModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './content-admin-list.component.html',
   styleUrl: './content-admin-list.component.scss',

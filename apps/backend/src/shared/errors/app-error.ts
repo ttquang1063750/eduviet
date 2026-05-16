@@ -29,6 +29,10 @@ export class AppError extends Error {
     return new AppError(400, 'BAD_REQUEST', message, details);
   }
 
+  static validation(message: string, details?: unknown[]) {
+    return new AppError(422, 'VALIDATION_ERROR', message, details);
+  }
+
   static internal(message = 'Đã có lỗi xảy ra, vui lòng thử lại') {
     return new AppError(500, 'INTERNAL_ERROR', message);
   }

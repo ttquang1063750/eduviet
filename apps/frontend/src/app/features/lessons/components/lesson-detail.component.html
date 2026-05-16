@@ -60,7 +60,7 @@
 
               @if ((lq.question.type === 'SINGLE_CHOICE' || lq.question.type === 'MULTIPLE_CHOICE') && lq.question.options) {
                 <div class="options-list">
-                  @for (opt of $any(lq.question.options); track opt.id; let j = $index) {
+                  @for (opt of lq.question.options!; track opt.id; let j = $index) {
                     <label class="option-item" [class.selected]="selectedAnswers()[lq.question.id] === opt.id">
                       <input
                         type="radio"

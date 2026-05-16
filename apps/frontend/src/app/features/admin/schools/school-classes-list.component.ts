@@ -6,9 +6,10 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ClassesService, ClassItem } from '../../../core/services/classes.service';
+import { SchoolsService } from '../../../core/services/schools.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
 import { getApiErrorMessage } from '../../../core/utils/http-error';
@@ -20,10 +21,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSelectModule } from '@angular/material/select';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @Component({
-  selector: 'app-classes-admin-list',
+  selector: 'app-school-classes-list',
   standalone: true,
   imports: [
     RouterLink,
@@ -34,36 +35,55 @@ import { MatSelectModule } from '@angular/material/select';
     MatInputModule,
     MatIconModule,
     MatTooltipModule,
-    MatSelectModule,
+    MatProgressBarModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './classes-admin-list.component.html',
-  styleUrl: './classes-admin-list.component.scss',
+  templateUrl: './school-classes-list.component.html',
+  styleUrl: './school-classes-list.component.scss',
 })
-export class ClassesAdminListComponent implements OnInit {
+export class SchoolClassesListComponent implements OnInit {
+  private route = inject(ActivatedRoute);
   private classesService = inject(ClassesService);
+  private schoolsService = inject(SchoolsService);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmService);
-  private router = inject(Router);
 
-  readonly displayedColumns = ['name', 'grade', 'school', 'academicYear', 'students', 'actions'];
+  readonly displayedColumns = ['name', 'grade', 'academicYear', 'teacher', 'students', 'actions'];
 
+  schoolId = signal<string>('');
+  schoolName = signal<string>('');
   classes = signal<ClassItem[]>([]);
   total = signal(0);
   page = signal(1);
-  readonly perPage = 10;
+  readonly perPage = 20;
   totalPages = computed(() => Math.ceil(this.total() / this.perPage));
   loading = signal(false);
 
   searchControl = new FormControl('');
 
+  /** Base URL tương đối cho routerLink — dùng lại schoolId từ URL */
+  get baseUrl(): string[] {
+    return ['/admin/schools', this.schoolId()];
+  }
+
   ngOnInit(): void {
+    const id = this.route.snapshot.paramMap.get('id') ?? '';
+    this.schoolId.set(id);
+
+    // Load tên trường cho breadcrumb
+    if (id) {
+      this.schoolsService.findById(id).subscribe({
+        next: (school) => this.schoolName.set(school.name),
+      });
+    }
+
     this.searchControl.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged())
       .subscribe(() => {
         this.page.set(1);
         this.loadClasses();
       });
+
     this.loadClasses();
   }
 
@@ -71,9 +91,9 @@ export class ClassesAdminListComponent implements OnInit {
     this.loading.set(true);
     this.classesService
       .getAll({
+        schoolId: this.schoolId(),
         page: this.page(),
         perPage: this.perPage,
-        search: this.searchControl.value || undefined,
       })
       .subscribe({
         next: (res) => {
@@ -90,31 +110,10 @@ export class ClassesAdminListComponent implements OnInit {
     this.loadClasses();
   }
 
-  /** Navigate đến edit class trong context của trường (school-scoped URL) */
-  onEdit(cls: ClassItem): void {
-    void this.router.navigate([
-      '/admin/schools',
-      cls.school.id,
-      'classes',
-      cls.id,
-    ]);
-  }
-
-  /** Navigate đến students list */
-  onViewStudents(cls: ClassItem): void {
-    void this.router.navigate([
-      '/admin/schools',
-      cls.school.id,
-      'classes',
-      cls.id,
-      'students',
-    ]);
-  }
-
   async onDelete(cls: ClassItem): Promise<void> {
     const confirmed = await this.confirmService.confirm({
       title: 'Xóa lớp học',
-      message: `Xóa lớp "${cls.name}" (${cls.school.name})? Thao tác không thể hoàn tác.`,
+      message: `Xóa lớp "${cls.name}"? Toàn bộ dữ liệu liên quan sẽ bị xóa.`,
       confirmText: 'Xóa',
       type: 'danger',
     });

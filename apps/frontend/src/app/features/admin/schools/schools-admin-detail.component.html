@@ -1,104 +1,75 @@
-<div class="admin-container">
-  <div class="header-actions">
-    <h2>{{ isEditMode() ? 'Chỉnh sửa trường' : 'Thêm trường mới' }}</h2>
-    <a mat-stroked-button routerLink="/admin/schools">
-      <mat-icon>chevron_left</mat-icon> Quay lại
-    </a>
+<div class="detail-page">
+  <!-- Header -->
+  <div class="detail-header">
+    <div class="detail-header__left">
+      <a mat-icon-button routerLink="/admin/schools" matTooltip="Quay lại danh sách">
+        <mat-icon>arrow_back</mat-icon>
+      </a>
+      <h2 class="detail-header__title">
+        {{ isEditMode() ? 'Chỉnh sửa trường học' : 'Thêm trường mới' }}
+      </h2>
+    </div>
+    @if (isEditMode()) {
+      <a mat-stroked-button [routerLink]="['/admin/schools', schoolId(), 'classes']">
+        <mat-icon>school</mat-icon> Xem lớp học
+      </a>
+    }
   </div>
 
-  <form [formGroup]="schoolForm" (ngSubmit)="onSubmit()" class="detail-form">
-    <div class="form-grid">
-      <mat-form-field appearance="outline">
-        <mat-label>Tên trường</mat-label>
-        <input matInput formControlName="name" placeholder="Ví dụ: THPT Chu Văn An" required>
-        <mat-error>Tên trường là bắt buộc</mat-error>
-      </mat-form-field>
+  <!-- Form -->
+  <div class="form-card">
+    <form [formGroup]="schoolForm" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Tên trường</mat-label>
+          <input matInput formControlName="name" placeholder="Ví dụ: THPT Chu Văn An" required />
+          <mat-error>Tên trường là bắt buộc</mat-error>
+        </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Mã trường</mat-label>
-        <input matInput formControlName="code" placeholder="Ví dụ: CVAN" required>
-        <mat-error>Mã trường là bắt buộc</mat-error>
-      </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Mã trường</mat-label>
+          <input matInput formControlName="code" placeholder="Ví dụ: CVAN" required />
+          <mat-error>Mã trường là bắt buộc</mat-error>
+        </mat-form-field>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Địa chỉ</mat-label>
-        <input matInput formControlName="address" placeholder="Số nhà, đường, phường/xã...">
-      </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Địa chỉ</mat-label>
+          <input matInput formControlName="address" placeholder="Số nhà, đường, phường/xã..." />
+        </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Số điện thoại</mat-label>
-        <input matInput formControlName="phone" placeholder="024xxxxxxx">
-      </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Số điện thoại</mat-label>
+          <input matInput formControlName="phone" placeholder="024xxxxxxx" />
+        </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Email</mat-label>
-        <input matInput type="email" formControlName="email" placeholder="school@example.com">
-        <mat-error>Email không hợp lệ</mat-error>
-      </mat-form-field>
-    </div>
-
-    <div class="form-actions">
-      <button mat-flat-button color="primary" type="submit" [disabled]="schoolForm.invalid">
-        <mat-icon>save</mat-icon> {{ isEditMode() ? 'Cập nhật' : 'Tạo mới' }}
-      </button>
-
-      @if (isEditMode()) {
-        <button mat-button color="warn" type="button" (click)="onDelete()">
-          <mat-icon>delete</mat-icon> Xóa trường
-        </button>
-      }
-    </div>
-  </form>
-
-  <!-- ── Danh sách lớp học ──────────────────────────────── -->
-  @if (isEditMode()) {
-    <div class="classes-section">
-      <div class="section-header">
-        <h3>
-          <mat-icon>class</mat-icon>
-          Danh sách lớp học
-          @if (!loadingClasses()) {
-            <span class="count-badge">{{ schoolClasses().length }}</span>
-          }
-        </h3>
-        <button mat-flat-button color="primary" (click)="goToCreateClass()">
-          <mat-icon>add</mat-icon> Tạo lớp mới
-        </button>
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" placeholder="school@example.com" />
+          <mat-error>Email không hợp lệ</mat-error>
+        </mat-form-field>
       </div>
 
-      @if (loadingClasses()) {
-        <div class="loading-row">
-          <mat-spinner diameter="32"></mat-spinner>
-          <span>Đang tải danh sách lớp...</span>
-        </div>
-      } @else if (schoolClasses().length === 0) {
-        <div class="empty-state">
-          <mat-icon>inbox</mat-icon>
-          <p>Trường chưa có lớp học nào. Hãy tạo lớp đầu tiên!</p>
-        </div>
-      } @else {
-        <div class="classes-list">
-          @for (cls of schoolClasses(); track cls.id) {
-            <a class="class-row" [routerLink]="['/admin/classes', cls.id]">
-              <div class="class-info">
-                <span class="class-name">{{ cls.name }}</span>
-                <span class="class-meta">Khối {{ cls.grade }} · {{ cls.academicYear }}</span>
-              </div>
-              <div class="class-right">
-                @if (cls.homeroomTeacher) {
-                  <span class="teacher-chip">
-                    <mat-icon>person</mat-icon>{{ cls.homeroomTeacher.fullName }}
-                  </span>
-                }
-                <span class="student-count">
-                  <mat-icon>people</mat-icon>{{ cls._count.enrollments }} HS
-                </span>
-                <mat-icon class="chevron">chevron_right</mat-icon>
-              </div>
-            </a>
+      <div class="form-actions">
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          [disabled]="schoolForm.invalid || saving()"
+        >
+          @if (saving()) {
+            <mat-spinner diameter="18" />
+          } @else {
+            <mat-icon>save</mat-icon>
           }
-        </div>
-      }
-    </div>
-  }
+          {{ isEditMode() ? 'Cập nhật' : 'Tạo mới' }}
+        </button>
+
+        @if (isEditMode()) {
+          <button mat-stroked-button color="warn" type="button" (click)="onDelete()">
+            <mat-icon>delete</mat-icon> Xóa trường
+          </button>
+        }
+      </div>
+    </form>
+  </div>
 </div>

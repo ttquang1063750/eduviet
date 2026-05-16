@@ -1,0 +1,158 @@
+<div class="students-page">
+
+  <!-- Admin card -->
+  <div class="admin-card">
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar__title-group">
+        <h2 class="toolbar__title">
+          Học sinh
+          @if (enrollments().length > 0) {
+            <span class="count-badge">{{ enrollments().length }}</span>
+          }
+        </h2>
+        @if (className()) {
+          <span class="toolbar__subtitle">{{ className() }}{{ schoolName() ? ' · ' + schoolName() : '' }}</span>
+        }
+      </div>
+      <div class="toolbar__actions">
+        <a mat-stroked-button [routerLink]="backUrl()">
+          <mat-icon>edit</mat-icon> Chỉnh sửa lớp
+        </a>
+        <button mat-flat-button (click)="toggleAddPanel()">
+          <mat-icon>{{ showAddPanel() ? 'close' : 'person_add' }}</mat-icon>
+          {{ showAddPanel() ? 'Đóng' : 'Thêm học sinh' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading bar -->
+    @if (loadingEnrollments()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    <!-- Add student panel -->
+    @if (showAddPanel()) {
+      <div class="add-panel">
+        <div class="add-panel__header">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="add-panel__search">
+            <mat-label>Tìm học sinh</mat-label>
+            <input matInput [formControl]="searchControl" placeholder="Nhập tên hoặc email..." />
+            <mat-icon matPrefix>search</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <div class="add-panel__results" (scroll)="onSearchScroll($event)">
+          @if (searching()) {
+            <div class="panel-loading">
+              <mat-spinner diameter="24" />
+              <span>Đang tìm kiếm...</span>
+            </div>
+          } @else if (searchResults().length === 0) {
+            <div class="panel-empty">
+              <mat-icon>person_search</mat-icon>
+              <span>Không tìm thấy học sinh phù hợp</span>
+            </div>
+          } @else {
+            @for (student of searchResults(); track student.id) {
+              <div class="student-result">
+                <div class="student-result__avatar">
+                  @if (student.avatarUrl) {
+                    <img [src]="student.avatarUrl" [alt]="student.fullName" />
+                  } @else {
+                    <mat-icon>person</mat-icon>
+                  }
+                </div>
+                <div class="student-result__info">
+                  <span class="student-result__name">{{ student.fullName }}</span>
+                  <span class="student-result__email">{{ student.email }}</span>
+                </div>
+                <button
+                  mat-stroked-button
+                  color="primary"
+                  (click)="onEnroll(student)"
+                  [disabled]="enrollingId() === student.id"
+                >
+                  <mat-spinner diameter="16" [style.display]="enrollingId() === student.id ? 'inline-block' : 'none'" />
+                  <mat-icon [style.display]="enrollingId() !== student.id ? '' : 'none'">add</mat-icon>
+                  <span [style.display]="enrollingId() !== student.id ? '' : 'none'">Thêm</span>
+                </button>
+              </div>
+            }
+            @if (loadingMore()) {
+              <div class="panel-loading">
+                <mat-spinner diameter="20" />
+              </div>
+            }
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Enrolled students table -->
+    <div class="table-wrapper">
+      <mat-table [dataSource]="enrollments()" class="students-table">
+
+        <!-- Cột: Avatar -->
+        <ng-container matColumnDef="avatar">
+          <mat-header-cell *matHeaderCellDef class="avatar-header"></mat-header-cell>
+          <mat-cell *matCellDef="let enrollment" class="avatar-cell">
+            <div class="avatar">
+              @if (enrollment.user.avatarUrl) {
+                <img [src]="enrollment.user.avatarUrl" [alt]="enrollment.user.fullName" />
+              } @else {
+                <mat-icon>person</mat-icon>
+              }
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Cột: Họ tên -->
+        <ng-container matColumnDef="name">
+          <mat-header-cell *matHeaderCellDef>Họ và tên</mat-header-cell>
+          <mat-cell *matCellDef="let enrollment">
+            <span class="student-name">{{ enrollment.user.fullName }}</span>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Cột: Email -->
+        <ng-container matColumnDef="email">
+          <mat-header-cell *matHeaderCellDef>Email</mat-header-cell>
+          <mat-cell *matCellDef="let enrollment">
+            <span class="student-email">{{ enrollment.user.email }}</span>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Cột: Hành động -->
+        <ng-container matColumnDef="actions">
+          <mat-header-cell *matHeaderCellDef class="actions-header"></mat-header-cell>
+          <mat-cell *matCellDef="let enrollment" class="actions-cell">
+            <button
+              mat-icon-button
+              color="warn"
+              matTooltip="Xóa khỏi lớp"
+              (click)="onRemove(enrollment)"
+              [disabled]="removingId() === enrollment.user.id"
+            >
+              <mat-spinner diameter="18" [style.display]="removingId() === enrollment.user.id ? 'inline-block' : 'none'" />
+              <mat-icon [style.display]="removingId() !== enrollment.user.id ? '' : 'none'">person_remove</mat-icon>
+            </button>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+
+        <!-- Empty state -->
+        <tr class="mat-row no-data-row" *matNoDataRow>
+          <td class="mat-cell no-data-cell" [attr.colspan]="displayedColumns.length">
+            <mat-icon>group_off</mat-icon>
+            <span>Lớp chưa có học sinh nào. Nhấn "Thêm học sinh" để bắt đầu.</span>
+          </td>
+        </tr>
+      </mat-table>
+    </div>
+
+  </div>
+</div>

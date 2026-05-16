@@ -9,16 +9,23 @@ import {
 import { RouterLink } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { SchoolsService } from '../../../core/services/schools.service';
+import { ToastService } from '../../../core/services/toast.service';
+import { ConfirmService } from '../../../core/services/confirm.service';
 import { School } from '@eduviet/shared-types';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { GeoTreeComponent, GeoNodeSelected } from '../../../shared/components/geo-tree/geo-tree.component';
 import { AuthService } from '../../../core/services/auth.service';
+import { getApiErrorMessage } from '../../../core/utils/http-error';
 
+import { MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-schools-admin-list',
@@ -27,11 +34,15 @@ import { MatChipsModule } from '@angular/material/chips';
     RouterLink,
     ReactiveFormsModule,
     GeoTreeComponent,
+    MatTableModule,
+    MatSortModule,
+    MatPaginatorModule,
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
     MatChipsModule,
+    MatTooltipModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './schools-admin-list.component.html',
@@ -40,6 +51,10 @@ import { MatChipsModule } from '@angular/material/chips';
 export class SchoolsAdminListComponent implements OnInit {
   private schoolsService = inject(SchoolsService);
   private authService = inject(AuthService);
+  private toastService = inject(ToastService);
+  private confirmService = inject(ConfirmService);
+
+  readonly displayedColumns = ['code', 'name', 'address', 'actions'];
 
   schools = signal<School[]>([]);
   total = signal(0);
@@ -106,5 +121,30 @@ export class SchoolsAdminListComponent implements OnInit {
   onPageChange(newPage: number): void {
     this.page.set(newPage);
     this.loadSchools();
+  }
+
+  async onDelete(school: School): Promise<void> {
+    const confirmed = await this.confirmService.confirm({
+      title: 'Xóa trường học',
+      message: `Xóa trường "${school.name}"? Thao tác này không thể hoàn tác.`,
+      confirmText: 'Xóa',
+      type: 'danger',
+    });
+    if (!confirmed) return;
+
+    this.schoolsService.delete(school.id).subscribe({
+      next: () => {
+        this.schools.update((list) => list.filter((s) => s.id !== school.id));
+        this.total.update((t) => t - 1);
+        this.toastService.success('Đã xóa trường học');
+      },
+      error: (err: unknown) => {
+        this.toastService.error(getApiErrorMessage(err, 'Xóa thất bại'));
+      },
+    });
+  }
+
+  trackById(_index: number, school: School): string {
+    return school.id;
   }
 }
