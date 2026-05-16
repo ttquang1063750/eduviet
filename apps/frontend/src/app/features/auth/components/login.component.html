@@ -38,15 +38,15 @@
 
       <div class="features-list">
         <div class="feature-item">
-          <span class="feature-icon">📚</span>
+          <mat-icon class="feature-icon">menu_book</mat-icon>
           <span>Hàng nghìn bài học từ lớp 1-12</span>
         </div>
         <div class="feature-item">
-          <span class="feature-icon">✏️</span>
+          <mat-icon class="feature-icon">edit</mat-icon>
           <span>Bài tập tương tác, vẽ hình</span>
         </div>
         <div class="feature-item">
-          <span class="feature-icon">💬</span>
+          <mat-icon class="feature-icon">chat</mat-icon>
           <span>Chat trực tiếp với giáo viên</span>
         </div>
       </div>
@@ -63,60 +63,67 @@
 
       @if (errorMessage()) {
         <div class="alert alert-error" role="alert">
-          <span class="alert-icon">⚠️</span>
-          {{ errorMessage() }}
+          <mat-icon class="alert-icon">warning</mat-icon>
+          <span>{{ errorMessage() }}</span>
         </div>
       }
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="login-form" novalidate>
-        <div class="form-group">
-          <label for="email" class="form-label">Email</label>
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
           <input
-            id="email"
+            matInput
             type="email"
             formControlName="email"
-            class="form-input"
-            [class.error]="isFieldInvalid('email')"
             placeholder="example@eduviet.vn"
             autocomplete="email"
           />
-          @if (isFieldInvalid('email')) {
-            <span class="field-error">Email không hợp lệ</span>
+          @if (form.controls.email.hasError('required')) {
+            <mat-error>Vui lòng nhập email</mat-error>
+          } @else if (
+            form.controls.email.hasError('email') ||
+            form.controls.email.hasError('pattern')
+          ) {
+            <mat-error>Email không hợp lệ</mat-error>
           }
-        </div>
+        </mat-form-field>
 
-        <div class="form-group">
-          <label for="password" class="form-label">Mật khẩu</label>
-          <div class="input-wrapper">
-            <input
-              id="password"
-              [type]="showPassword() ? 'text' : 'password'"
-              formControlName="password"
-              class="form-input"
-              [class.error]="isFieldInvalid('password')"
-              placeholder="••••••••"
-              autocomplete="current-password"
-            />
-            <button
-              type="button"
-              class="toggle-password"
-              (click)="showPassword.update(v => !v)"
-              [attr.aria-label]="showPassword() ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
-            >
-              {{ showPassword() ? '🙈' : '👁️' }}
-            </button>
-          </div>
-          @if (isFieldInvalid('password')) {
-            <span class="field-error">Mật khẩu phải có ít nhất 6 ký tự</span>
+        <mat-form-field appearance="outline">
+          <mat-label>Mật khẩu</mat-label>
+          <input
+            matInput
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="••••••••"
+            autocomplete="current-password"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="showPassword.update(v => !v)"
+            [attr.aria-label]="showPassword() ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
+          >
+            <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (form.controls.password.hasError('required')) {
+            <mat-error>Vui lòng nhập mật khẩu</mat-error>
+          } @else if (form.controls.password.hasError('minlength')) {
+            <mat-error>Mật khẩu phải có ít nhất 6 ký tự</mat-error>
           }
-        </div>
+        </mat-form-field>
 
-        <button type="submit" class="btn-primary" [disabled]="form.invalid || isLoading()">
+        <button
+          mat-flat-button
+          type="submit"
+          class="submit-btn"
+          [disabled]="form.invalid || isLoading()"
+        >
           @if (isLoading()) {
-            <span class="spinner"></span>
-            Đang đăng nhập...
+            <mat-progress-spinner diameter="20" mode="indeterminate" />
+            <span>Đang đăng nhập...</span>
           } @else {
-            Đăng nhập
+            <span>Đăng nhập</span>
           }
         </button>
       </form>
@@ -125,8 +132,8 @@
         <p class="demo-title">Tài khoản demo:</p>
         <div class="demo-grid">
           @for (account of demoAccounts; track account.role) {
-            <button class="demo-btn" (click)="fillDemo(account)">
-              <span class="demo-role">{{ account.label }}</span>
+            <button mat-stroked-button type="button" class="demo-btn" (click)="fillDemo(account)">
+              {{ account.label }}
             </button>
           }
         </div>

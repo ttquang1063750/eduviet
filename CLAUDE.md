@@ -18,7 +18,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-16 — session 24: CI fix + gitignore cleanup)
+## Trạng thái hiện tại (cập nhật 2026-05-16 — session 25: Login Material refactor)
 
 ### ✅ Đã hoàn thành
 
@@ -220,6 +220,18 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ `features/admin/questions/questions-admin.component` — Question Bank admin page (filter, paginate, CRUD modal)
 - ✅ `chat.types.ts` — `role` → `roles` (multi-role fix)
 
+
+#### Session 25 — Login page Material refactor (2026-05-16)
+- ✅ Thay toàn bộ raw `<input>`/`<button>`/emoji ở `features/auth/components/login.component` bằng Angular Material 3
+- ✅ Email + password → `mat-form-field appearance="outline"` + `<mat-error>` (auto-handle invalid state qua `ErrorStateMatcher`)
+- ✅ Password toggle → `mat-icon-button matSuffix` + `visibility`/`visibility_off` icon
+- ✅ Submit → `mat-flat-button` + `mat-progress-spinner diameter=20` cho loading state
+- ✅ Alert ⚠️ → `<mat-icon>warning`; demo buttons → `mat-stroked-button`; feature emoji (📚✏️💬) → `mat-icon` (menu_book, edit, chat)
+- ✅ Apply theme tokens: `--mat-sys-primary`, `--mat-sys-surface`, `--mat-sys-error-container`, `--mat-sys-on-error-container`, `--mat-sys-on-surface-variant`, `--mat-sys-outline-variant`
+- ✅ SCSS giảm 299 → 201 dòng (-33%); xoá `.form-input`, `.btn-primary`, `.toggle-password`, `.spinner`, `@keyframes spin`, `.field-error`, `.form-label`, `.demo-btn` raw, `.demo-role`
+- ✅ Component.ts: +5 Material imports, xoá `isFieldInvalid()` dead method (Material auto-handle)
+- ✅ Bonus fix: `Validators.email` cho phép TLD optional → thêm `Validators.pattern(/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/)` để bắt buộc TLD ≥ 2 chars
+- ✅ pnpm build + typecheck PASS; FE dev server HTTP 200 on /login
 
 #### Session 24 — Fix CI/CD + gitignore cleanup (2026-05-16, PR #16)
 - ✅ Root cause CI fail: `pnpm install` không tự chạy `prisma generate` → ~50 lỗi TS

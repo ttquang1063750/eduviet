@@ -1,11 +1,23 @@
 import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
@@ -19,7 +31,14 @@ export class LoginComponent {
   readonly showPassword = signal(false);
 
   readonly form = this.fb.nonNullable.group({
-    email: ['', [Validators.required, Validators.email]],
+    email: [
+      '',
+      [
+        Validators.required,
+        Validators.email,
+        Validators.pattern(/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/),
+      ],
+    ],
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
@@ -36,11 +55,6 @@ export class LoginComponent {
 
   fillDemo(account: { email: string }) {
     this.form.patchValue({ email: account.email, password: 'Admin@123' });
-  }
-
-  isFieldInvalid(field: 'email' | 'password'): boolean {
-    const control = this.form.get(field);
-    return !!(control?.invalid && control?.touched);
   }
 
   onSubmit() {

@@ -1,6 +1,6 @@
 # EduViet — Progress Tracker
 
-> Cập nhật lần cuối: 2026-05-16 (session 24 — Fix CI/CD + gitignore cleanup)
+> Cập nhật lần cuối: 2026-05-16 (session 25 — Login Material refactor)
 > Workflow: `/plan-task` → `/execute-step` (lặp) → `/check-point` → `/resume` → tiếp tục
 
 ---
@@ -130,6 +130,30 @@
 |------|----------|
 | `main-layout.component.scss` | Sidebar bg `var(--mat-sys-primary)`, remove border-radius, icon left-align token |
 | `styles.scss` | Collapsed centering: `mdc-list-item__content { flex: 0; width: 0 }` — fix icon alignment |
+
+---
+
+## Session 25 — Login page Material refactor (2026-05-16)
+
+Thay toàn bộ raw form elements ở trang login bằng Angular Material 3 để đồng nhất với rules UI/UX.
+
+### Files đã sửa
+
+| File | Thay đổi |
+|------|----------|
+| `features/auth/components/login.component.ts` | +5 Material imports (form-field, input, button, icon, progress-spinner); xoá `isFieldInvalid()` dead method |
+| `features/auth/components/login.component.html` | Email/password → `mat-form-field outline` + `<mat-error>` (auto invalid state); password toggle → `mat-icon-button matSuffix` + `visibility[_off]`; submit → `mat-flat-button` + `mat-progress-spinner`; alert ⚠️ → `<mat-icon>warning`; demo → `mat-stroked-button`; feature emoji (📚✏️💬) → `<mat-icon>menu_book/edit/chat` |
+| `features/auth/components/login.component.scss` | 299 → 201 dòng (-33%); xoá dead CSS (`.form-input`, `.btn-primary`, `.toggle-password`, `.spinner`, `@keyframes spin`, `.demo-btn` raw, `.field-error`, `.form-label`); apply theme tokens (`--mat-sys-primary`, `--mat-sys-error-container`, `--mat-sys-on-surface-variant`, `--mat-sys-outline-variant`); thêm `.submit-btn` full-width + `mat-icon` width/height fix |
+
+### Bonus: Strict email validation
+- Vấn đề: `Validators.email` của Angular permissive (follow WHATWG HTML5 spec), chấp nhận `user@localhost` không TLD
+- Fix: thêm `Validators.pattern(/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/)` cạnh `Validators.email`
+- HTML: mat-error check cả 2 error key `email || pattern`
+
+### Verify
+- ✅ `pnpm build` + `pnpm typecheck` PASS
+- ✅ FE dev server `localhost:4200/login` HTTP 200
+- ⏳ Manual UX verification (user)
 
 ---
 
