@@ -107,7 +107,6 @@ export class ReportsService {
       doc.on('end', () => resolve(Buffer.concat(chunks)));
       doc.on('error', reject);
 
-      const pageWidth = doc.page.width - 100; // trừ margin 2 bên
       const now = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
 
       // ── Header ────────────────────────────────────────────────────────────────
