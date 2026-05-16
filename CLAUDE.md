@@ -18,7 +18,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-16 — session 25: Login Material refactor)
+## Trạng thái hiện tại (cập nhật 2026-05-16 — session 26: i18n plan + /i18n-check skill)
 
 ### ✅ Đã hoàn thành
 
@@ -220,6 +220,13 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ `features/admin/questions/questions-admin.component` — Question Bank admin page (filter, paginate, CRUD modal)
 - ✅ `chat.types.ts` — `role` → `roles` (multi-role fix)
 
+
+#### Session 26 — i18n plan + /i18n-check skill + security audit (2026-05-16)
+- ✅ Plan task i18n: 30 steps / 5 phase, Angular `@angular/localize` 2 builds (vi default + `/en/`)
+- ✅ Skill mới `/i18n-check` — scan HTML/TS tìm text thiếu marker; WARN_MODE / ENFORCE_MODE auto-detect; phát hiện text node + attribute + TS dynamic strings
+- ✅ Wire `/i18n-check` vào execute-step Angular checklist (gate cuối)
+- ✅ rules.md: section "i18n bắt buộc cho mọi UI mới" với ID convention `@@feature.context.key` + examples + workflow
+- ✅ Security audit 3 commits gần: 0 CRITICAL, 2 HIGH (demo creds hardcode, no-explicit-any warn), 2 MEDIUM, 12 PASS — logged vào backlog
 
 #### Session 25 — Login page Material refactor (2026-05-16)
 - ✅ Thay toàn bộ raw `<input>`/`<button>`/emoji ở `features/auth/components/login.component` bằng Angular Material 3

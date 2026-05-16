@@ -1,6 +1,6 @@
 # EduViet — Progress Tracker
 
-> Cập nhật lần cuối: 2026-05-16 (session 25 — Login Material refactor)
+> Cập nhật lần cuối: 2026-05-16 (session 26 — i18n plan + /i18n-check skill)
 > Workflow: `/plan-task` → `/execute-step` (lặp) → `/check-point` → `/resume` → tiếp tục
 
 ---
@@ -130,6 +130,27 @@
 |------|----------|
 | `main-layout.component.scss` | Sidebar bg `var(--mat-sys-primary)`, remove border-radius, icon left-align token |
 | `styles.scss` | Collapsed centering: `mdc-list-item__content { flex: 0; width: 0 }` — fix icon alignment |
+
+---
+
+## Session 26 — i18n plan + /i18n-check skill + security audit (2026-05-16)
+
+### Skill mới
+| File | Mô tả |
+|------|-------|
+| `.claude/commands/i18n-check.md` | New skill quét HTML/TS tìm text thiếu i18n marker. WARN_MODE (chưa setup) → ENFORCE_MODE (đã setup `@angular/localize`). Phát hiện text node, attribute, TS dynamic strings. Đề xuất ID convention `@@feature.context.key`. |
+| `.claude/commands/execute-step.md` | Wire `/i18n-check` vào Angular component checklist (gate cuối cùng) |
+| `.claude/rules.md` | Section mới "i18n bắt buộc cho mọi UI mới" — examples + workflow + ID convention |
+
+### Task i18n đã plan (chưa execute)
+- Approach: Angular built-in `@angular/localize`, 2 builds (vi default + en)
+- URL routing: `/` vi, `/en/` en
+- 30 steps / 5 phase trong `.claude/task.md`
+- Ước lượng 6-8 giờ, chia nhiều session
+
+### Security audit
+- 0 CRITICAL, 2 HIGH (demo credentials hardcode + ESLint no-explicit-any warn-only), 2 MEDIUM, 12 PASS
+- Đã log vào backlog section "🔒 Security debt" để fix trước production deploy
 
 ---
 

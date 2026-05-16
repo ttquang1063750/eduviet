@@ -14,6 +14,20 @@ Approach: Angular built-in `@angular/localize` (compile-time, multi-bundle).
 Bắt đầu: 2026-05-16
 Step hiện tại: 1 — Install `@angular/localize` package
 
+## Snapshot (checkpoint 2026-05-16)
+- Đã xong: 0/30 steps (chỉ plan, chưa execute)
+- Đang làm: Step 1 — chưa bắt đầu
+- Files đã tạo trong session 26 (related): `.claude/commands/i18n-check.md`, update `execute-step.md` + `rules.md`
+- Cần làm tiếp:
+  - Phase 1 (steps 1-6): install package + config angular.json + register locale data + tạo LanguageSwitcher
+  - Sau khi setup xong, `/i18n-check` chuyển sang ENFORCE_MODE
+- Gotchas:
+  - `@angular/localize/init` cần import sớm trong main.ts (trước app bootstrap)
+  - angular.json `i18n.sourceLocale: "vi"` + `locales.en.baseHref: "/en/"`
+  - Build size x2 — CI cần update để build cả 2 locale
+  - Strings dynamic trong TS (toast, confirm, error) cần `$localize` template tag
+- Lệnh tiếp theo: `/resume` rồi `/execute-step`
+
 ## Phase 1: Infrastructure setup (steps 1-6)
 
 - [ ] 1. Install `@angular/localize` + register
