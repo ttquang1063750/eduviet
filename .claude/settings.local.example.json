@@ -1,0 +1,17 @@
+{
+  "_comment": "Sao chép file này sang settings.local.json và tuỳ chỉnh. settings.local.json ĐÃ BỊ gitignore — không commit. Mỗi máy/người tự maintain allowlist riêng cho các lệnh hay dùng.",
+  "permissions": {
+    "allow": [
+      "Bash(pnpm --version)",
+      "Bash(npm --version)",
+      "Bash(docker --version)",
+      "Bash(gh run *)",
+      "Bash(gh pr *)",
+      "Bash(git push *)",
+      "Bash(curl -s http://localhost:3000/*)",
+      "Bash(curl -s http://localhost:4200/*)",
+      "Bash(open http://localhost:4200)"
+    ],
+    "additionalDirectories": []
+  }
+}

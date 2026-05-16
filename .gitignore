@@ -26,6 +26,12 @@ Thumbs.db
 .vscode/settings.json
 *.suo
 
+# Claude Code — local per-machine settings (commit settings.local.example.json instead)
+.claude/settings.local.json
+
+# Claude Code Superpowers — brainstorm sessions and ephemeral state
+.superpowers/
+
 # Testing
 coverage/
 cypress/screenshots/
