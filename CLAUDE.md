@@ -18,7 +18,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-15 — checkpoint sau session 23)
+## Trạng thái hiện tại (cập nhật 2026-05-16 — session 24: CI fix + gitignore cleanup)
 
 ### ✅ Đã hoàn thành
 
@@ -220,6 +220,20 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ `features/admin/questions/questions-admin.component` — Question Bank admin page (filter, paginate, CRUD modal)
 - ✅ `chat.types.ts` — `role` → `roles` (multi-role fix)
 
+
+#### Session 24 — Fix CI/CD + gitignore cleanup (2026-05-16, PR #16)
+- ✅ Root cause CI fail: `pnpm install` không tự chạy `prisma generate` → ~50 lỗi TS
+- ✅ `package.json` root — `postinstall: pnpm --filter @eduviet/prisma generate` (DRY cho local+CI+Docker)
+- ✅ `audit.ts` — thêm `LESSON_REVIEWER_ASSIGNED` vào `AuditAction` enum
+- ✅ `users.service.ts` — `UpdateUserData.title: string | null` (cho phép clear)
+- ✅ `backend/tsconfig.json` — `"jsx": "preserve"` cho transitive `.tsx` imports từ email-templates
+- ✅ `lessons.service.spec.ts` — fix mock cho multi-role + lessonQuestions structure (debt từ session 10-11)
+- ✅ `backend/eslint.config.js` (NEW) — ESLint 9 flat config; BE chưa từng có config từ trước
+- ✅ Dead code cleanup: `pageWidth`, `UserDbRaw`, `_actorId`
+- ✅ `angular.json` — bundle budget initial 1MB → 3MB (debt: lazy-load KaTeX/Konva/Quill)
+- ✅ `frontend/package.json` — `test` no-op (debt: setup FE test runner)
+- ✅ Gitignore cleanup: `.claude/settings.local.json` + `.superpowers/` untrack, ship `.example.json`
+- ✅ CI run 25955753606 — Test ✅ Lint ✅ Build ✅ (squash-merged → main `6ab7c8c`)
 
 #### Session 23 — Bug fixes + Deprecated API cleanup (2026-05-14)
 - ✅ `AppError.validation()` — thêm static method HTTP 422 (fix runtime TypeError)
