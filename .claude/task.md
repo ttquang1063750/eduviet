@@ -1,102 +1,171 @@
-# Active Task: Login page — refactor sang Angular Material
+# Active Task: i18n — Angular built-in (`@angular/localize`) Vietnamese + English
 
 ## Mục tiêu
-Thay tất cả form elements raw HTML (`<input>`, `<button>`, emoji icons) ở trang login bằng Angular Material 3 components để đồng nhất với rules UI/UX dự án (M3 high-density, mat-form-field outline, mat-icon thay emoji).
+Thêm internationalization cho FE với 2 ngôn ngữ:
+- **vi** (default, source language — strings hiện tại đã là tiếng Việt)
+- **en** (translation target)
 
-## Trạng thái: COMPLETED (code done — chờ user verify UX)
+Approach: Angular built-in `@angular/localize` (compile-time, multi-bundle).
+- Mỗi locale = 1 build riêng → tốt cho SEO, performance tối ưu
+- Routing: `/` cho vi (root), `/en/` cho en
+- Language switcher: button trong layout → window.location redirect
+
+## Trạng thái: IN_PROGRESS
 Bắt đầu: 2026-05-16
-Hoàn thành: 2026-05-16
+Step hiện tại: 1 — Install `@angular/localize` package
 
-## Phạm vi
+## Phase 1: Infrastructure setup (steps 1-6)
 
-### Thay (raw → Material)
-| Hiện tại | Material |
-|---|---|
-| `<input>` email + password | `mat-form-field appearance="outline"` + `matInput` |
-| Toggle password button (🙈/👁️) | `mat-icon-button matSuffix` + `<mat-icon>visibility[_off]</mat-icon>` |
-| Submit `<button class="btn-primary">` | `mat-flat-button color="primary"` |
-| Spinner `<span class="spinner">` | `<mat-progress-spinner diameter="20" mode="indeterminate">` |
-| Error alert `<div class="alert">` | mat-card error styling + `<mat-icon>warning</mat-icon>` |
-| Demo `<button class="demo-btn">` | `mat-stroked-button` |
-| Feature icons (📚✏️💬) | `<mat-icon>menu_book/edit/chat</mat-icon>` |
-| Alert icon ⚠️ | `<mat-icon>warning</mat-icon>` |
-| Field validation message | `<mat-error>` trong mat-form-field |
+- [ ] 1. Install `@angular/localize` + register
+       `pnpm --filter @eduviet/frontend add @angular/localize`
+       Thêm `import '@angular/localize/init'` vào `src/polyfills.ts` (hoặc main.ts nếu không có polyfills.ts)
 
-### Giữ nguyên
-- Layout 2 panel (illustration + form)
-- Brand logo SVG + decorative illustration SVG
-- ReactiveFormsModule + signals (form, showPassword, errorMessage, isLoading)
-- Demo accounts logic + 8 accounts
-- Component.ts patterns (OnPush, inject, signals) — đã đúng rules
+- [ ] 2. `angular.json` — thêm i18n config
+       ```json
+       "i18n": {
+         "sourceLocale": "vi",
+         "locales": {
+           "en": { "translation": "src/locale/messages.en.xlf", "baseHref": "/en/" }
+         }
+       }
+       ```
+       Build configurations: thêm `localize: true` cho production
 
-## Steps
+- [ ] 3. `app.config.ts` — register locale data
+       ```typescript
+       import { registerLocaleData } from '@angular/common';
+       import localeVi from '@angular/common/locales/vi';
+       import localeEn from '@angular/common/locales/en';
+       registerLocaleData(localeVi);
+       registerLocaleData(localeEn);
+       ```
 
-- [x] 1. `login.component.ts` — thêm imports Material modules
-       ✅ Thêm 5 imports: MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule
-       ✅ Đăng ký trong `imports[]` của @Component decorator
+- [ ] 4. `index.html` — `<html lang="vi">` (sẽ được Angular override per locale)
 
-- [x] 2. `login.component.html` — refactor form fields (email + password)
-       ✅ Email: `mat-form-field appearance="outline"` + `matInput` + 2× `mat-error` (required + email)
-       ✅ Password: `mat-form-field` + `matInput` + `mat-icon-button matSuffix` với `visibility`/`visibility_off` icon
-       ✅ Password errors: 2× `mat-error` (required + minlength)
-       ✅ `isFieldInvalid()` method sẽ không còn dùng — Material auto-handle invalid state
+- [ ] 5. Tạo `LanguageSwitcherComponent` — `shared/components/language-switcher/`
+       Material `mat-button-toggle-group` hoặc `mat-menu` với 2 option: 🇻🇳 Tiếng Việt / 🇬🇧 English
+       Click → `window.location.href = '/en/' + currentPath` (hoặc `/`)
+       Detect current locale: `LOCALE_ID` từ Angular DI
 
-- [x] 3. `login.component.html` — refactor submit button + spinner
-       ✅ `mat-flat-button type="submit"` (M3 default = primary, không cần `color="primary"`)
-       ✅ Loading: `<mat-progress-spinner diameter="20" mode="indeterminate" />` + text
-       ✅ Giữ `[disabled]="form.invalid || isLoading()"`
+- [ ] 6. Inject `LanguageSwitcherComponent` vào `main-layout` + `blog-layout` (header area)
 
-- [x] 4. `login.component.html` — refactor error alert + demo buttons + feature icons
-       ✅ Error alert: `<mat-icon class="alert-icon">warning</mat-icon>` thay ⚠️
-       ✅ Demo: 8× `<button mat-stroked-button type="button">` thay raw `.demo-btn`
-       ✅ Feature icons: `menu_book`, `edit`, `chat` thay 📚 ✏️ 💬
+## Phase 2: Mark up templates với `i18n` attribute (steps 7-22)
 
-- [x] 5. `login.component.scss` + cleanup `login.component.ts`
-       ✅ Xoá dead CSS: `.form-group`, `.form-label`, `.form-input`, `.field-error`, `.input-wrapper`, `.toggle-password`, `.btn-primary`, `.spinner`, `@keyframes spin`, `.demo-btn` (raw style), `.demo-role`
-       ✅ Apply theme tokens: form-header h2 → `var(--mat-sys-primary)`, alert-error → error-container tokens, demo-title → on-surface-variant, demo-accounts border → outline-variant
-       ✅ Resize: `.feature-icon` + `.alert-icon` thêm `width`+`height` 1.25rem cho mat-icon
-       ✅ Mới: `.submit-btn` (full-width + flex gap cho spinner), `.demo-btn` (font-size 0.78rem)
-       ✅ SCSS giảm 299 → 201 dòng (-33%)
-       ✅ Bonus: xoá `isFieldInvalid()` method dead code trong component.ts
+Mỗi step = 1 folder/feature, thêm `i18n` attribute cho mọi text node + `i18n-<attr>` cho attributes (placeholder, aria-label, title).
 
-- [x] 6. Visual verify — automated checks PASS
-       ✅ FE dev server running (HTTP 200 on /login)
-       ✅ Material Icons font loaded
-       ✅ `pnpm build` PASS (Angular catches missing module imports)
-       ✅ `pnpm typecheck` PASS
-       ✅ File hiển thị trong Launch Preview panel
-       ⏳ Manual UX verification (user): email/password validation, password toggle, submit disabled state, loading spinner, error alert, 8 demo buttons fill, mobile responsive (<768px hides illustration)
+- [ ] 7. `layout/` — main-layout.component.html + blog-layout/
+       Sidebar nav items, footer, user menu
+
+- [ ] 8. `shared/components/` — breadcrumb, confirm dialog, toast, drawing-canvas, geo-tree
+       Common UI strings
+
+- [ ] 9. `features/auth/` — login.component.html, register (nếu có)
+       Form labels, errors, demo buttons
+
+- [ ] 10. `features/dashboard/` — main dashboard cho user thường
+
+- [ ] 11. `features/student-dashboard/` — dashboard học sinh
+
+- [ ] 12. `features/lessons/` — list + detail (~3 files)
+
+- [ ] 13. `features/classes/` — list + detail (~3 files)
+
+- [ ] 14. `features/blog/` — list + detail + comment (~3 files)
+
+- [ ] 15. `features/chat/` — widget + room-list + message-thread (~4 files)
+
+- [ ] 16. `features/reports/` — dashboard + export controls
+
+- [ ] 17. `features/admin/users/` — list + detail + create modal
+
+- [ ] 18. `features/admin/schools/` — list + nested routes (~6 files)
+
+- [ ] 19. `features/admin/classes/` — list + detail (~3 files)
+
+- [ ] 20. `features/admin/lessons/` — list + editor + exercise-editor (~5 files)
+
+- [ ] 21. `features/admin/questions/`, `features/admin/blog/`, `features/admin/subjects/`, `features/admin/content/`
+
+- [ ] 22. Sanity check — grep mọi text chưa có `i18n` attribute
+       `grep -rn ">" apps/frontend/src/app/features --include="*.html" | grep -v "i18n"` (heuristic)
+
+## Phase 3: Extract + translate (steps 23-25)
+
+- [ ] 23. `pnpm --filter @eduviet/frontend ng extract-i18n --output-path=src/locale`
+       Generates `src/locale/messages.xlf` (XLIFF 1.2)
+
+- [ ] 24. Copy `messages.xlf` → `messages.en.xlf`, dịch toàn bộ `<target>` từ tiếng Việt sang English
+       Có thể dùng AI bulk translate hoặc dịch thủ công
+
+- [ ] 25. Verify XLF — check tất cả `<target>` đã có nội dung, no XML errors
+       Có thể dùng `xmllint --noout messages.en.xlf` nếu installed
+
+## Phase 4: Build + deploy config (steps 26-28)
+
+- [ ] 26. Build cả 2 locale: `pnpm --filter @eduviet/frontend ng build --localize`
+       Output: `dist/frontend/vi/` + `dist/frontend/en/`
+
+- [ ] 27. Update `docker/nginx/nginx.spa.conf` — routing:
+       - `/` → vi (default)
+       - `/en/` → en
+       - SPA fallback per locale
+
+- [ ] 28. Update `docker/frontend/Dockerfile` — multi-locale build + copy cả 2 outputs
+
+## Phase 5: Verify (steps 29-30)
+
+- [ ] 29. Test dev mode cho mỗi locale
+       `pnpm --filter @eduviet/frontend ng serve --configuration=en` để xem English locally
+
+- [ ] 30. Visual verify cuối cùng
+       - Switcher hoạt động (vi ↔ en)
+       - Date/number format theo locale (Angular DatePipe tự handle qua LOCALE_ID)
+       - Plural (ICU) hiển thị đúng nếu có sử dụng
+       - Không còn text tiếng Việt hardcoded trong bundle en
 
 ## Context quan trọng
 
-### Rules UI/UX đang áp dụng (từ rules.md)
-- `mat-form-field appearance="outline"` — bắt buộc cho form fields
-- `mat-flat-button` action chính, `mat-stroked-button` phụ, `mat-icon-button` quick action
-- `<mat-icon>` thay emoji
-- M3 theme + density -3 (đã setup global)
-- Không hardcode màu — dùng `var(--mat-sys-*)`
+### Quyết định thiết kế
+- **Default locale = vi** (source) — templates hiện đang viết bằng tiếng Việt, không cần dịch source
+- **URL routing**: `https://eduviet.vn/` (vi) vs `https://eduviet.vn/en/`
+- **Switcher**: redirect URL (không runtime switch) — Angular built-in không support runtime switch trực tiếp
+- **i18n ID strategy**: dùng `@@custom.id` cho strings tái sử dụng nhiều chỗ (vd `@@common.cancel`, `@@common.save`); auto-id cho strings unique
 
-### Gotchas
-- `MatFormFieldModule` cần BrowserAnimations — đã có `provideAnimationsAsync` trong app.config
-- Standalone imports — KHÔNG dùng NgModule, mỗi module Material import riêng vào component
-- `mat-error` chỉ hiển thị khi form control invalid + touched — đã có sẵn `isFieldInvalid()` nhưng Material tự handle qua `errorStateMatcher`. Có thể đơn giản hoá bằng cách bỏ method này và dùng built-in.
-- Password reveal: dùng `signal showPassword`, switch icon dựa `showPassword()`
-- mat-progress-spinner trong button: dùng `diameter="20"` cho vừa cỡ text
+### i18n attribute patterns
+```html
+<!-- Text content -->
+<h2 i18n="@@login.title">Chào mừng trở lại!</h2>
 
-### Material modules cần import
-```typescript
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+<!-- Attribute -->
+<input i18n-placeholder="@@login.email.placeholder" placeholder="example@eduviet.vn" />
+
+<!-- Plural (ICU) -->
+<span i18n="@@lessons.count">
+  {count, plural, =0 {Không có bài học} =1 {1 bài học} other {# bài học}}
+</span>
+
+<!-- Description for translator -->
+<button i18n="Nút xoá|Hành động xoá item@@common.delete">Xoá</button>
 ```
 
+### Gotchas
+- Validation messages trong code .ts cần dùng `$localize` template tag, không phải `i18n` attribute
+  ```typescript
+  this.errorMessage.set($localize`:@@common.error:Đã có lỗi xảy ra`);
+  ```
+- Date/number formatting: Angular pipes (date, currency, number) tự dùng `LOCALE_ID` — không cần custom code
+- `ConfirmService` + `ToastService` messages dynamic từ TS — cần `$localize`
+- Build size: localize tăng build time 2x (2 builds). CI cần update build step.
+- ng extract-i18n cần chạy mỗi khi thêm string mới → workflow: viết code → mark i18n → extract → translate → build
+
+### CLI commands cheatsheet
+- Extract: `ng extract-i18n --output-path=src/locale --format=xlf`
+- Build all locales: `ng build --localize`
+- Serve specific locale: `ng serve --configuration=en` (cần config trong angular.json)
+
 ## Files đã tạo/sửa
-- `apps/frontend/src/app/features/auth/components/login.component.ts` — thêm 5 Material imports
-- `apps/frontend/src/app/features/auth/components/login.component.html` — refactor toàn bộ sang Material (form fields, submit, alert, demo, feature icons)
-- `apps/frontend/src/app/features/auth/components/login.component.scss` — clean up 98 dòng dead CSS, apply theme tokens
-- `apps/frontend/src/app/features/auth/components/login.component.ts` — xoá `isFieldInvalid()` dead code
+(Điền khi thực thi)
 
 ## Bước tiếp theo sau task này
-Backlog rỗng. Possible: register page cũng cần refactor tương tự nếu có pattern lặp.
+- Setup workflow CI: auto-extract messages khi PR thay đổi templates (optional)
+- I18n cho BE error messages (API responses) — phía BE chưa có, có thể làm task riêng

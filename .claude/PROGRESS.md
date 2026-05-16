@@ -200,14 +200,19 @@ Thay toàn bộ raw form elements ở trang login bằng Angular Material 3 đ�
 
 ## 🚧 Backlog
 
-**Không còn backlog kỹ thuật tồn đọng.**
+### ← NEXT: i18n full UI translation (Angular `@angular/localize`)
+- Approach: built-in compile-time, 2 builds (vi default + en)
+- URL: `/` cho vi, `/en/` cho en
+- Plan chi tiết 30 steps trong `.claude/task.md` (Phase 1-5)
+- Ước lượng: 6-8 giờ, có thể chia nhiều session
 
-Possible enhancements (chỉ làm khi user yêu cầu):
+### Possible enhancements (chỉ làm khi user yêu cầu)
 - Setup FE test infrastructure (Vitest cho Angular zoneless)
 - Lazy-load heavy libs (KaTeX, Konva, Quill) để giảm bundle initial
 - Fix 11 warnings `no-explicit-any` ở BE
 - Security hardening CI (Trivy, CodeQL, npm audit gate)
 - Deploy hardening (Prisma migrate deploy + health check + rollback)
+- Register page Material refactor (pattern tương tự session 25)
 
 ---
 
