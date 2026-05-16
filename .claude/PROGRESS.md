@@ -206,6 +206,13 @@ Thay toàn bộ raw form elements ở trang login bằng Angular Material 3 đ�
 - Plan chi tiết 30 steps trong `.claude/task.md` (Phase 1-5)
 - Ước lượng: 6-8 giờ, có thể chia nhiều session
 
+### 🔒 Security debt (từ audit 2026-05-16, fix trước production deploy)
+- **[HIGH]** `login.component.ts:26-35` — `demoAccounts` + `password: 'Admin@123'` hardcode → ship vào bundle production. Fix: bọc `if (!environment.production)` hoặc xoá block. Risk: backdoor public nếu seeded accounts tồn tại trên prod DB.
+- **[HIGH]** `apps/backend/eslint.config.js:29` — `no-explicit-any: warn` cho phép thêm `any` mới không block CI. Fix: giữ `error`, dùng `eslint-disable-next-line` cho 1 chỗ legitimate ở `users.repository.ts:202`.
+- **[MEDIUM]** FE test no-op — sau này setup Vitest cho FE test runner, hiện CI không catch FE regression.
+- **[MEDIUM]** `UpdateUserData` allowlist không strict — khi thêm admin-only field tương lai cần update service whitelist.
+- **[REC]** Pre-commit hook chặn `.claude/settings.local.json`; tăng login password `min(6) → min(8)` để đồng bộ register schema.
+
 ### Possible enhancements (chỉ làm khi user yêu cầu)
 - Setup FE test infrastructure (Vitest cho Angular zoneless)
 - Lazy-load heavy libs (KaTeX, Konva, Quill) để giảm bundle initial
