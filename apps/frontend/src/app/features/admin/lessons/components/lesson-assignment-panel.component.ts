@@ -1,5 +1,6 @@
 import { Component, inject, signal, input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { DatePipe } from '@angular/common';
 import { LessonAssignmentsService } from '../../../../core/services/lesson-assignments.service';
 import { SchoolsService } from '../../../../core/services/schools.service';
 import { ClassesService, ClassItem } from '../../../../core/services/classes.service';
@@ -30,6 +31,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    DatePipe,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
