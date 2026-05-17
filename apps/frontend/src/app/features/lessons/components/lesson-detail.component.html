@@ -2,7 +2,7 @@
   @if (loading()) {
     <div class="loading-state">
       <div class="spinner-large"></div>
-      <p>Đang tải bài học...</p>
+      <p i18n>Đang tải bài học...</p>
     </div>
   } @else if (lesson()) {
     <div class="lesson-layout">
@@ -32,7 +32,7 @@
         <!-- Theory panel -->
         <div class="theory-panel">
           <div class="panel-header">
-            <h2>📖 Lý thuyết</h2>
+            <h2 i18n>📖 Lý thuyết</h2>
           </div>
           <div class="theory-content">
             <!--
@@ -48,12 +48,12 @@
         <!-- Exercises panel -->
         <div class="exercises-panel">
           <div class="panel-header">
-            <h2>✏️ Bài tập ({{ lesson()!.lessonQuestions.length }})</h2>
+            <h2 i18n>✏️ Bài tập ({{ lesson()!.lessonQuestions.length }})</h2>
           </div>
 
           @for (lq of lesson()!.lessonQuestions; track lq.id; let i = $index) {
             <div class="exercise-card">
-              <div class="exercise-number">Câu {{ i + 1 }}</div>
+              <div class="exercise-number" i18n>Câu {{ i + 1 }}</div>
               <div class="exercise-question">
                 <markdown [data]="lq.question.content" [inline]="true"></markdown>
               </div>
@@ -82,7 +82,7 @@
                   <input
                     type="text"
                     class="fill-input"
-                    placeholder="Nhập đáp án của bạn..."
+                    i18n-placeholder placeholder="Nhập đáp án của bạn..."
                     (input)="selectAnswer(lq.question.id, getInputValue($event))"
                   />
                 </div>
@@ -110,16 +110,16 @@
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <polyline points="20 6 9 17 4 12"/>
                       </svg>
-                      Đã lưu bài vẽ
+                      <span i18n>Đã lưu bài vẽ</span>
                     </div>
                   }
                 </div>
               }
 
               <div class="exercise-footer">
-                <span class="points-badge">{{ lq.question.points }} điểm</span>
+                <span class="points-badge" i18n>{{ lq.question.points }} điểm</span>
                 @if (lq.question.hints.length > 0) {
-                  <button class="hint-btn" (click)="toggleHint(lq.question.id)">💡 Gợi ý</button>
+                  <button class="hint-btn" (click)="toggleHint(lq.question.id)" i18n>💡 Gợi ý</button>
                 }
               </div>
 
@@ -131,15 +131,15 @@
             </div>
           }
 
-          <button class="submit-btn" (click)="submitAnswers()">Nộp bài</button>
+          <button class="submit-btn" (click)="submitAnswers()" i18n>Nộp bài</button>
         </div>
       </div>
     </div>
   } @else {
     <div class="error-state">
       <div class="error-icon">😕</div>
-      <h2>Bài học không tồn tại</h2>
-      <a routerLink="/lessons" class="back-link">← Quay lại danh sách</a>
+      <h2 i18n>Bài học không tồn tại</h2>
+      <a routerLink="/lessons" class="back-link" i18n>← Quay lại danh sách</a>
     </div>
   }
 </div>

@@ -98,11 +98,11 @@ export class SchoolsAdminDetailComponent implements OnInit {
     this.saving.set(true);
     operation.subscribe({
       next: () => {
-        this.toastService.success(this.isEditMode() ? 'Đã cập nhật trường học' : 'Đã tạo trường học');
+        this.toastService.success(this.isEditMode() ? $localize`Đã cập nhật trường học` : $localize`Đã tạo trường học`);
         void this.router.navigate(['/admin/schools']);
       },
       error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err, 'Lưu thất bại'));
+        this.toastService.error(getApiErrorMessage(err, $localize`Lưu thất bại`));
         this.saving.set(false);
       },
     });
@@ -112,19 +112,19 @@ export class SchoolsAdminDetailComponent implements OnInit {
     if (!this.isEditMode()) return;
 
     const confirmed = await this.confirmService.confirm({
-      title: 'Xác nhận xóa',
-      message: 'Bạn có chắc chắn muốn xóa trường này?',
+      title: $localize`Xác nhận xóa`,
+      message: $localize`Bạn có chắc chắn muốn xóa trường này?`,
       type: 'danger',
     });
 
     if (confirmed) {
       this.schoolsService.delete(this.schoolId()!).subscribe({
         next: () => {
-          this.toastService.success('Đã xóa trường học');
+          this.toastService.success($localize`Đã xóa trường học`);
           void this.router.navigate(['/admin/schools']);
         },
         error: (err: unknown) => {
-          this.toastService.error(getApiErrorMessage(err, 'Xóa thất bại'));
+          this.toastService.error(getApiErrorMessage(err, $localize`Xóa thất bại`));
         },
       });
     }

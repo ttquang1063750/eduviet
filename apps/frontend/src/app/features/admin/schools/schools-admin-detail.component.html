@@ -2,16 +2,20 @@
   <!-- Header -->
   <div class="detail-header">
     <div class="detail-header__left">
-      <a mat-icon-button routerLink="/admin/schools" matTooltip="Quay lại danh sách">
+      <a mat-icon-button routerLink="/admin/schools" i18n-matTooltip matTooltip="Quay lại danh sách">
         <mat-icon>arrow_back</mat-icon>
       </a>
       <h2 class="detail-header__title">
-        {{ isEditMode() ? 'Chỉnh sửa trường học' : 'Thêm trường mới' }}
+        @if (isEditMode()) {
+          <span i18n>Chỉnh sửa trường học</span>
+        } @else {
+          <span i18n>Thêm trường mới</span>
+        }
       </h2>
     </div>
     @if (isEditMode()) {
       <a mat-stroked-button [routerLink]="['/admin/schools', schoolId(), 'classes']">
-        <mat-icon>school</mat-icon> Xem lớp học
+        <mat-icon>school</mat-icon> <span i18n>Xem lớp học</span>
       </a>
     }
   </div>
@@ -21,31 +25,31 @@
     <form [formGroup]="schoolForm" (ngSubmit)="onSubmit()">
       <div class="form-grid">
         <mat-form-field appearance="outline">
-          <mat-label>Tên trường</mat-label>
-          <input matInput formControlName="name" placeholder="Ví dụ: THPT Chu Văn An" required />
-          <mat-error>Tên trường là bắt buộc</mat-error>
+          <mat-label i18n>Tên trường</mat-label>
+          <input matInput formControlName="name" i18n-placeholder placeholder="Ví dụ: THPT Chu Văn An" required />
+          <mat-error i18n>Tên trường là bắt buộc</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Mã trường</mat-label>
-          <input matInput formControlName="code" placeholder="Ví dụ: CVAN" required />
-          <mat-error>Mã trường là bắt buộc</mat-error>
+          <mat-label i18n>Mã trường</mat-label>
+          <input matInput formControlName="code" i18n-placeholder placeholder="Ví dụ: CVAN" required />
+          <mat-error i18n>Mã trường là bắt buộc</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Địa chỉ</mat-label>
-          <input matInput formControlName="address" placeholder="Số nhà, đường, phường/xã..." />
+          <mat-label i18n>Địa chỉ</mat-label>
+          <input matInput formControlName="address" i18n-placeholder placeholder="Số nhà, đường, phường/xã..." />
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Số điện thoại</mat-label>
-          <input matInput formControlName="phone" placeholder="024xxxxxxx" />
+          <mat-label i18n>Số điện thoại</mat-label>
+          <input matInput formControlName="phone" i18n-placeholder placeholder="024xxxxxxx" />
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Email</mat-label>
-          <input matInput type="email" formControlName="email" placeholder="school@example.com" />
-          <mat-error>Email không hợp lệ</mat-error>
+          <mat-label i18n>Email</mat-label>
+          <input matInput type="email" formControlName="email" i18n-placeholder placeholder="school@example.com" />
+          <mat-error i18n>Email không hợp lệ</mat-error>
         </mat-form-field>
       </div>
 
@@ -61,12 +65,16 @@
           } @else {
             <mat-icon>save</mat-icon>
           }
-          {{ isEditMode() ? 'Cập nhật' : 'Tạo mới' }}
+          @if (isEditMode()) {
+            <span i18n>Cập nhật</span>
+          } @else {
+            <span i18n>Tạo mới</span>
+          }
         </button>
 
         @if (isEditMode()) {
           <button mat-stroked-button color="warn" type="button" (click)="onDelete()">
-            <mat-icon>delete</mat-icon> Xóa trường
+            <mat-icon>delete</mat-icon> <span i18n>Xóa trường</span>
           </button>
         }
       </div>

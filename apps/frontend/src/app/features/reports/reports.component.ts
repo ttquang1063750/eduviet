@@ -37,7 +37,7 @@ export class ReportsComponent implements AfterViewInit {
         this.createContentChart(summary.contentCounts);
         this.createLoginActivityChart(summary.loginActivities);
       },
-      error: () => this.toast.error('Không thể tải dữ liệu báo cáo'),
+      error: () => this.toast.error($localize`Không thể tải dữ liệu báo cáo`),
     });
   }
 
@@ -48,11 +48,11 @@ export class ReportsComponent implements AfterViewInit {
     this.reportsService.exportExcel().subscribe({
       next: (blob) => {
         this.triggerDownload(blob, `eduviet-report-${this.todayStr()}.xlsx`);
-        this.toast.success('Đã xuất báo cáo Excel thành công');
+        this.toast.success($localize`Đã xuất báo cáo Excel thành công`);
         this.isExportingExcel.set(false);
       },
       error: () => {
-        this.toast.error('Xuất Excel thất bại. Vui lòng thử lại');
+        this.toast.error($localize`Xuất Excel thất bại. Vui lòng thử lại`);
         this.isExportingExcel.set(false);
       },
     });
@@ -65,11 +65,11 @@ export class ReportsComponent implements AfterViewInit {
     this.reportsService.exportPdf().subscribe({
       next: (blob) => {
         this.triggerDownload(blob, `eduviet-report-${this.todayStr()}.pdf`);
-        this.toast.success('Đã xuất báo cáo PDF thành công');
+        this.toast.success($localize`Đã xuất báo cáo PDF thành công`);
         this.isExportingPdf.set(false);
       },
       error: () => {
-        this.toast.error('Xuất PDF thất bại. Vui lòng thử lại');
+        this.toast.error($localize`Xuất PDF thất bại. Vui lòng thử lại`);
         this.isExportingPdf.set(false);
       },
     });
@@ -98,7 +98,7 @@ export class ReportsComponent implements AfterViewInit {
         labels: Object.keys(data),
         datasets: [
           {
-            label: 'Người dùng theo vai trò',
+            label: $localize`Người dùng theo vai trò`,
             data: Object.values(data),
             backgroundColor: [
               '#FF6384', '#36A2EB', '#FFCE56',
@@ -115,10 +115,10 @@ export class ReportsComponent implements AfterViewInit {
     this.contentChart = new Chart('contentChart', {
       type: 'bar',
       data: {
-        labels: ['Bài học', 'Lớp học', 'Bài viết Blog'],
+        labels: [$localize`Bài học`, $localize`Lớp học`, $localize`Bài viết Blog`],
         datasets: [
           {
-            label: 'Tổng số',
+            label: $localize`Tổng số`,
             data: [data.lessons, data.classes, data.blogPosts],
             backgroundColor: ['#36A2EB', '#FFCE56', '#4BC0C0'],
           },
@@ -137,7 +137,7 @@ export class ReportsComponent implements AfterViewInit {
         labels: sorted.map(([date]) => date),
         datasets: [
           {
-            label: 'Lượt đăng nhập',
+            label: $localize`Lượt đăng nhập`,
             data: sorted.map(([, count]) => count),
             fill: false,
             borderColor: '#FF6384',

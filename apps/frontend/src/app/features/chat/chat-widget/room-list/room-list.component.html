@@ -2,11 +2,11 @@
   <!-- Header tabs + nút tạo cuộc hội thoại mới -->
   <div class="room-list-header">
     <div class="room-tabs">
-      <button [class.active]="currentTab() === 'ALL'" (click)="currentTab.set('ALL')">Tất cả</button>
-      <button [class.active]="currentTab() === 'CLASS'" (click)="currentTab.set('CLASS')">Lớp học</button>
-      <button [class.active]="currentTab() === 'DIRECT'" (click)="currentTab.set('DIRECT')">Cá nhân</button>
+      <button [class.active]="currentTab() === 'ALL'" (click)="currentTab.set('ALL')" i18n>Tất cả</button>
+      <button [class.active]="currentTab() === 'CLASS'" (click)="currentTab.set('CLASS')" i18n>Lớp học</button>
+      <button [class.active]="currentTab() === 'DIRECT'" (click)="currentTab.set('DIRECT')" i18n>Cá nhân</button>
     </div>
-    <button class="btn-new-chat" (click)="toggleNewChat()" [class.active]="showNewChat()" title="Cuộc hội thoại mới">
+    <button class="btn-new-chat" (click)="toggleNewChat()" [class.active]="showNewChat()" i18n-title title="Cuộc hội thoại mới">
       {{ showNewChat() ? '✕' : '✏️' }}
     </button>
   </div>
@@ -17,20 +17,20 @@
       <input
         type="text"
         class="user-search-input"
-        placeholder="Tìm tên hoặc email..."
+        i18n-placeholder placeholder="Tìm tên hoặc email..."
         [ngModel]="userSearchTerm()"
         (ngModelChange)="onUserSearch($event)"
         autocomplete="off"
       />
 
       @if (searchingUsers()) {
-        <div class="search-hint">Đang tìm kiếm...</div>
+        <div class="search-hint" i18n>Đang tìm kiếm...</div>
       } @else if (userSearchError()) {
         <div class="search-hint search-hint--error">{{ userSearchError() }}</div>
       } @else if (userSearchTerm() && userResults().length === 0) {
-        <div class="search-hint">Không tìm thấy người dùng.</div>
+        <div class="search-hint" i18n>Không tìm thấy người dùng.</div>
       } @else if (!userSearchTerm()) {
-        <div class="search-hint">Nhập tên hoặc email để tìm người dùng.</div>
+        <div class="search-hint" i18n>Nhập tên hoặc email để tìm người dùng.</div>
       }
 
       @for (user of userResults(); track user.id) {
@@ -72,7 +72,7 @@
               @if (room.lastMessage) {
                 {{ room.lastMessage.sender.fullName }}: {{ room.lastMessage.content }}
               } @else {
-                <span class="no-message">Chưa có tin nhắn</span>
+                <span class="no-message" i18n>Chưa có tin nhắn</span>
               }
             </span>
             @if ((room.unreadCount ?? 0) > 0) {
@@ -85,13 +85,13 @@
           class="btn-delete-room"
           [class.deleting]="deletingRoomId() === room.id"
           (click)="deleteRoom($event, room.id)"
-          title="Xoá cuộc hội thoại"
+          i18n-title title="Xoá cuộc hội thoại"
         >{{ deletingRoomId() === room.id ? '…' : '🗑' }}</button>
       </div>
     } @empty {
       <div class="empty-rooms">
-        <p>Chưa có cuộc hội thoại nào.</p>
-        <p class="empty-hint">Nhấn ✏️ để bắt đầu trò chuyện.</p>
+        <p i18n>Chưa có cuộc hội thoại nào.</p>
+        <p class="empty-hint" i18n>Nhấn ✏️ để bắt đầu trò chuyện.</p>
       </div>
     }
   </div>

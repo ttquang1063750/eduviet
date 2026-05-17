@@ -1,6 +1,6 @@
 # EduViet — Progress Tracker
 
-> Cập nhật lần cuối: 2026-05-16 (session 26 — i18n plan + /i18n-check skill)
+> Cập nhật lần cuối: 2026-05-17 (session 27 — i18n COMPLETED: 30 steps, 5 phases, vi+en)
 > Workflow: `/plan-task` → `/execute-step` (lặp) → `/check-point` → `/resume` → tiếp tục
 
 ---
@@ -130,6 +130,26 @@
 |------|----------|
 | `main-layout.component.scss` | Sidebar bg `var(--mat-sys-primary)`, remove border-radius, icon left-align token |
 | `styles.scss` | Collapsed centering: `mdc-list-item__content { flex: 0; width: 0 }` — fix icon alignment |
+
+---
+
+## Session 27 — i18n Full implementation (2026-05-17) ✅
+
+Đã hoàn thành toàn bộ 30 bước trong plan i18n.
+
+### Phase 1 & 2: Infrastructure & Template markup
+- Cấu hình `@angular/localize/init` vào polyfills và thêm types vào `tsconfig.app.json` (chuẩn Angular CLI).
+- Gắn nhãn `i18n` và `i18n-<attr>` cho toàn bộ templates trong project (~50 files).
+- Sử dụng `$localize` trong TypeScript cho các chuỗi dynamic (toast, confirm, labels).
+- Sanity check repo-wide đảm bảo không còn text tiếng Việt chưa được bọc i18n.
+
+### Phase 3, 4 & 5: Extraction, Configuration & Verification
+- Trích xuất 973 thông điệp vào `messages.xlf`.
+- Tạo `messages.en.xlf` và dịch các chuỗi giao diện chính sang tiếng Anh.
+- Cấu hình `angular.json` hỗ trợ đa ngôn ngữ (vi, en) với baseHref riêng biệt.
+- Thêm script `dev:en` vào `package.json`.
+- Cấu hình Nginx routing hỗ trợ các đường dẫn ngôn ngữ.
+- Build thành công configuration `en`.
 
 ---
 

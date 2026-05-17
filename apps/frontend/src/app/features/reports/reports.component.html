@@ -1,6 +1,6 @@
 <div class="reports-container">
   <div class="reports-header">
-    <h1 class="reports-title">Báo cáo & Phân tích</h1>
+    <h1 class="reports-title" i18n>Báo cáo & Phân tích</h1>
     <div class="export-actions">
       <button
         class="btn btn-export btn-excel"
@@ -8,9 +8,9 @@
         (click)="exportExcel()"
       >
         @if (isExportingExcel()) {
-          <span class="spinner"></span> Đang xuất...
+          <span class="spinner"></span> <span i18n>Đang xuất...</span>
         } @else {
-          <span class="icon">📊</span> Xuất Excel
+          <span class="icon">📊</span> <span i18n>Xuất Excel</span>
         }
       </button>
       <button
@@ -19,9 +19,9 @@
         (click)="exportPdf()"
       >
         @if (isExportingPdf()) {
-          <span class="spinner"></span> Đang xuất...
+          <span class="spinner"></span> <span i18n>Đang xuất...</span>
         } @else {
-          <span class="icon">📄</span> Xuất PDF
+          <span class="icon">📄</span> <span i18n>Xuất PDF</span>
         }
       </button>
     </div>
@@ -29,21 +29,21 @@
 
   <div class="charts-grid">
     <div class="chart-card">
-      <h2 class="chart-title">Người dùng theo vai trò</h2>
+      <h2 class="chart-title" i18n>Người dùng theo vai trò</h2>
       <div class="chart-wrapper">
         <canvas id="userRolesChart"></canvas>
       </div>
     </div>
 
     <div class="chart-card">
-      <h2 class="chart-title">Tổng quan nội dung</h2>
+      <h2 class="chart-title" i18n>Tổng quan nội dung</h2>
       <div class="chart-wrapper">
         <canvas id="contentChart"></canvas>
       </div>
     </div>
 
     <div class="chart-card">
-      <h2 class="chart-title">Hoạt động đăng nhập (7 ngày qua)</h2>
+      <h2 class="chart-title" i18n>Hoạt động đăng nhập (7 ngày qua)</h2>
       <div class="chart-wrapper">
         <canvas id="loginActivityChart"></canvas>
       </div>

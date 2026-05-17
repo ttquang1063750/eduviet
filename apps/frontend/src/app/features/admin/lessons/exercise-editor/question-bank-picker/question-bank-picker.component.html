@@ -3,8 +3,8 @@
     <!-- Header -->
     <div class="picker-header">
       <div>
-        <h2>Ngân hàng câu hỏi</h2>
-        <p class="picker-subtitle">{{ totalCount() }} câu hỏi · Môn này</p>
+        <h2 i18n>Ngân hàng câu hỏi</h2>
+        <p class="picker-subtitle" i18n>{{ totalCount() }} câu hỏi · Môn này</p>
       </div>
       <button class="btn-close" (click)="close()">×</button>
     </div>
@@ -14,11 +14,12 @@
       <input
         type="text"
         class="form-control search-input"
-        placeholder="Tìm nội dung, tag..."
+        i18n-placeholder placeholder="Tìm nội dung, tag..."
         [value]="searchQuery()"
         (input)="searchQuery.set(getInputValue($event))"
         (keydown.enter)="applyFilter()"
       />
+
       <select
         class="form-control"
         [value]="filterType()"
@@ -37,23 +38,24 @@
           <option [value]="d.value">{{ d.label }}</option>
         }
       </select>
-      <button class="btn btn-secondary" (click)="applyFilter()">Lọc</button>
+      <button class="btn btn-secondary" (click)="applyFilter()" i18n>Lọc</button>
     </div>
 
     <!-- Bulk select -->
     <div class="bulk-bar">
-      <span class="selected-count">Đã chọn: {{ selectedIds().size }}</span>
-      <button class="btn-link" (click)="selectAll()">Chọn tất cả trang</button>
-      <button class="btn-link" (click)="clearSelection()">Bỏ chọn</button>
+      <span class="selected-count" i18n>Đã chọn: {{ selectedIds().size }}</span>
+      <button class="btn-link" (click)="selectAll()" i18n>Chọn tất cả trang</button>
+      <button class="btn-link" (click)="clearSelection()" i18n>Bỏ chọn</button>
     </div>
 
     <!-- Question List -->
     <div class="picker-body">
       @if (loading()) {
-        <div class="loading-state">Đang tải...</div>
+        <div class="loading-state" i18n>Đang tải...</div>
       } @else if (questions().length === 0) {
-        <div class="empty-state">Không tìm thấy câu hỏi phù hợp.</div>
-      } @else {
+        <div class="empty-state" i18n>Không tìm thấy câu hỏi phù hợp.</div>
+      }
+ @else {
         <ul class="bank-list">
           @for (q of questions(); track q.id) {
             <li
@@ -79,9 +81,9 @@
                       {{ difficultyLabels[q.difficulty] }}
                     </span>
                   }
-                  <span class="points-badge">{{ q.points }}đ</span>
+                  <span class="points-badge">{{ q.points }}<span i18n>đ</span></span>
                   @if (isAlreadyAdded(q.id)) {
-                    <span class="added-badge">Đã thêm</span>
+                    <span class="added-badge" i18n>Đã thêm</span>
                   }
                 </div>
                 <p class="bank-content">{{ q.content }}</p>
@@ -103,18 +105,19 @@
     @if (totalPages() > 1) {
       <div class="picker-pagination">
         <button class="btn btn-secondary" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">←</button>
-        <span>Trang {{ currentPage() }} / {{ totalPages() }}</span>
+        <span i18n>Trang {{ currentPage() }} / {{ totalPages() }}</span>
         <button class="btn btn-secondary" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)">→</button>
       </div>
     }
 
     <!-- Footer -->
     <div class="picker-footer">
-      <button class="btn btn-secondary" (click)="close()">Huỷ</button>
+      <button class="btn btn-secondary" (click)="close()" i18n>Huỷ</button>
       <button
         class="btn btn-primary"
         [disabled]="selectedIds().size === 0"
         (click)="confirmAdd()"
+        i18n
       >
         Thêm {{ selectedIds().size }} câu hỏi vào bài
       </button>

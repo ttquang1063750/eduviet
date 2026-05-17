@@ -1,7 +1,7 @@
 <header class="page-header">
   <div>
-    <h1 class="page-title">Xin chào, {{ lastName() }}! 👋</h1>
-    <p class="page-subtitle">Hôm nay bạn muốn học gì?</p>
+    <h1 class="page-title" i18n>Xin chào, {{ lastName() }}! 👋</h1>
+    <p class="page-subtitle" i18n>Hôm nay bạn muốn học gì?</p>
   </div>
 </header>
 
@@ -11,7 +11,7 @@
     <div class="stat-icon">📚</div>
     <div class="stat-body">
       <div class="stat-value">{{ totalLessons() }}</div>
-      <div class="stat-label">Bài học</div>
+      <div class="stat-label" i18n>Bài học</div>
     </div>
     <div class="stat-bg-shape"></div>
   </div>
@@ -19,7 +19,7 @@
     <div class="stat-icon">✅</div>
     <div class="stat-body">
       <div class="stat-value">0</div>
-      <div class="stat-label">Đã hoàn thành</div>
+      <div class="stat-label" i18n>Đã hoàn thành</div>
     </div>
     <div class="stat-bg-shape"></div>
   </div>
@@ -27,7 +27,7 @@
     <div class="stat-icon">🎯</div>
     <div class="stat-body">
       <div class="stat-value">5</div>
-      <div class="stat-label">Môn học</div>
+      <div class="stat-label" i18n>Môn học</div>
     </div>
     <div class="stat-bg-shape"></div>
   </div>
@@ -35,7 +35,7 @@
     <div class="stat-icon">🏆</div>
     <div class="stat-body">
       <div class="stat-value">0</div>
-      <div class="stat-label">Điểm tích lũy</div>
+      <div class="stat-label" i18n>Điểm tích lũy</div>
     </div>
     <div class="stat-bg-shape"></div>
   </div>
@@ -44,8 +44,8 @@
 <!-- Recent lessons -->
 <section class="section">
   <div class="section-header">
-    <h2 class="section-title">Bài học mới nhất</h2>
-    <a routerLink="/lessons" class="see-all-link">Xem tất cả →</a>
+    <h2 class="section-title" i18n>Bài học mới nhất</h2>
+    <a routerLink="/lessons" class="see-all-link" i18n>Xem tất cả →</a>
   </div>
 
   @if (lessonsLoading()) {
@@ -75,7 +75,7 @@
             </span>
           </div>
           <div class="lesson-footer">
-            <span class="lesson-time">⏱ {{ lesson.estimatedMinutes }} phút</span>
+            <span class="lesson-time" i18n>⏱ {{ lesson.estimatedMinutes }} phút</span>
             <span class="lesson-arrow">→</span>
           </div>
         </a>

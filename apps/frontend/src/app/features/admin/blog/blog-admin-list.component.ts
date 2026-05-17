@@ -16,12 +16,12 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { DatePipe } from '@angular/common';
 
 const STATUS_LABELS: Record<BlogStatus, string> = {
-  DRAFT: 'Nháp',
-  REVIEW: 'Đang duyệt',
-  APPROVED: 'Đã duyệt',
-  PUBLISHED: 'Đã xuất bản',
-  ARCHIVED: 'Lưu trữ',
-  REJECTED: 'Bị từ chối',
+  DRAFT: $localize`Nháp`,
+  REVIEW: $localize`Đang duyệt`,
+  APPROVED: $localize`Đã duyệt`,
+  PUBLISHED: $localize`Đã xuất bản`,
+  ARCHIVED: $localize`Lưu trữ`,
+  REJECTED: $localize`Bị từ chối`,
 };
 
 import { MatButtonModule } from '@angular/material/button';
@@ -56,13 +56,13 @@ export class BlogAdminListComponent implements OnInit {
   statusFilter = signal<BlogStatus | ''>('');
 
   readonly statuses: Array<{ value: BlogStatus | ''; label: string }> = [
-    { value: '', label: 'Tất cả trạng thái' },
-    { value: 'DRAFT', label: 'Nháp' },
-    { value: 'REVIEW', label: 'Đang duyệt' },
-    { value: 'APPROVED', label: 'Đã duyệt' },
-    { value: 'PUBLISHED', label: 'Đã xuất bản' },
-    { value: 'ARCHIVED', label: 'Lưu trữ' },
-    { value: 'REJECTED', label: 'Bị từ chối' },
+    { value: '', label: $localize`Tất cả trạng thái` },
+    { value: 'DRAFT', label: $localize`Nháp` },
+    { value: 'REVIEW', label: $localize`Đang duyệt` },
+    { value: 'APPROVED', label: $localize`Đã duyệt` },
+    { value: 'PUBLISHED', label: $localize`Đã xuất bản` },
+    { value: 'ARCHIVED', label: $localize`Lưu trữ` },
+    { value: 'REJECTED', label: $localize`Bị từ chối` },
   ];
 
   statusLabels = STATUS_LABELS;
@@ -105,28 +105,28 @@ export class BlogAdminListComponent implements OnInit {
 
   async onPublish(post: BlogListItem): Promise<void> {
     const confirmed = await this.confirmService.confirm({
-      title: 'Xuất bản bài viết',
-      message: `Xuất bản bài viết "${post.title}"? Bài sẽ hiển thị công khai ngay lập tức.`,
-      confirmText: 'Xuất bản',
+      title: $localize`Xuất bản bài viết`,
+      message: $localize`Xuất bản bài viết "${post.title}"? Bài sẽ hiển thị công khai ngay lập tức.`,
+      confirmText: $localize`Xuất bản`,
       type: 'primary',
     });
     if (!confirmed) return;
     this.blogService.publish(post.id).subscribe({
       next: (updated) => {
         this.posts.update((list) => list.map((p) => (p.id === updated.id ? updated : p)));
-        this.toastService.success('Đã xuất bản bài viết');
+        this.toastService.success($localize`Đã xuất bản bài viết`);
       },
       error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err, 'Xuất bản thất bại'));
+        this.toastService.error(getApiErrorMessage(err, $localize`Xuất bản thất bại`));
       },
     });
   }
 
   async onDelete(post: BlogListItem): Promise<void> {
     const confirmed = await this.confirmService.confirm({
-      title: 'Xóa bài viết',
-      message: `Xóa bài viết "${post.title}"? Thao tác này không thể hoàn tác.`,
-      confirmText: 'Xóa',
+      title: $localize`Xóa bài viết`,
+      message: $localize`Xóa bài viết "${post.title}"? Thao tác này không thể hoàn tác.`,
+      confirmText: $localize`Xóa`,
       type: 'danger',
     });
     if (!confirmed) return;
@@ -134,10 +134,10 @@ export class BlogAdminListComponent implements OnInit {
       next: () => {
         this.posts.update((list) => list.filter((p) => p.id !== post.id));
         this.total.update((t) => t - 1);
-        this.toastService.success('Đã xóa bài viết');
+        this.toastService.success($localize`Đã xóa bài viết`);
       },
       error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err, 'Xóa thất bại'));
+        this.toastService.error(getApiErrorMessage(err, $localize`Xóa thất bại`));
       },
     });
   }

@@ -58,28 +58,28 @@ export class ContentAdminListComponent implements OnInit {
 
   async approve(_id: string): Promise<void> {
     const confirmed = await this.confirmService.confirm({
-      title: 'Xác nhận duyệt',
-      message: 'Bạn có chắc chắn muốn duyệt bài viết này?',
-      confirmText: 'Duyệt bài',
+      title: $localize`Xác nhận duyệt`,
+      message: $localize`Bạn có chắc chắn muốn duyệt bài viết này?`,
+      confirmText: $localize`Duyệt bài`,
     });
 
     if (confirmed) {
       // this.moderationService.approve(id).subscribe(() => this.loadPendingContent());
-      this.toastService.success('Thao tác duyệt được giả lập');
+      this.toastService.success($localize`Thao tác duyệt được giả lập`);
     }
   }
 
   async reject(_id: string): Promise<void> {
     const confirmed = await this.confirmService.confirm({
-      title: 'Xác nhận từ chối',
-      message: 'Bạn có chắc chắn muốn từ chối bài viết này?',
-      confirmText: 'Từ chối',
+      title: $localize`Xác nhận từ chối`,
+      message: $localize`Bạn có chắc chắn muốn từ chối bài viết này?`,
+      confirmText: $localize`Từ chối`,
       type: 'danger',
     });
 
     if (confirmed) {
       // this.moderationService.reject(id, reason).subscribe(() => this.loadPendingContent());
-      this.toastService.info('Thao tác từ chối được giả lập');
+      this.toastService.info($localize`Thao tác từ chối được giả lập`);
     }
   }
 }

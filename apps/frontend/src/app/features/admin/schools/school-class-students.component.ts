@@ -139,9 +139,9 @@ export class SchoolClassStudentsComponent implements OnInit {
 
   async onRemove(enrollment: Enrollment): Promise<void> {
     const confirmed = await this.confirmService.confirm({
-      title: 'Xóa học sinh khỏi lớp',
-      message: `Xóa ${enrollment.user.fullName} khỏi lớp này?`,
-      confirmText: 'Xóa',
+      title: $localize`Xóa học sinh khỏi lớp`,
+      message: $localize`Xóa ${enrollment.user.fullName} khỏi lớp này?`,
+      confirmText: $localize`Xóa`,
       type: 'danger',
     });
     if (!confirmed) return;
@@ -152,7 +152,7 @@ export class SchoolClassStudentsComponent implements OnInit {
         this.enrollments.update((list) =>
           list.filter((e) => e.user.id !== enrollment.user.id),
         );
-        this.toastService.success(`Đã xóa ${enrollment.user.fullName} khỏi lớp`);
+        this.toastService.success($localize`Đã xóa ${enrollment.user.fullName} khỏi lớp`);
         this.removingId.set(null);
         // Refresh search results nếu panel đang mở
         if (this.showAddPanel()) {
@@ -160,7 +160,7 @@ export class SchoolClassStudentsComponent implements OnInit {
         }
       },
       error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err, 'Xóa học sinh thất bại'));
+        this.toastService.error(getApiErrorMessage(err, $localize`Xóa học sinh thất bại`));
         this.removingId.set(null);
       },
     });
@@ -251,10 +251,10 @@ export class SchoolClassStudentsComponent implements OnInit {
           prev.filter((u) => u.id !== student.id),
         );
         this.enrollingId.set(null);
-        this.toastService.success(`Đã thêm ${student.fullName} vào lớp`);
+        this.toastService.success($localize`Đã thêm ${student.fullName} vào lớp`);
       },
       error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err, 'Thêm học sinh thất bại'));
+        this.toastService.error(getApiErrorMessage(err, $localize`Thêm học sinh thất bại`));
         this.enrollingId.set(null);
       },
     });

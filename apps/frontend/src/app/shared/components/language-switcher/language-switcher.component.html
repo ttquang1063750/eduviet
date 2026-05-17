@@ -1,0 +1,20 @@
+<mat-button-toggle-group
+  [value]="currentLocale()"
+  aria-label="Language / Ngôn ngữ"
+  class="lang-switcher"
+>
+  <mat-button-toggle
+    value="vi"
+    matTooltip="Tiếng Việt"
+    (click)="switchTo('vi')"
+  >
+    🇻🇳 VI
+  </mat-button-toggle>
+  <mat-button-toggle
+    value="en"
+    matTooltip="English"
+    (click)="switchTo('en')"
+  >
+    🇬🇧 EN
+  </mat-button-toggle>
+</mat-button-toggle-group>

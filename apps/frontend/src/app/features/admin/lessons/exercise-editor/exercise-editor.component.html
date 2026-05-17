@@ -1,19 +1,20 @@
 @if (loading()) {
   <div class="loading-overlay">
     <div class="spinner"></div>
-    <p>Đang tải...</p>
+    <p i18n>Đang tải...</p>
   </div>
-} @else {
+}
+ @else {
   <div class="editor-shell">
     <!-- Header -->
     <header class="editor-header">
-      <button class="btn-back" (click)="goBack()">← Quay lại</button>
+      <button class="btn-back" (click)="goBack()" i18n>← Quay lại</button>
       <div class="header-info">
         <h1 class="lesson-title">{{ lesson()?.title ?? 'Bài học' }}</h1>
-        <span class="question-count">{{ lessonQuestions().length }} câu hỏi</span>
+        <span class="question-count" i18n>{{ lessonQuestions().length }} câu hỏi</span>
       </div>
       <div class="header-actions">
-        <label class="randomize-toggle">
+        <label class="randomize-toggle" i18n>
           <input
             type="checkbox"
             [checked]="randomizeQuestions()"
@@ -29,17 +30,18 @@
       <!-- LEFT: Question list (40%) -->
       <aside class="panel-left">
         <div class="panel-actions">
-          <button class="btn btn-primary" (click)="openCreateForm()">+ Tạo mới</button>
-          <button class="btn btn-secondary" (click)="openPicker()">Từ ngân hàng</button>
-          <button class="btn btn-secondary" (click)="openGenerate()">Tự động tạo</button>
+          <button class="btn btn-primary" (click)="openCreateForm()" i18n>+ Tạo mới</button>
+          <button class="btn btn-secondary" (click)="openPicker()" i18n>Từ ngân hàng</button>
+          <button class="btn btn-secondary" (click)="openGenerate()" i18n>Tự động tạo</button>
         </div>
 
         @if (lessonQuestions().length === 0) {
           <div class="empty-list">
-            <p>Chưa có câu hỏi nào.</p>
-            <p>Hãy tạo mới hoặc chọn từ ngân hàng câu hỏi.</p>
+            <p i18n>Chưa có câu hỏi nào.</p>
+            <p i18n>Hãy tạo mới hoặc chọn từ ngân hàng câu hỏi.</p>
           </div>
-        } @else {
+        }
+ @else {
           <ul
             cdkDropList
             [cdkDropListData]="lessonQuestions()"
@@ -63,7 +65,7 @@
                 <button
                   class="btn-remove"
                   (click)="$event.stopPropagation(); removeQuestion(lq.questionId)"
-                  matTooltip="Gỡ khỏi bài"
+                  i18n-matTooltip matTooltip="Gỡ khỏi bài"
                 >×</button>
               </li>
             }
@@ -75,8 +77,8 @@
       <main class="panel-right">
         @if (panelMode() === 'list') {
           <div class="empty-panel">
-            <p>Chọn câu hỏi để chỉnh sửa,</p>
-            <p>hoặc nhấn <strong>Tạo mới</strong> để thêm câu hỏi.</p>
+            <p i18n>Chọn câu hỏi để chỉnh sửa,</p>
+            <p i18n>hoặc nhấn <strong>Tạo mới</strong> để thêm câu hỏi.</p>
           </div>
         }
 
@@ -108,17 +110,17 @@
     <div class="modal-backdrop" (click)="closeGenerate()">
       <div class="modal-dialog generate-dialog" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h2>Tự động tạo câu hỏi</h2>
+          <h2 i18n>Tự động tạo câu hỏi</h2>
           <button class="btn-close" (click)="closeGenerate()">×</button>
         </div>
 
         <div class="modal-body">
           <div class="form-group">
-            <label>Từ khóa / chủ đề</label>
+            <label i18n>Từ khóa / chủ đề</label>
             <input
               type="text"
               class="form-control"
-              placeholder="VD: Phương trình bậc 2, Chiến tranh thế giới..."
+              i18n-placeholder placeholder="VD: Phương trình bậc 2, Chiến tranh thế giới..."
               [value]="generateKeyword()"
               (input)="generateKeyword.set(getInputValue($event))"
             />
@@ -126,7 +128,7 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label>Số câu (1–10)</label>
+              <label i18n>Số câu (1–10)</label>
               <input
                 type="number"
                 class="form-control"
@@ -137,7 +139,7 @@
               />
             </div>
             <div class="form-group">
-              <label>Loại câu hỏi</label>
+              <label i18n>Loại câu hỏi</label>
               <select
                 class="form-control"
                 [value]="generateType()"
@@ -156,15 +158,15 @@
             (click)="runGenerate()"
           >
             @if (isGenerating()) {
-              Đang tạo...
+              <span i18n>Đang tạo...</span>
             } @else {
-              Tạo câu hỏi
+              <span i18n>Tạo câu hỏi</span>
             }
           </button>
 
           @if (generatedDrafts().length > 0) {
             <div class="draft-list">
-              <p class="draft-header">Chọn câu hỏi muốn thêm vào bài:</p>
+              <p class="draft-header" i18n>Chọn câu hỏi muốn thêm vào bài:</p>
               @for (draft of generatedDrafts(); track $index; let i = $index) {
                 <label class="draft-item">
                   <input
@@ -181,6 +183,7 @@
                 class="btn btn-success"
                 [disabled]="isSaving()"
                 (click)="addSelectedDrafts()"
+                i18n
               >
                 Thêm {{ selectedDraftIds().size }} câu đã chọn vào bài
               </button>

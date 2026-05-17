@@ -43,37 +43,37 @@ export class QuestionBankPickerComponent implements OnInit {
   readonly filterDifficulty = signal<string>('');
 
   readonly questionTypes: { value: string; label: string }[] = [
-    { value: '', label: 'Tất cả loại' },
-    { value: 'SINGLE_CHOICE', label: 'Một đáp án' },
-    { value: 'MULTIPLE_CHOICE', label: 'Nhiều đáp án' },
-    { value: 'FILL_IN_BLANK', label: 'Điền vào ô trống' },
-    { value: 'SHORT_ANSWER', label: 'Trả lời ngắn' },
-    { value: 'ESSAY', label: 'Tự luận' },
-    { value: 'DRAWING', label: 'Vẽ / Sơ đồ' },
+    { value: '', label: $localize`Tất cả loại` },
+    { value: 'SINGLE_CHOICE', label: $localize`Một đáp án` },
+    { value: 'MULTIPLE_CHOICE', label: $localize`Nhiều đáp án` },
+    { value: 'FILL_IN_BLANK', label: $localize`Điền vào ô trống` },
+    { value: 'SHORT_ANSWER', label: $localize`Trả lời ngắn` },
+    { value: 'ESSAY', label: $localize`Tự luận` },
+    { value: 'DRAWING', label: $localize`Vẽ / Sơ đồ` },
   ];
 
   readonly difficultyOptions = [
-    { value: '', label: 'Tất cả độ khó' },
-    { value: 'EASY', label: 'Dễ' },
-    { value: 'MEDIUM', label: 'Trung bình' },
-    { value: 'HARD', label: 'Khó' },
-    { value: 'ADVANCED', label: 'Nâng cao' },
+    { value: '', label: $localize`Tất cả độ khó` },
+    { value: 'EASY', label: $localize`Dễ` },
+    { value: 'MEDIUM', label: $localize`Trung bình` },
+    { value: 'HARD', label: $localize`Khó` },
+    { value: 'ADVANCED', label: $localize`Nâng cao` },
   ];
 
   readonly questionTypeLabels: Record<string, string> = {
-    SINGLE_CHOICE: 'Một đáp án',
-    MULTIPLE_CHOICE: 'Nhiều đáp án',
-    FILL_IN_BLANK: 'Điền vào ô trống',
-    SHORT_ANSWER: 'Trả lời ngắn',
-    ESSAY: 'Tự luận',
-    DRAWING: 'Vẽ / Sơ đồ',
+    SINGLE_CHOICE: $localize`Một đáp án`,
+    MULTIPLE_CHOICE: $localize`Nhiều đáp án`,
+    FILL_IN_BLANK: $localize`Điền vào ô trống`,
+    SHORT_ANSWER: $localize`Trả lời ngắn`,
+    ESSAY: $localize`Tự luận`,
+    DRAWING: $localize`Vẽ / Sơ đồ`,
   };
 
   readonly difficultyLabels: Record<string, string> = {
-    EASY: 'Dễ',
-    MEDIUM: 'TB',
-    HARD: 'Khó',
-    ADVANCED: 'Nâng cao',
+    EASY: $localize`Dễ`,
+    MEDIUM: $localize`TB`,
+    HARD: $localize`Khó`,
+    ADVANCED: $localize`Nâng cao`,
   };
 
   ngOnInit() {
@@ -99,7 +99,7 @@ export class QuestionBankPickerComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err));
+        this.toastService.error(getApiErrorMessage(err, $localize`Không thể tải ngân hàng câu hỏi`));
         this.loading.set(false);
       },
     });
@@ -155,7 +155,7 @@ export class QuestionBankPickerComponent implements OnInit {
   confirmAdd() {
     const selected = this.questions().filter((q) => this.isSelected(q.id));
     if (!selected.length) {
-      this.toastService.error('Chưa chọn câu hỏi nào');
+      this.toastService.error($localize`Chưa chọn câu hỏi nào`);
       return;
     }
     this.added.emit(selected);
