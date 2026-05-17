@@ -3,8 +3,8 @@
   <!-- Header -->
   <div class="dashboard-header">
     <div class="dashboard-header__greeting">
-      <h1>Xin chào, {{ currentUser()?.fullName ?? 'bạn' }}! 👋</h1>
-      <p class="text-muted">Đây là tổng quan học tập của bạn hôm nay</p>
+      <h1 i18n>Xin chào, {{ currentUser()?.fullName ?? 'bạn' }}! 👋</h1>
+      <p class="text-muted" i18n>Đây là tổng quan học tập của bạn hôm nay</p>
     </div>
   </div>
 
@@ -12,7 +12,7 @@
   @if (isLoading()) {
     <div class="loading-state">
       <mat-spinner diameter="48" />
-      <p>Đang tải dữ liệu...</p>
+      <p i18n>Đang tải dữ liệu...</p>
     </div>
   }
 
@@ -21,7 +21,7 @@
     <div class="error-state">
       <mat-icon color="warn">error_outline</mat-icon>
       <p>{{ error() }}</p>
-      <button mat-stroked-button (click)="loadDashboard()">Thử lại</button>
+      <button mat-stroked-button (click)="loadDashboard()" i18n>Thử lại</button>
     </div>
   }
 
@@ -36,7 +36,7 @@
           </div>
           <div class="stat-card__body">
             <span class="stat-card__value">{{ dashboard()!.progress.totalClasses }}</span>
-            <span class="stat-card__label">Lớp đang học</span>
+            <span class="stat-card__label" i18n>Lớp đang học</span>
           </div>
         </mat-card-content>
       </mat-card>
@@ -48,7 +48,7 @@
           </div>
           <div class="stat-card__body">
             <span class="stat-card__value">{{ dashboard()!.progress.totalLessons }}</span>
-            <span class="stat-card__label">Bài học có sẵn</span>
+            <span class="stat-card__label" i18n>Bài học có sẵn</span>
           </div>
         </mat-card-content>
       </mat-card>
@@ -60,7 +60,7 @@
           </div>
           <div class="stat-card__body">
             <span class="stat-card__value">{{ completionPercent() }}%</span>
-            <span class="stat-card__label">Tiến độ hoàn thành</span>
+            <span class="stat-card__label" i18n>Tiến độ hoàn thành</span>
             <mat-progress-bar
               mode="determinate"
               [value]="completionPercent()"
@@ -76,8 +76,8 @@
       <mat-card class="empty-card">
         <mat-card-content>
           <mat-icon>class</mat-icon>
-          <h3>Bạn chưa được vào lớp nào</h3>
-          <p class="text-muted">Liên hệ giáo viên hoặc quản trị viên để được thêm vào lớp học.</p>
+          <h3 i18n>Bạn chưa được vào lớp nào</h3>
+          <p class="text-muted" i18n>Liên hệ giáo viên hoặc quản trị viên để được thêm vào lớp học.</p>
         </mat-card-content>
       </mat-card>
     }
@@ -105,7 +105,7 @@
           <mat-divider />
 
           @if (cls.lessons.length === 0) {
-            <p class="no-lessons">Chưa có bài học nào cho lớp này.</p>
+            <p class="no-lessons" i18n>Chưa có bài học nào cho lớp này.</p>
           }
 
           <!-- Lesson List -->

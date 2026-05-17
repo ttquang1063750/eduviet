@@ -1,28 +1,28 @@
 <div class="page">
   <div class="page-header">
-    <h1>📚 Kho bài học</h1>
-    <p>Tìm kiếm và học bài theo môn học, cấp lớp của bạn</p>
+    <h1 i18n>📚 Kho bài học</h1>
+    <p i18n>Tìm kiếm và học bài theo môn học, cấp lớp của bạn</p>
   </div>
 
   <div class="filters" [formGroup]="filterForm">
     <input
       formControlName="search"
       class="search-input"
-      placeholder="🔍 Tìm kiếm bài học..."
+      i18n-placeholder placeholder="🔍 Tìm kiếm bài học..."
       type="search"
     />
     <select formControlName="grade" class="filter-select">
-      <option value="">Tất cả lớp</option>
+      <option value="" i18n>Tất cả lớp</option>
       @for (g of grades; track g) {
         <option [value]="g">Lớp {{ g }}</option>
       }
     </select>
     <select formControlName="difficulty" class="filter-select">
-      <option value="">Tất cả độ khó</option>
-      <option value="EASY">Dễ</option>
-      <option value="MEDIUM">Trung bình</option>
-      <option value="HARD">Khó</option>
-      <option value="ADVANCED">Nâng cao</option>
+      <option value="" i18n>Tất cả độ khó</option>
+      <option value="EASY" i18n>Dễ</option>
+      <option value="MEDIUM" i18n>Trung bình</option>
+      <option value="HARD" i18n>Khó</option>
+      <option value="ADVANCED" i18n>Nâng cao</option>
     </select>
   </div>
 
@@ -35,8 +35,8 @@
   } @else if (lessons().length === 0) {
     <div class="empty-state">
       <div class="empty-illustration">📭</div>
-      <h3>Không tìm thấy bài học nào</h3>
-      <p>Thử thay đổi bộ lọc tìm kiếm của bạn</p>
+      <h3 i18n>Không tìm thấy bài học nào</h3>
+      <p i18n>Thử thay đổi bộ lọc tìm kiếm của bạn</p>
     </div>
   } @else {
     <div class="grid">
@@ -63,9 +63,9 @@
     </div>
 
     <div class="pagination">
-      <button class="page-btn" [disabled]="page() <= 1" (click)="changePage(page() - 1)">← Trước</button>
-      <span class="page-info">Trang {{ page() }} / {{ totalPages() }}</span>
-      <button class="page-btn" [disabled]="page() >= totalPages()" (click)="changePage(page() + 1)">Tiếp →</button>
+      <button class="page-btn" [disabled]="page() <= 1" (click)="changePage(page() - 1)" i18n>← Trước</button>
+      <span class="page-info" i18n>Trang {{ page() }} / {{ totalPages() }}</span>
+      <button class="page-btn" [disabled]="page() >= totalPages()" (click)="changePage(page() + 1)" i18n>Tiếp →</button>
     </div>
   }
 </div>

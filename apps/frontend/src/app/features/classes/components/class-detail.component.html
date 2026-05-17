@@ -1,17 +1,17 @@
 @if (loading()) {
   <div class="loading-state">
     <div class="spinner"></div>
-    <p>Đang tải thông tin lớp...</p>
+    <p i18n>Đang tải thông tin lớp...</p>
   </div>
 } @else if (error()) {
   <div class="error-state">
     <p>{{ error() }}</p>
-    <a routerLink="/classes" class="btn btn--outline">← Quay lại danh sách</a>
+    <a routerLink="/classes" class="btn btn--outline" i18n>← Quay lại danh sách</a>
   </div>
 } @else if (cls(); as c) {
   <div class="class-detail-page">
     <nav class="breadcrumb-nav">
-      <a routerLink="/classes" class="breadcrumb-link">Lớp học</a>
+      <a routerLink="/classes" class="breadcrumb-link" i18n>Lớp học</a>
       <span class="breadcrumb-sep">›</span>
       <span>{{ c.name }}</span>
     </nav>
@@ -27,11 +27,11 @@
       <div class="class-stats">
         <div class="stat-card">
           <span class="stat-value">{{ studentCount() }}</span>
-          <span class="stat-label">Học sinh</span>
+          <span class="stat-label" i18n>Học sinh</span>
         </div>
         @if (c.homeroomTeacher) {
           <div class="teacher-card">
-            <span class="teacher-label">Giáo viên chủ nhiệm</span>
+            <span class="teacher-label" i18n>Giáo viên chủ nhiệm</span>
             <span class="teacher-name">{{ c.homeroomTeacher.fullName }}</span>
             <span class="teacher-email">{{ c.homeroomTeacher.email }}</span>
           </div>
@@ -40,19 +40,19 @@
     </header>
 
     <section class="students-section">
-      <h2 class="section-title">Danh sách học sinh ({{ studentCount() }})</h2>
+      <h2 class="section-title" i18n>Danh sách học sinh ({{ studentCount() }})</h2>
 
       @if (students().length === 0) {
-        <p class="empty-text">Chưa có học sinh nào trong lớp này.</p>
+        <p class="empty-text" i18n>Chưa có học sinh nào trong lớp này.</p>
       } @else {
         <div class="students-table-wrapper">
           <table class="students-table">
             <thead>
               <tr>
-                <th>#</th>
-                <th>Học sinh</th>
+                <th i18n>#</th>
+                <th i18n>Học sinh</th>
                 <th>Email</th>
-                <th>Tham gia</th>
+                <th i18n>Tham gia</th>
               </tr>
             </thead>
             <tbody>

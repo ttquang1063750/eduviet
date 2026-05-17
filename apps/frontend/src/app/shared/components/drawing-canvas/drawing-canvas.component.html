@@ -1,7 +1,7 @@
 <div class="canvas-wrapper">
 
   <!-- ── Toolbar ─────────────────────────────────────────────────────────── -->
-  <div class="toolbar" role="toolbar" aria-label="Công cụ vẽ">
+  <div class="toolbar" role="toolbar" i18n-aria-label aria-label="Công cụ vẽ">
 
     <!-- Nhóm 1: Chọn công cụ -->
     <div class="tool-group">
@@ -9,8 +9,8 @@
         class="tool-btn"
         [class.active]="activeTool() === 'pencil'"
         (click)="setTool('pencil')"
-        title="Bút chì — vẽ tự do"
-        aria-label="Bút chì"
+        i18n-title title="Bút chì — vẽ tự do"
+        i18n-aria-label aria-label="Bút chì"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
@@ -21,8 +21,8 @@
         class="tool-btn"
         [class.active]="activeTool() === 'line'"
         (click)="setTool('line')"
-        title="Đoạn thẳng"
-        aria-label="Đoạn thẳng"
+        i18n-title title="Đoạn thẳng"
+        i18n-aria-label aria-label="Đoạn thẳng"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <line x1="5" y1="19" x2="19" y2="5"/>
@@ -33,8 +33,8 @@
         class="tool-btn"
         [class.active]="activeTool() === 'rect'"
         (click)="setTool('rect')"
-        title="Hình chữ nhật"
-        aria-label="Hình chữ nhật"
+        i18n-title title="Hình chữ nhật"
+        i18n-aria-label aria-label="Hình chữ nhật"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="5" width="18" height="14" rx="2"/>
@@ -45,8 +45,8 @@
         class="tool-btn"
         [class.active]="activeTool() === 'ellipse'"
         (click)="setTool('ellipse')"
-        title="Hình ellipse / tròn"
-        aria-label="Ellipse"
+        i18n-title title="Hình ellipse / tròn"
+        i18n-aria-label aria-label="Ellipse"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <ellipse cx="12" cy="12" rx="10" ry="6"/>
@@ -57,8 +57,8 @@
         class="tool-btn eraser"
         [class.active]="activeTool() === 'eraser'"
         (click)="setTool('eraser')"
-        title="Tẩy — click vào nét vẽ để xóa"
-        aria-label="Tẩy"
+        i18n-title title="Tẩy — click vào nét vẽ để xóa"
+        i18n-aria-label aria-label="Tẩy"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/>
@@ -70,12 +70,12 @@
 
     <!-- Nhóm 2: Màu & độ dày -->
     <div class="tool-group">
-      <label class="color-label" title="Màu nét vẽ">
+      <label class="color-label" i18n-title title="Màu nét vẽ">
         <input
           type="color"
           [value]="strokeColor()"
           (input)="setColor(getInputValue($event))"
-          aria-label="Màu nét vẽ"
+          i18n-aria-label aria-label="Màu nét vẽ"
           class="color-picker"
         />
       </label>
@@ -84,13 +84,13 @@
         class="width-select"
         [value]="strokeWidth()"
         (change)="setWidth(+getInputValue($event))"
-        aria-label="Độ dày nét vẽ"
-        title="Độ dày nét"
+        i18n-aria-label aria-label="Độ dày nét vẽ"
+        i18n-title title="Độ dày nét"
       >
-        <option value="1">Mảnh</option>
-        <option value="2">Thường</option>
-        <option value="4">Đậm</option>
-        <option value="6">Rất đậm</option>
+        <option value="1" i18n>Mảnh</option>
+        <option value="2" i18n>Thường</option>
+        <option value="4" i18n>Đậm</option>
+        <option value="6" i18n>Rất đậm</option>
       </select>
     </div>
 
@@ -100,8 +100,8 @@
         class="tool-btn"
         (click)="undo()"
         [disabled]="!canUndo()"
-        title="Hoàn tác"
-        aria-label="Hoàn tác"
+        i18n-title title="Hoàn tác"
+        i18n-aria-label aria-label="Hoàn tác"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 2.6-6.36L3 10"/>
@@ -112,8 +112,8 @@
         class="tool-btn"
         (click)="redo()"
         [disabled]="!canRedo()"
-        title="Làm lại"
-        aria-label="Làm lại"
+        i18n-title title="Làm lại"
+        i18n-aria-label aria-label="Làm lại"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 7v6h-6"/><path d="M21 13a9 9 0 1 1-2.6-6.36L21 10"/>
@@ -123,8 +123,8 @@
       <button
         class="tool-btn danger"
         (click)="clearCanvas()"
-        title="Xóa tất cả nét vẽ"
-        aria-label="Xóa tất cả"
+        i18n-title title="Xóa tất cả nét vẽ"
+        i18n-aria-label aria-label="Xóa tất cả"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/>
@@ -134,12 +134,12 @@
     </div>
 
     <!-- Xuất ảnh -->
-    <button class="export-btn" (click)="exportAsImage()" title="Lưu bài làm dưới dạng hình ảnh">
+    <button class="export-btn" (click)="exportAsImage()" i18n-title title="Lưu bài làm dưới dạng hình ảnh">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/>
         <line x1="12" y1="15" x2="12" y2="3"/>
       </svg>
-      Lưu hình
+      <span i18n>Lưu hình</span>
     </button>
   </div>
 

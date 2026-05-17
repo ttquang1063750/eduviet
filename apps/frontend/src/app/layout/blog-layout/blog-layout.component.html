@@ -13,12 +13,13 @@
       </a>
 
       <nav class="blog-header__nav">
-        <a routerLink="/blog" class="blog-header__nav-link">Tất cả bài viết</a>
+        <a routerLink="/blog" class="blog-header__nav-link" i18n>Tất cả bài viết</a>
         @if (isLoggedIn()) {
-          <a routerLink="/dashboard" class="blog-header__nav-link">Ứng dụng</a>
+          <a routerLink="/dashboard" class="blog-header__nav-link" i18n>Ứng dụng</a>
         } @else {
-          <a routerLink="/auth/login" class="blog-header__nav-link blog-header__nav-link--cta">Đăng nhập</a>
+          <a routerLink="/auth/login" class="blog-header__nav-link blog-header__nav-link--cta" i18n>Đăng nhập</a>
         }
+        <app-language-switcher />
       </nav>
     </div>
   </header>
@@ -30,6 +31,6 @@
 
   <!-- Footer -->
   <footer class="blog-footer">
-    <p>© {{ currentYear }} EduViet — Nền tảng học tập trực tuyến dành cho học sinh Việt Nam</p>
+    <p i18n>© {{ currentYear }} EduViet — Nền tảng học tập trực tuyến dành cho học sinh Việt Nam</p>
   </footer>
 </div>

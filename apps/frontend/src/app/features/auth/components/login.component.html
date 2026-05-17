@@ -13,7 +13,7 @@
         </div>
         <div>
           <h1 class="brand-name">EduViet</h1>
-          <p class="brand-tagline">Nền tảng học tập thông minh</p>
+          <p class="brand-tagline" i18n>Nền tảng học tập thông minh</p>
         </div>
       </div>
 
@@ -39,15 +39,15 @@
       <div class="features-list">
         <div class="feature-item">
           <mat-icon class="feature-icon">menu_book</mat-icon>
-          <span>Hàng nghìn bài học từ lớp 1-12</span>
+          <span i18n>Hàng nghìn bài học từ lớp 1-12</span>
         </div>
         <div class="feature-item">
           <mat-icon class="feature-icon">edit</mat-icon>
-          <span>Bài tập tương tác, vẽ hình</span>
+          <span i18n>Bài tập tương tác, vẽ hình</span>
         </div>
         <div class="feature-item">
           <mat-icon class="feature-icon">chat</mat-icon>
-          <span>Chat trực tiếp với giáo viên</span>
+          <span i18n>Chat trực tiếp với giáo viên</span>
         </div>
       </div>
     </div>
@@ -57,8 +57,8 @@
   <div class="form-panel">
     <div class="form-container">
       <div class="form-header">
-        <h2>Chào mừng trở lại!</h2>
-        <p>Đăng nhập để tiếp tục học tập</p>
+        <h2 i18n>Chào mừng trở lại!</h2>
+        <p i18n>Đăng nhập để tiếp tục học tập</p>
       </div>
 
       @if (errorMessage()) {
@@ -79,17 +79,17 @@
             autocomplete="email"
           />
           @if (form.controls.email.hasError('required')) {
-            <mat-error>Vui lòng nhập email</mat-error>
+            <mat-error i18n>Vui lòng nhập email</mat-error>
           } @else if (
             form.controls.email.hasError('email') ||
             form.controls.email.hasError('pattern')
           ) {
-            <mat-error>Email không hợp lệ</mat-error>
+            <mat-error i18n>Email không hợp lệ</mat-error>
           }
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Mật khẩu</mat-label>
+          <mat-label i18n>Mật khẩu</mat-label>
           <input
             matInput
             [type]="showPassword() ? 'text' : 'password'"
@@ -107,9 +107,9 @@
             <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
           @if (form.controls.password.hasError('required')) {
-            <mat-error>Vui lòng nhập mật khẩu</mat-error>
+            <mat-error i18n>Vui lòng nhập mật khẩu</mat-error>
           } @else if (form.controls.password.hasError('minlength')) {
-            <mat-error>Mật khẩu phải có ít nhất 6 ký tự</mat-error>
+            <mat-error i18n>Mật khẩu phải có ít nhất 6 ký tự</mat-error>
           }
         </mat-form-field>
 
@@ -121,15 +121,15 @@
         >
           @if (isLoading()) {
             <mat-progress-spinner diameter="20" mode="indeterminate" />
-            <span>Đang đăng nhập...</span>
+            <span i18n>Đang đăng nhập...</span>
           } @else {
-            <span>Đăng nhập</span>
+            <span i18n>Đăng nhập</span>
           }
         </button>
       </form>
 
       <div class="demo-accounts">
-        <p class="demo-title">Tài khoản demo:</p>
+        <p class="demo-title" i18n>Tài khoản demo:</p>
         <div class="demo-grid">
           @for (account of demoAccounts; track account.role) {
             <button mat-stroked-button type="button" class="demo-btn" (click)="fillDemo(account)">

@@ -145,22 +145,58 @@ provideAnimationsAsync()
   - Tooltip: `matTooltip` — KHÔNG dùng attribute `title=` trên Material components.
   - Icons: `<mat-icon>` — KHÔNG dùng emoji làm icon trong UI.
 - **KHÔNG** tự viết CSS cho các input/button cơ bản trừ khi cần tinh chỉnh layout đặc thù.
+- **TUYỆT ĐỐI KHÔNG dùng `::ng-deep`** — deprecated, phá vỡ ViewEncapsulation, gây style leak. Thay bằng:
+  - Đặt style trên host element (`.host-class { font-size: 0.75rem }`) → Material child inherit
+  - Dùng `styles.scss` global scope nếu cần override Material internals project-wide
+  - Dùng Angular Material theming tokens (`mat.theme()`, `--mat-*` CSS vars) cho customization đúng cách
 
 ### i18n bắt buộc cho mọi UI mới
 - **TẤT CẢ** text hiển thị cho user — text node, attribute (placeholder, aria-label, title, alt, matTooltip), và string trong TS (toast, confirm, error message) — PHẢI có marker i18n:
   ```html
-  <!-- ✅ ĐÚNG — text node -->
-  <h2 i18n="@@login.title">Chào mừng trở lại</h2>
+  <!-- ✅ ĐÚNG — text node: dùng i18n bare, Angular auto-generate ID -->
+  <h2 i18n>Chào mừng trở lại</h2>
 
-  <!-- ✅ ĐÚNG — attribute -->
-  <input i18n-placeholder="@@login.email_placeholder" placeholder="example@eduviet.vn" />
+  <!-- ✅ ĐÚNG — attribute tĩnh -->
+  <input i18n-placeholder placeholder="example@eduviet.vn" />
 
-  <!-- ✅ ĐÚNG — TS dynamic message -->
-  this.toast.error($localize`:@@common.error:Đã có lỗi xảy ra`);
+  <!-- ✅ ĐÚNG — TS dynamic message ($localize không cần @@id) -->
+  this.toast.error($localize`Đã có lỗi xảy ra`);
   ```
-- **ID convention**: `@@<feature>.<context>.<key>` (vd `@@admin.users.delete_confirm`). Strings tái sử dụng → `@@common.<key>` (vd `@@common.save`, `@@common.cancel`, `@@common.delete`).
 - **KHÔNG bỏ qua** binding `{{ }}`, comment, ký tự đặc biệt — chỉ text có chữ cái cần i18n.
 - **Workflow**: sau khi tạo/sửa template → gọi `/i18n-check <file>` để verify. Nếu `@angular/localize` đã install → BẮT BUỘC pass trước khi commit.
+
+### i18n — Quy tắc cụ thể
+
+#### Luôn dùng `i18n` bare — KHÔNG dùng `@@id`
+```html
+<!-- ✅ ĐÚNG -->
+<span i18n>Tổng quan</span>
+<p i18n>Nền tảng học tập trực tuyến dành cho học sinh Việt Nam</p>
+<input i18n-placeholder placeholder="Tìm kiếm..." />
+<div i18n-aria-label aria-label="Công cụ vẽ"></div>
+
+<!-- ❌ SAI — verbose, không cần thiết -->
+<span i18n="@@nav.dashboard">Tổng quan</span>
+<input i18n-placeholder="@@search.placeholder" placeholder="Tìm kiếm..." />
+```
+
+#### Dynamic bindings — KHÔNG dùng `$localize` cho UX phụ
+```html
+<!-- ✅ ĐÚNG — tooltip là UX phụ, không cần i18n (đã có <span i18n> bên dưới) -->
+[matTooltip]="collapsed() ? 'Tổng quan' : ''"
+<span matListItemTitle i18n>Tổng quan</span>
+
+<!-- ❌ SAI — over-engineering, tạo object $localize thừa trong component TS -->
+readonly i18nLabels = { dashboard: $localize`:Tổng quan` };
+[matTooltip]="collapsed() ? i18nLabels.dashboard : ''"
+```
+- `$localize` trong TS chỉ dùng khi chuỗi **bắt buộc phải dịch** và **không thể dùng `i18n` attribute** (vd: toast messages, error messages trong service).
+
+#### Không cần dịch
+- Brand name: `EduViet`, `EduViet Blog`
+- Language switcher labels: `VI`, `EN` (tên ngôn ngữ hiển thị native)
+- Icon names: `<mat-icon>home</mat-icon>` (không phải text hiển thị)
+- Binding-only values: `{{ user()?.fullName }}`, `{{ currentYear }}`
 
 ## Prisma / Database
 - UUID primary key: `@id @default(uuid())`.

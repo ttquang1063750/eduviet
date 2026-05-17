@@ -11,6 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
 import { getInitials } from '../core/utils/name-initials';
+import { LanguageSwitcherComponent } from '../shared/components/language-switcher/language-switcher.component';
 
 @Component({
   selector: 'app-main-layout',
@@ -28,6 +29,7 @@ import { getInitials } from '../core/utils/name-initials';
     MatIconModule,
     MatTooltipModule,
     MatButtonModule,
+    LanguageSwitcherComponent,
   ],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',

@@ -18,7 +18,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-16 — session 26: i18n plan + /i18n-check skill)
+## Trạng thái hiện tại (cập nhật 2026-05-17 — session 27: i18n Phase 1 setup + Phase 2 markup steps 7-13)
 
 ### ✅ Đã hoàn thành
 
@@ -220,6 +220,12 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ `features/admin/questions/questions-admin.component` — Question Bank admin page (filter, paginate, CRUD modal)
 - ✅ `chat.types.ts` — `role` → `roles` (multi-role fix)
 
+
+#### Session 27 — i18n Phase 1 setup + Phase 2 markup steps 7-13 (2026-05-17)
+- ✅ Phase 1: install `@angular/localize`, `angular.json` i18n config, register CLDR, `lang="vi"` on html, `LanguageSwitcherComponent` (mat-button-toggle 🇻🇳/🇬🇧), inject vào 2 layouts
+- ✅ Phase 2 steps 7-13: i18n markup cho layout/, shared/components/, auth/, dashboard/, student-dashboard/, lessons/, classes/ — tổng ~85 markers thêm vào
+- ✅ Rule mới: `i18n` bare (không `@@id`); KHÔNG `::ng-deep`; KHÔNG `$localize` cho UX phụ
+- ✅ Đồng bộ `rules.md` + `task.md` — xoá tất cả examples dùng `@@id`
 
 #### Session 26 — i18n plan + /i18n-check skill + security audit (2026-05-16)
 - ✅ Plan task i18n: 30 steps / 5 phase, Angular `@angular/localize` 2 builds (vi default + `/en/`)

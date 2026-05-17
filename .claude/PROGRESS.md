@@ -1,6 +1,6 @@
 # EduViet — Progress Tracker
 
-> Cập nhật lần cuối: 2026-05-16 (session 26 — i18n plan + /i18n-check skill)
+> Cập nhật lần cuối: 2026-05-17 (session 27 — i18n Phase 1 setup + Phase 2 markup steps 7-13)
 > Workflow: `/plan-task` → `/execute-step` (lặp) → `/check-point` → `/resume` → tiếp tục
 
 ---
@@ -130,6 +130,35 @@
 |------|----------|
 | `main-layout.component.scss` | Sidebar bg `var(--mat-sys-primary)`, remove border-radius, icon left-align token |
 | `styles.scss` | Collapsed centering: `mdc-list-item__content { flex: 0; width: 0 }` — fix icon alignment |
+
+---
+
+## Session 27 — i18n Phase 1 setup + Phase 2 markup (2026-05-17)
+
+### Phase 1: Infrastructure (steps 1-6 ✅)
+- `@angular/localize@21.2.13` installed; `import '@angular/localize/init'` → `main.ts`
+- `angular.json`: i18n block (sourceLocale vi, locales.en baseHref /en/, localize:true production)
+- `app.config.ts`: register CLDR localeVi + localeEn
+- `index.html`: `lang="en"` → `lang="vi"`
+- NEW `shared/components/language-switcher/` — mat-button-toggle-group 🇻🇳/🇬🇧, inject(LOCALE_ID), URL redirect
+- language-switcher injected vào main-layout (sidebar bottom) + blog-layout (header nav)
+
+### Phase 2: Template markup (steps 7-13 ✅)
+| Step | Files | Markers |
+|------|-------|---------|
+| 7 layout/ | main-layout.html, blog-layout.html | 13 nav spans + footer |
+| 8 shared/ | drawing-canvas.html, geo-tree.html | i18n-aria-label, i18n-title, options, empty states |
+| 9 auth/ | login.component.html | 13 markers |
+| 10 dashboard/ | dashboard.component.html | 9 markers |
+| 11 student-dashboard/ | student-dashboard.component.html | 10 markers |
+| 12 lessons/ | lesson-list + lesson-detail | 14 + 11 markers |
+| 13 classes/ | class-list + class-detail | 5 + 10 markers |
+
+### Rules cập nhật
+- `rules.md`: KHÔNG dùng `::ng-deep`; i18n bare (không `@@id`); no `$localize` cho UX phụ
+- `task.md` + `rules.md`: xoá tất cả examples dùng `@@id`
+
+### Còn lại Phase 2 (steps 14-22): blog, chat, reports, admin/*, sanity check
 
 ---
 
