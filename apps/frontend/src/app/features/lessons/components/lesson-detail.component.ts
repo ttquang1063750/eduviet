@@ -1,16 +1,21 @@
 import { Component, inject, signal, input, ChangeDetectionStrategy, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { MarkdownComponent } from 'ngx-markdown';
 import { LessonsService } from '../../../core/services/lessons.service';
 import { BreadcrumbService } from '../../../core/services/breadcrumb.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { AttemptsService } from '../../../core/services/attempts.service';
+import { ConfirmService } from '../../../core/services/confirm.service';
 import { DrawingCanvasComponent } from '../../../shared/components/drawing-canvas/drawing-canvas.component';
-import type { Lesson } from '@eduviet/shared-types';
+import { ExamTimerComponent } from './exam-timer.component';
+import type { Lesson, AttemptMode, Attempt } from '@eduviet/shared-types';
+import { getApiErrorMessage } from '../../../core/utils/http-error';
 
 @Component({
   selector: 'app-lesson-detail',
   standalone: true,
-  imports: [RouterLink, MarkdownComponent, DrawingCanvasComponent],
+  imports: [CommonModule, RouterLink, MarkdownComponent, DrawingCanvasComponent, ExamTimerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './lesson-detail.component.html',
   styleUrl: './lesson-detail.component.scss',
@@ -19,16 +24,23 @@ export class LessonDetailComponent implements OnInit {
   private lessonsService = inject(LessonsService);
   private breadcrumbService = inject(BreadcrumbService);
   private toastService = inject(ToastService);
+  private attemptsService = inject(AttemptsService);
+  private confirmService = inject(ConfirmService);
+  private router = inject(Router);
 
   readonly slug = input.required<string>();
   readonly loading = signal(true);
   readonly lesson = signal<Lesson | null>(null);
+
+  // Attempt state
+  readonly activeAttempt = signal<Attempt | null>(null);
+  readonly showModeSelector = signal(true);
+  readonly submitting = signal(false);
+
   /**
-   * Lưu đáp án học sinh theo exerciseId.
-   * - MULTIPLE_CHOICE / FILL_IN_BLANK / SHORT_ANSWER: string value
-   * - DRAWING: base64 PNG string (từ DrawingCanvasComponent.imageExported)
+   * Lưu đáp án học sinh theo questionId.
    */
-  readonly selectedAnswers = signal<Record<string, string>>({});
+  readonly selectedAnswers = signal<Record<string, any>>({});
   readonly showHints = signal<Record<string, boolean>>({});
 
   ngOnInit() {
@@ -44,44 +56,90 @@ export class LessonDetailComponent implements OnInit {
     });
   }
 
-  selectAnswer(exerciseId: string, value: string): void {
-    this.selectedAnswers.update((prev) => ({ ...prev, [exerciseId]: value }));
+  async startAttempt(mode: AttemptMode): Promise<void> {
+    const lesson = this.lesson();
+    if (!lesson) return;
+
+    if (mode === 'MOCK_EXAM') {
+      const confirmed = await this.confirmService.confirm({
+        title: $localize`Bắt đầu thi thử`,
+        message: $localize`Chế độ thi thử sẽ giới hạn thời gian trong ${lesson.timeLimitSec! / 60} phút và chỉ có thể làm ${lesson.maxAttempts || 1} lần. Bạn đã sẵn sàng?`,
+        confirmText: $localize`Bắt đầu ngay`,
+      });
+      if (!confirmed) return;
+    }
+
+    this.attemptsService.startAttempt({ lessonId: lesson.id, mode }).subscribe({
+      next: (res) => {
+        this.activeAttempt.set(res.data);
+        this.showModeSelector.set(false);
+        this.toastService.success($localize`Đã bắt đầu lượt làm bài: ${mode}`);
+      },
+      error: (err: unknown) => {
+        this.toastService.error(getApiErrorMessage(err, $localize`Không thể bắt đầu làm bài`));
+      },
+    });
   }
 
-  /** Nhận base64 PNG từ canvas vẽ hình và lưu vào selectedAnswers */
-  saveDrawing(exerciseId: string, imageData: string): void {
-    this.selectedAnswers.update((prev) => ({ ...prev, [exerciseId]: imageData }));
+  selectAnswer(questionId: string, value: any): void {
+    this.selectedAnswers.update((prev) => ({ ...prev, [questionId]: value }));
   }
 
-  toggleHint(exerciseId: string): void {
-    this.showHints.update((prev) => ({ ...prev, [exerciseId]: !prev[exerciseId] }));
+  toggleMultipleAnswer(questionId: string, optionId: string): void {
+    this.selectedAnswers.update((prev) => {
+      const current = (prev[questionId] as string[]) || [];
+      const updated = current.includes(optionId)
+        ? current.filter((id) => id !== optionId)
+        : [...current, optionId];
+      return { ...prev, [questionId]: updated };
+    });
+  }
+
+  saveDrawing(questionId: string, imageData: string): void {
+    this.selectedAnswers.update((prev) => ({ ...prev, [questionId]: imageData }));
+  }
+
+  toggleHint(questionId: string): void {
+    this.showHints.update((prev) => ({ ...prev, [questionId]: !prev[questionId] }));
   }
 
   submitAnswers(): void {
-    const answered = Object.keys(this.selectedAnswers()).length;
-    const total = this.lesson()?.lessonQuestions.length ?? 0;
-    // TODO: Thay bằng API call khi hệ thống chấm điểm sẵn sàng
-    this.toastService.info(
-      `Đã nộp ${answered}/${total} câu trả lời!\n(Chức năng chấm điểm sẽ được tích hợp trong phiên bản đầy đủ)`
-    );
+    const attempt = this.activeAttempt();
+    if (!attempt) return;
+
+    this.submitting.set(true);
+    const answers = Object.entries(this.selectedAnswers()).map(([questionId, answer]) => ({
+      questionId,
+      answer,
+    }));
+
+    this.attemptsService.submitAttempt(attempt.id, { answers }).subscribe({
+      next: (res) => {
+        this.toastService.success($localize`Nộp bài thành công!`);
+        this.router.navigate(['/lessons', this.slug(), 'result', res.data.id]);
+      },
+      error: (err: unknown) => {
+        this.toastService.error(getApiErrorMessage(err, $localize`Nộp bài thất bại`));
+        this.submitting.set(false);
+      },
+    });
   }
 
   difficultyLabel(d: string): string {
     const labels: Record<string, string> = {
-      EASY: 'Dễ',
-      MEDIUM: 'Trung bình',
-      HARD: 'Khó',
-      ADVANCED: 'Nâng cao',
+      EASY: $localize`Dễ`,
+      MEDIUM: $localize`Trung bình`,
+      HARD: $localize`Khó`,
+      ADVANCED: $localize`Nâng cao`,
     };
     return labels[d] ?? d;
   }
 
-  hasDrawingAnswer(exerciseId: string): boolean {
-    const ans = this.selectedAnswers()[exerciseId];
-    return Boolean(ans?.startsWith('data:image/'));
+  hasDrawingAnswer(questionId: string): boolean {
+    const ans = this.selectedAnswers()[questionId];
+    return Boolean(typeof ans === 'string' && ans.startsWith('data:image/'));
   }
 
-  /** Typed helper thay thế $any($event.target).value trong template */
   getInputValue(event: Event): string {
     return (event.target as HTMLInputElement).value;
   }

@@ -22,6 +22,8 @@ export interface Lesson {
   estimatedMinutes: number;
   status: ContentStatus;
   randomizeQuestions: boolean;
+  timeLimitSec: number | null;
+  maxAttempts: number;
   lessonQuestions: LessonQuestion[];
   reviewerId: string | null;
   publishedAt: string | null;

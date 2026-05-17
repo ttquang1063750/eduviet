@@ -66,10 +66,23 @@ export const routes: Routes = [
           {
             path: ':slug',
             data: { breadcrumb: 'Chi tiết', breadcrumbAlias: 'lessons/:slug' },
-            loadComponent: () =>
-              import('./features/lessons/components/lesson-detail.component').then(
-                (m) => m.LessonDetailComponent
-              ),
+            children: [
+              {
+                path: '',
+                loadComponent: () =>
+                  import('./features/lessons/components/lesson-detail.component').then(
+                    (m) => m.LessonDetailComponent
+                  ),
+              },
+              {
+                path: 'result/:attemptId',
+                data: { breadcrumb: 'Kết quả', breadcrumbAlias: 'lessons/:slug/result/:attemptId' },
+                loadComponent: () =>
+                  import('./features/lessons/components/attempt-result.component').then(
+                    (m) => m.AttemptResultComponent
+                  ),
+              },
+            ],
           },
         ],
       },
@@ -103,6 +116,15 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/student-dashboard/student-dashboard.component').then(
             (m) => m.StudentDashboardComponent
+          ),
+      },
+      {
+        path: 'my/attempts',
+        data: { breadcrumb: 'Kết quả của tôi', breadcrumbAlias: 'my/attempts' },
+        canActivate: [roleGuard('STUDENT')],
+        loadComponent: () =>
+          import('./features/lessons/components/attempt-history.component').then(
+            (m) => m.AttemptHistoryComponent
           ),
       },
       // ── Reports ─────────────────────────────────────────────────
@@ -153,6 +175,28 @@ export const routes: Routes = [
               import('./features/admin/classes/classes-admin.routes').then(
                 (m) => m.CLASSES_ADMIN_ROUTES
               ),
+          },
+          {
+            path: 'grading',
+            data: { breadcrumb: 'Chấm điểm' },
+            canActivate: [roleGuard('HOMEROOM_TEACHER', 'SUBJECT_TEACHER', 'SUPER_ADMIN', 'SCHOOL_ADMIN')],
+            children: [
+              {
+                path: '',
+                loadComponent: () =>
+                  import('./features/admin/grading/grading-queue.component').then(
+                    (m) => m.GradingQueueComponent
+                  ),
+              },
+              {
+                path: ':attemptId',
+                data: { breadcrumb: 'Chi tiết bài làm', breadcrumbAlias: 'admin/grading/:attemptId' },
+                loadComponent: () =>
+                  import('./features/admin/grading/grading-detail.component').then(
+                    (m) => m.GradingDetailComponent
+                  ),
+              },
+            ],
           },
           {
             path: 'content',

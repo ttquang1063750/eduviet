@@ -1,0 +1,70 @@
+<div class="page">
+  <div class="page-header">
+    <h1 i18n>Hàng đợi chấm điểm</h1>
+    <p class="page-subtitle" i18n>Các bài làm có câu hỏi tự luận hoặc vẽ cần được chấm tay.</p>
+  </div>
+
+  <mat-card class="table-card">
+    <mat-card-content>
+      @if (loading()) {
+        <div class="loading-state">
+          <mat-spinner diameter="40"></mat-spinner>
+          <span i18n>Đang tải danh sách...</span>
+        </div>
+      } @else if (queue().length === 0) {
+        <div class="empty-state" i18n>🎉 Tuyệt vời! Không còn bài nào cần chấm.</div>
+      } @else {
+        <mat-table [dataSource]="queue()" class="queue-table">
+          <!-- Student Column -->
+          <ng-container matColumnDef="student">
+            <mat-header-cell *matHeaderCellDef i18n>Học sinh</mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              <div class="student-cell">
+                <strong>{{ row.student.fullName }}</strong>
+                <span class="email">{{ row.student.email }}</span>
+              </div>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Lesson Column -->
+          <ng-container matColumnDef="lesson">
+            <mat-header-cell *matHeaderCellDef i18n>Bài học</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row.lesson.title }}</mat-cell>
+          </ng-container>
+
+          <!-- Pending Count Column -->
+          <ng-container matColumnDef="pendingCount">
+            <mat-header-cell *matHeaderCellDef i18n>Số câu chờ chấm</mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              <span class="pending-badge">{{ row._count.answers }}</span>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Submitted At Column -->
+          <ng-container matColumnDef="submittedAt">
+            <mat-header-cell *matHeaderCellDef i18n>Ngày nộp</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row.submittedAt | date:'HH:mm dd/MM/yyyy' }}</mat-cell>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <mat-header-cell *matHeaderCellDef></mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              <button mat-flat-button color="primary" [routerLink]="[row.id]" i18n>Chấm điểm</button>
+            </mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+        </mat-table>
+
+        @if (total() > perPage) {
+          <div class="pagination">
+             <!-- Simplified pagination for now -->
+             <span i18n>Tổng cộng {{ total() }} bài</span>
+          </div>
+        }
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

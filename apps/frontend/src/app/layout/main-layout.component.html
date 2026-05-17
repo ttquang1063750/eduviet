@@ -68,6 +68,15 @@
           <mat-icon matListItemIcon>school</mat-icon>
           <span matListItemTitle i18n [style.display]="collapsed() ? 'none' : ''">Trang của tôi</span>
         </a>
+
+        <a mat-list-item routerLink="/my/attempts"
+           routerLinkActive #rla2b="routerLinkActive"
+           [activated]="rla2b.isActive"
+           i18n-matTooltip matTooltip="Kết quả của tôi"
+           matTooltipPosition="right">
+          <mat-icon matListItemIcon>history_edu</mat-icon>
+          <span matListItemTitle i18n [style.display]="collapsed() ? 'none' : ''">Kết quả của tôi</span>
+        </a>
       }
 
       <a mat-list-item routerLink="/blog"
@@ -177,6 +186,15 @@
            matTooltipPosition="right">
           <mat-icon matListItemIcon>fact_check</mat-icon>
           <span matListItemTitle i18n [style.display]="collapsed() ? 'none' : ''">Kiểm duyệt</span>
+        </a>
+
+        <a mat-list-item routerLink="/admin/grading"
+           routerLinkActive #rla13="routerLinkActive"
+           [activated]="rla13.isActive"
+           i18n-matTooltip matTooltip="Chấm điểm"
+           matTooltipPosition="right">
+          <mat-icon matListItemIcon>grading</mat-icon>
+          <span matListItemTitle i18n [style.display]="collapsed() ? 'none' : ''">Chấm điểm</span>
         </a>
       }
 

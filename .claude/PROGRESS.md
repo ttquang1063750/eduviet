@@ -1,6 +1,6 @@
 # EduViet — Progress Tracker
 
-> Cập nhật lần cuối: 2026-05-17 (session 27 — i18n COMPLETED: 30 steps, 5 phases, vi+en)
+> Cập nhật lần cuối: 2026-05-17 (session 28 — Assessment System + runtime bug fixes + dev server green)
 > Workflow: `/plan-task` → `/execute-step` (lặp) → `/check-point` → `/resume` → tiếp tục
 
 ---
@@ -92,6 +92,69 @@
 
 ---
 
+## Session 28 — Assessment System + Runtime Bug Fixes (2026-05-17)
+
+### Bug fixes từ `bash start-dev.sh`
+| File | Fix |
+|------|-----|
+| `attempts.routes.ts` | `z.any()` → `z.unknown()` trong Zod body schema (FastifyError schema invalid) |
+| `grading-detail/queue.component.ts` | Import path `../../../../` → `../../../` (sai 4 levels thay vì 3) |
+| `attempt-history/result.component.ts` | Thêm `ChangeDetectionStrategy` vào import |
+| 4 components | Thêm `DatePipe` (attempt-history, attempt-result, grading-queue, student-dashboard) |
+| `grading-queue/detail.component.ts` | Thêm `MatProgressSpinnerModule` |
+| `lesson-detail.component.ts` | Thêm `ConfirmService` import |
+| `lesson-admin-editor.component.ts` | Thêm `getInputValue()` method |
+| `shared-types/lesson.types.ts` | Thêm `timeLimitSec`, `maxAttempts` vào `Lesson` interface |
+| `shared-types/attempt.types.ts` | Fix `AttemptSummary`: xoá duplicate `maxScore`, thêm `totalScore` + `lesson?` |
+| `attempt-history.component.ts` | Fix mapper: `score` → `totalScore`, `a.lesson?.title ?? ''` |
+| `student-dashboard.component.ts` | Fix mapper: `score` → `totalScore` |
+| `attempt-result.component.html` | Fix `correctAnswer: string | string[]` → `toMarkdownString()` helper |
+| 5 components | Xoá `CommonModule` (exam-timer, attempt-result, attempt-history, grading-queue, grading-detail) |
+| `attempt-result.component.ts` | Thêm `toMarkdownString()` helper method |
+
+**Kết quả:** `Application bundle generation complete` ✅ — dev server chạy sạch
+
+---
+
+## Session 28 — Assessment System COMPLETED (2026-05-17)
+
+### BE — `apps/backend/src/modules/attempts/` (NEW)
+| File | Mô tả |
+|------|-------|
+| `attempts.repository.ts` | CRUD + `getLessonQuestions()` + `upsertAnswers()` (Prisma.JsonNull) + `gradeAnswer()` + pagination |
+| `attempts.service.ts` | `startAttempt` (MOCK_EXAM constraints), `submitAttempt` (auto-grade 3 types), `getResult` (hide correct if TEST), `gradeAnswer` (auto-GRADED when all done) |
+| `attempts.routes.ts` | 6 endpoints: POST /, POST /:id/submit, GET /my, GET /:id, GET /pending-grading, PATCH /:id/answers/:answerId/grade |
+| `attempts.service.spec.ts` | 10 tests: startAttempt (4), submitAttempt (4), getResult (2) |
+
+### Schema + Types
+- `libs/prisma/schema.prisma` — Attempt + AttemptAnswer models + AttemptMode/Status enums + Lesson exam config fields
+- `libs/prisma/migrations/20260517000001_add_attempt_system/migration.sql`
+- `packages/shared-types/src/attempt.types.ts` — Attempt, AttemptAnswer, StartAttemptRequest, SubmitAttemptRequest, GradeAnswerRequest, AttemptResult, AttemptSummary
+
+### FE — Features
+| Feature | Files |
+|---------|-------|
+| `attempts.service.ts` | FE HTTP service (6 methods) |
+| `lesson-detail.component.*` | Mode selector + wire submit → API + navigate to result + ExamTimer integration |
+| `attempt-result.component.*` | Kết quả bài làm: điểm, per-question review, hide/show correct answers by mode |
+| `attempt-history.component.*` | Lịch sử bài làm (`/my/attempts`) |
+| `exam-timer.component.*` | Countdown timer (input timeLimitSec, output timeUp, auto-submit) |
+| `admin/grading/grading-queue.*` | Danh sách attempts chờ chấm tay |
+| `admin/grading/grading-detail.*` | Chấm tay từng câu trả lời SHORT_ANSWER/ESSAY/DRAWING |
+| `student-dashboard` | Section "Kết quả gần đây" + average score |
+| `main-layout` | Nav links "Kết quả của tôi" + "Chấm điểm" |
+| `lesson-admin-editor` | Exam config (timeLimitSec, maxAttempts) |
+
+### Code Quality Fixes (session 28 cleanup)
+- `exam-timer.component.ts` — split inline template/styles → 3 files; remove CommonModule; `any` → `ReturnType<typeof setInterval>`; emoji icon → `<mat-icon>`
+- `attempt-result.component.ts` — remove CommonModule
+- `attempt-history.component.ts` — remove CommonModule; `as any[]` → `as AttemptSummary[]`
+- `grading-queue.component.ts` — remove CommonModule; `any[]` → `PendingAttempt[]` interface
+- `grading-detail.component.ts` — remove CommonModule; `Record<string, any>` → `Record<string, FormGroup>`
+- `rules.md` — thêm rule "KHÔNG inline template/styles trong .ts" với ❌/✅ examples
+
+---
+
 ## Session 23 — Bug fixes + Deprecated API cleanup (2026-05-14)
 
 ### Bug fixes ✅
@@ -133,23 +196,28 @@
 
 ---
 
+## Session 28 — Assessment System Full implementation (2026-05-17) ✅
+
+Đã xây dựng hoàn chỉnh hệ thống bài làm, chấm điểm và đánh giá.
+
+### Core Backend & infrastructure
+- Triển khai Migration thêm bảng `attempts` và `attempt_answers`.
+- Xây dựng Repository, Service và Routes xử lý logic làm bài.
+- Logic auto-grade cho câu hỏi trắc nghiệm và điền ô trống.
+- Cơ chế quản lý thi thử (MOCK_EXAM) với giới hạn thời gian và số lượt.
+
+### Frontend UI & Flow
+- Màn hình chọn chế độ làm bài (Ôn tập, Kiểm tra, Thi thử).
+- Tích hợp Countdown Timer cho chế độ thi thử.
+- Màn hình xem kết quả chi tiết với biểu đồ điểm số và giải thích.
+- Lịch sử làm bài cá nhân của học sinh.
+- Hàng đợi chấm điểm và giao diện chấm điểm tay cho giáo viên.
+
+---
+
 ## Session 27 — i18n Full implementation (2026-05-17) ✅
+...
 
-Đã hoàn thành toàn bộ 30 bước trong plan i18n.
-
-### Phase 1 & 2: Infrastructure & Template markup
-- Cấu hình `@angular/localize/init` vào polyfills và thêm types vào `tsconfig.app.json` (chuẩn Angular CLI).
-- Gắn nhãn `i18n` và `i18n-<attr>` cho toàn bộ templates trong project (~50 files).
-- Sử dụng `$localize` trong TypeScript cho các chuỗi dynamic (toast, confirm, labels).
-- Sanity check repo-wide đảm bảo không còn text tiếng Việt chưa được bọc i18n.
-
-### Phase 3, 4 & 5: Extraction, Configuration & Verification
-- Trích xuất 973 thông điệp vào `messages.xlf`.
-- Tạo `messages.en.xlf` và dịch các chuỗi giao diện chính sang tiếng Anh.
-- Cấu hình `angular.json` hỗ trợ đa ngôn ngữ (vi, en) với baseHref riêng biệt.
-- Thêm script `dev:en` vào `package.json`.
-- Cấu hình Nginx routing hỗ trợ các đường dẫn ngôn ngữ.
-- Build thành công configuration `en`.
 
 ---
 

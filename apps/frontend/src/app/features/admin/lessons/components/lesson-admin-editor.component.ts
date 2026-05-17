@@ -56,8 +56,11 @@ export class LessonAdminEditorComponent implements OnInit {
     topic: ['', [Validators.required, Validators.minLength(2)]],
     difficulty: ['MEDIUM', Validators.required],
     theory: ['', [Validators.required, Validators.minLength(10)]],
-    estimatedMinutes: [30, [Validators.required, Validators.min(5)]],
-    reviewerId: [null],
+    estimatedMinutes: [30, [Validators.required, Validators.min(1)]],
+    timeLimitSec: [0, [Validators.min(0)]],
+    maxAttempts: [0, [Validators.min(0)]],
+    reviewerId: [null as string | null],
+
   });
 
   readonly quillConfig = {
@@ -169,5 +172,9 @@ export class LessonAdminEditorComponent implements OnInit {
         },
       });
     }
+  }
+
+  getInputValue(event: Event): string {
+    return (event.target as HTMLInputElement).value;
   }
 }

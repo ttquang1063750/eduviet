@@ -71,6 +71,38 @@
       </mat-card>
     </div>
 
+    <!-- Recent Results -->
+    <div class="dashboard-section">
+      <div class="section-header">
+        <h2 i18n>Kết quả gần đây</h2>
+        <a routerLink="/my/attempts" class="view-all-link" i18n>Xem tất cả kết quả →</a>
+      </div>
+
+      @if (recentAttempts().length === 0) {
+        <mat-card class="empty-section-card">
+          <mat-card-content i18n>Bạn chưa hoàn thành bài tập nào.</mat-card-content>
+        </mat-card>
+      } @else {
+        <div class="recent-results-grid">
+          @for (att of recentAttempts(); track att.id) {
+            <mat-card class="attempt-card" [routerLink]="['/lessons', att.lessonSlug, 'result', att.id]">
+              <mat-card-content>
+                <div class="attempt-card__header">
+                  <span class="mode-badge">{{ att.mode }}</span>
+                  <span class="date">{{ att.submittedAt | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <h3 class="lesson-title">{{ att.lessonTitle }}</h3>
+                <div class="score-row">
+                  <span class="score-label" i18n>Điểm:</span>
+                  <span class="score-value">{{ att.totalScore ?? 0 }} / {{ att.maxScore }}</span>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      }
+    </div>
+
     <!-- Lớp học và bài học -->
     @if (dashboard()!.classes.length === 0) {
       <mat-card class="empty-card">
