@@ -1,0 +1,102 @@
+<div class="page">
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner-large"></div>
+      <p i18n>Đang tải kết quả...</p>
+    </div>
+  } @else if (result(); as res) {
+    <div class="result-layout">
+      <!-- ── Header: Score Summary ────────────────────────────────────── -->
+      <div class="result-header card">
+        <div class="score-circle" [style.--percent]="scorePercentage()">
+          <div class="score-value">
+            <span class="total">{{ res.totalScore ?? 0 }}</span>
+            <span class="max">/ {{ res.maxScore }}</span>
+          </div>
+          <div class="score-label" i18n>Điểm số</div>
+        </div>
+
+        <div class="result-info">
+          <h1 class="lesson-title">{{ res.lesson?.title }}</h1>
+          <div class="result-badges">
+            <span class="badge badge-mode">{{ res.mode }}</span>
+            <span class="badge badge-status" [class.graded]="res.status === 'GRADED'">
+              {{ res.status === 'GRADED' ? 'Đã chấm' : 'Chờ chấm' }}
+            </span>
+          </div>
+          <p class="submitted-at" i18n>Đã nộp lúc: {{ res.submittedAt | date:'HH:mm dd/MM/yyyy' }}</p>
+        </div>
+
+        <div class="result-actions">
+          @if (res.mode === 'PRACTICE') {
+            <button class="btn btn-primary" [routerLink]="['/lessons', res.lesson?.slug ?? '']" i18n>Làm lại</button>
+          }
+          <a routerLink="/lessons" class="btn btn-outline" i18n>Về danh sách bài học</a>
+        </div>
+      </div>
+
+      <!-- ── Question Breakdown ────────────────────────────────────────── -->
+      <div class="questions-list">
+        @for (ans of res.answers; track ans.id; let i = $index) {
+          <div class="question-card card" [class.correct]="isCorrect(ans)" [class.incorrect]="isIncorrect(ans)" [class.pending]="isPending(ans)">
+            <div class="question-header">
+              <span class="q-number" i18n>Câu {{ i + 1 }}</span>
+              <span class="q-score" i18n>{{ ans.score ?? 0 }} / {{ ans.question?.points }} điểm</span>
+              @if (isCorrect(ans)) {
+                <span class="q-status-badge correct" i18n>Đúng</span>
+              } @else if (isIncorrect(ans)) {
+                <span class="q-status-badge incorrect" i18n>Sai</span>
+              } @else {
+                <span class="q-status-badge pending" i18n>Chờ chấm</span>
+              }
+            </div>
+
+            <div class="q-content">
+              <markdown [data]="ans.question?.content" [inline]="true"></markdown>
+            </div>
+
+            <!-- Student Answer -->
+            <div class="student-answer">
+              <label i18n>Câu trả lời của bạn:</label>
+              @if (ans.question?.type === 'DRAWING') {
+                <img [src]="ans.answer" class="drawing-preview" i18n-alt alt="Student drawing" />
+              }
+ @else if (ans.question?.type === 'MULTIPLE_CHOICE') {
+                <div class="multiple-answers">
+                  @for (id of ans.answer; track id) {
+                    <span class="ans-pill">{{ id }}</span>
+                  }
+                </div>
+              } @else {
+                <div class="text-answer">{{ ans.answer }}</div>
+              }
+            </div>
+
+            <!-- Correct Answer (shown if Practice OR Graded) -->
+            @if (ans.question?.correctAnswer && (res.mode === 'PRACTICE' || res.status === 'GRADED')) {
+              <div class="correct-answer">
+                <label i18n>Đáp án đúng:</label>
+                <div class="answer-box">
+                  <markdown [data]="toMarkdownString(ans.question!.correctAnswer)" [inline]="true"></markdown>
+                </div>
+              </div>
+            }
+
+            <!-- Feedback / Explanation -->
+            @if (ans.feedback || (ans.question?.explanation && res.mode === 'PRACTICE')) {
+              <div class="explanation-box">
+                <h4 i18n>💡 Giải thích & Nhận xét:</h4>
+                <markdown [data]="ans.feedback || ans.question!.explanation"></markdown>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="error-state">
+      <h2 i18n>Không tìm thấy kết quả</h2>
+      <a routerLink="/lessons" i18n>Quay lại danh sách</a>
+    </div>
+  }
+</div>

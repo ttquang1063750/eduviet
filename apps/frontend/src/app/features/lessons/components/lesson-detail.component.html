@@ -2,29 +2,85 @@
   @if (loading()) {
     <div class="loading-state">
       <div class="spinner-large"></div>
-      <p>Đang tải bài học...</p>
+      <p i18n>Đang tải bài học...</p>
     </div>
   } @else if (lesson()) {
-    <div class="lesson-layout">
-      <div class="lesson-header">
-        <div class="lesson-badges">
-          <span
-            class="badge badge-subject"
-            [style.background]="lesson()!.subject.color + '22'"
-            [style.color]="lesson()!.subject.color ?? '#4A90E2'"
-          >
-            {{ lesson()!.subject.name }}
-          </span>
-          <span class="badge difficulty-{{ lesson()!.difficulty.toLowerCase() }}">
-            {{ difficultyLabel(lesson()!.difficulty) }}
-          </span>
-          <span class="badge badge-grade">Lớp {{ lesson()!.grade }}</span>
+    <!-- ── Mode Selector Overlay ──────────────────────────────────────── -->
+    @if (showModeSelector()) {
+      <div class="mode-selector-overlay">
+        <div class="mode-card">
+          <h2 i18n>Chọn chế độ làm bài</h2>
+          <p class="mode-desc" i18n>Vui lòng chọn mục tiêu của bạn cho bài học này.</p>
+          
+          <div class="modes-grid">
+            <button class="mode-item" (click)="startAttempt('PRACTICE')">
+              <span class="mode-icon">🎯</span>
+              <div class="mode-info">
+                <h3 i18n>Ôn tập</h3>
+                <p i18n>Làm bài không giới hạn, xem đáp án ngay sau khi nộp.</p>
+              </div>
+            </button>
+
+            <button class="mode-item" (click)="startAttempt('TEST')">
+              <span class="mode-icon">📝</span>
+              <div class="mode-info">
+                <h3 i18n>Kiểm tra</h3>
+                <p i18n>Lưu điểm số vào học bạ, ẩn đáp án để giáo viên chấm.</p>
+              </div>
+            </button>
+
+            @if (lesson()!.timeLimitSec) {
+              <button class="mode-item" (click)="startAttempt('MOCK_EXAM')">
+                <span class="mode-icon">⏱️</span>
+                <div class="mode-info">
+                  <h3 i18n>Thi thử</h3>
+                  <p i18n>Có giới hạn thời gian ({{ lesson()!.timeLimitSec! / 60 }} phút), chỉ làm {{ lesson()!.maxAttempts || 1 }} lần.</p>
+                </div>
+              </button>
+            }
+          </div>
+          
+          <div class="mode-footer">
+            <a routerLink="/lessons" class="btn-cancel" i18n>Hủy bỏ</a>
+          </div>
         </div>
-        <h1 class="lesson-title">{{ lesson()!.title }}</h1>
-        <div class="lesson-meta">
-          <span>📁 {{ lesson()!.topic }}</span>
-          <span>⏱ {{ lesson()!.estimatedMinutes }} phút học</span>
-          <span>📝 {{ lesson()!.lessonQuestions.length }} bài tập</span>
+      </div>
+    }
+
+    <div class="lesson-layout" [class.blurred]="showModeSelector()">
+      <div class="lesson-header">
+        <div class="header-left">
+          <div class="lesson-badges">
+            <span
+              class="badge badge-subject"
+              [style.background]="lesson()!.subject.color + '22'"
+              [style.color]="lesson()!.subject.color ?? '#4A90E2'"
+            >
+              {{ lesson()!.subject.name }}
+            </span>
+            <span class="badge difficulty-{{ lesson()!.difficulty.toLowerCase() }}">
+              {{ difficultyLabel(lesson()!.difficulty) }}
+            </span>
+            <span class="badge badge-grade">Lớp {{ lesson()!.grade }}</span>
+            @if (activeAttempt()) {
+              <span class="badge badge-mode">{{ activeAttempt()!.mode }}</span>
+            }
+          </div>
+          <h1 class="lesson-title">{{ lesson()!.title }}</h1>
+        </div>
+
+        <div class="header-right">
+          @if (activeAttempt()?.mode === 'MOCK_EXAM' && activeAttempt()?.timeLimitSec) {
+            <app-exam-timer 
+              [timeLimitSec]="activeAttempt()!.timeLimitSec!" 
+              (timeUp)="submitAnswers()" 
+            />
+          }
+          <div class="lesson-meta">
+            <span>📁 {{ lesson()!.topic }}</span>
+            <span>⏱ {{ lesson()!.estimatedMinutes }} phút học</span>
+            <span>📝 {{ lesson()!.lessonQuestions.length }} bài tập</span>
+          </div>
         </div>
       </div>
 
@@ -32,15 +88,9 @@
         <!-- Theory panel -->
         <div class="theory-panel">
           <div class="panel-header">
-            <h2>📖 Lý thuyết</h2>
+            <h2 i18n>📖 Lý thuyết</h2>
           </div>
           <div class="theory-content">
-            <!--
-              KaTeX rendering:
-              - Inline: $...$   →  e.g. "Giải phương trình $ax^2 + bx + c = 0$"
-              - Block:  $$...$$ →  e.g. "$$x = \frac{-b \pm \sqrt{\Delta}}{2a}$$"
-              SecurityContext.NONE được đặt trong app.config.ts để KaTeX HTML không bị Angular sanitizer cắt.
-            -->
             <markdown [data]="lesson()!.theory"></markdown>
           </div>
         </div>
@@ -48,17 +98,17 @@
         <!-- Exercises panel -->
         <div class="exercises-panel">
           <div class="panel-header">
-            <h2>✏️ Bài tập ({{ lesson()!.lessonQuestions.length }})</h2>
+            <h2 i18n>✏️ Bài tập ({{ lesson()!.lessonQuestions.length }})</h2>
           </div>
 
           @for (lq of lesson()!.lessonQuestions; track lq.id; let i = $index) {
             <div class="exercise-card">
-              <div class="exercise-number">Câu {{ i + 1 }}</div>
+              <div class="exercise-number" i18n>Câu {{ i + 1 }}</div>
               <div class="exercise-question">
                 <markdown [data]="lq.question.content" [inline]="true"></markdown>
               </div>
 
-              @if ((lq.question.type === 'SINGLE_CHOICE' || lq.question.type === 'MULTIPLE_CHOICE') && lq.question.options) {
+              @if (lq.question.type === 'SINGLE_CHOICE' && lq.question.options) {
                 <div class="options-list">
                   @for (opt of lq.question.options!; track opt.id; let j = $index) {
                     <label class="option-item" [class.selected]="selectedAnswers()[lq.question.id] === opt.id">
@@ -77,12 +127,30 @@
                 </div>
               }
 
+              @if (lq.question.type === 'MULTIPLE_CHOICE' && lq.question.options) {
+                <div class="options-list">
+                  @for (opt of lq.question.options!; track opt.id; let j = $index) {
+                    <label class="option-item" [class.selected]="(selectedAnswers()[lq.question.id] || []).includes(opt.id)">
+                      <input
+                        type="checkbox"
+                        [checked]="(selectedAnswers()[lq.question.id] || []).includes(opt.id)"
+                        (change)="toggleMultipleAnswer(lq.question.id, opt.id)"
+                      />
+                      <span class="option-label">{{ 'ABCD'[j] }}</span>
+                      <span class="option-text">
+                        <markdown [data]="opt.text" [inline]="true"></markdown>
+                      </span>
+                    </label>
+                  }
+                </div>
+              }
+
               @if (lq.question.type === 'FILL_IN_BLANK') {
                 <div class="fill-blank">
                   <input
                     type="text"
                     class="fill-input"
-                    placeholder="Nhập đáp án của bạn..."
+                    i18n-placeholder placeholder="Nhập đáp án của bạn..."
                     (input)="selectAnswer(lq.question.id, getInputValue($event))"
                   />
                 </div>
@@ -110,16 +178,16 @@
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <polyline points="20 6 9 17 4 12"/>
                       </svg>
-                      Đã lưu bài vẽ
+                      <span i18n>Đã lưu bài vẽ</span>
                     </div>
                   }
                 </div>
               }
 
               <div class="exercise-footer">
-                <span class="points-badge">{{ lq.question.points }} điểm</span>
+                <span class="points-badge" i18n>{{ lq.question.points }} điểm</span>
                 @if (lq.question.hints.length > 0) {
-                  <button class="hint-btn" (click)="toggleHint(lq.question.id)">💡 Gợi ý</button>
+                  <button class="hint-btn" (click)="toggleHint(lq.question.id)" i18n>💡 Gợi ý</button>
                 }
               </div>
 
@@ -131,15 +199,26 @@
             </div>
           }
 
-          <button class="submit-btn" (click)="submitAnswers()">Nộp bài</button>
+          <button 
+            class="submit-btn" 
+            (click)="submitAnswers()" 
+            [disabled]="submitting()"
+            i18n
+          >
+            @if (submitting()) {
+              Đang nộp bài...
+            } @else {
+              Nộp bài
+            }
+          </button>
         </div>
       </div>
     </div>
   } @else {
     <div class="error-state">
       <div class="error-icon">😕</div>
-      <h2>Bài học không tồn tại</h2>
-      <a routerLink="/lessons" class="back-link">← Quay lại danh sách</a>
+      <h2 i18n>Bài học không tồn tại</h2>
+      <a routerLink="/lessons" class="back-link" i18n>← Quay lại danh sách</a>
     </div>
   }
 </div>

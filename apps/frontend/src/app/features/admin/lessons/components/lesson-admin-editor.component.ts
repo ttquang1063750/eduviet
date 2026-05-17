@@ -56,8 +56,11 @@ export class LessonAdminEditorComponent implements OnInit {
     topic: ['', [Validators.required, Validators.minLength(2)]],
     difficulty: ['MEDIUM', Validators.required],
     theory: ['', [Validators.required, Validators.minLength(10)]],
-    estimatedMinutes: [30, [Validators.required, Validators.min(5)]],
-    reviewerId: [null],
+    estimatedMinutes: [30, [Validators.required, Validators.min(1)]],
+    timeLimitSec: [0, [Validators.min(0)]],
+    maxAttempts: [0, [Validators.min(0)]],
+    reviewerId: [null as string | null],
+
   });
 
   readonly quillConfig = {
@@ -117,7 +120,7 @@ export class LessonAdminEditorComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        this.toastService.error(getApiErrorMessage(err));
+        this.toastService.error(getApiErrorMessage(err, $localize`Không thể tải bài học`));
         this.loading.set(false);
         this.router.navigate(['/admin/lessons']);
       },
@@ -142,12 +145,12 @@ export class LessonAdminEditorComponent implements OnInit {
           if (reviewerId) {
             this.lessonsService.assignReviewer(this.lessonId()!, reviewerId).subscribe();
           }
-          this.toastService.success('Đã cập nhật bài học');
+          this.toastService.success($localize`Đã cập nhật bài học`);
           this.saving.set(false);
           this.router.navigate(['/admin/lessons']);
         },
         error: (err) => {
-          this.toastService.error(getApiErrorMessage(err));
+          this.toastService.error(getApiErrorMessage(err, $localize`Cập nhật thất bại`));
           this.saving.set(false);
         },
       });
@@ -159,15 +162,19 @@ export class LessonAdminEditorComponent implements OnInit {
           if (reviewerId) {
             this.lessonsService.assignReviewer(newId, reviewerId).subscribe();
           }
-          this.toastService.success('Đã tạo bài học mới');
+          this.toastService.success($localize`Đã tạo bài học mới`);
           this.saving.set(false);
           this.router.navigate(['/admin/lessons']);
         },
         error: (err) => {
-          this.toastService.error(getApiErrorMessage(err));
+          this.toastService.error(getApiErrorMessage(err, $localize`Tạo bài học thất bại`));
           this.saving.set(false);
         },
       });
     }
+  }
+
+  getInputValue(event: Event): string {
+    return (event.target as HTMLInputElement).value;
   }
 }

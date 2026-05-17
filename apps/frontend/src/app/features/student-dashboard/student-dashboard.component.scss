@@ -259,3 +259,86 @@
     height: 1.2rem;
   }
 }
+
+// ── Recent Results ───────────────────────────────────────────
+.dashboard-section {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+
+  h2 { font-size: 1.15rem; font-weight: 700; margin: 0; color: #111827; }
+  .view-all-link { color: var(--mat-sys-primary, #4a90e2); text-decoration: none; font-weight: 600; font-size: 0.8rem; }
+}
+
+.recent-results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.attempt-card {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 12px !important;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  mat-card-content {
+    padding: 1rem !important;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+
+    .mode-badge {
+      background: #f3f4f6;
+      color: #374151;
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .date { font-size: 0.72rem; color: #9ca3af; }
+  }
+
+  .lesson-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    color: #111827;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    .score-label { font-size: 0.75rem; color: #6b7280; }
+    .score-value { font-weight: 700; color: var(--mat-sys-primary, #4a90e2); font-size: 0.9rem; }
+  }
+}
+
+.empty-section-card {
+  background: #f9fafb !important;
+  color: #9ca3af;
+  text-align: center;
+  font-size: 0.85rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+}

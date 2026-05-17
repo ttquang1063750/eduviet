@@ -29,7 +29,7 @@
 
           <span class="time">{{ msg.createdAt | date:'HH:mm' }}</span>
           @if (msg.senderId === currentUserId()) {
-            <span class="tick" [class.tick--read]="isReadByOther(msg)" [title]="isReadByOther(msg) ? 'Đã xem' : 'Đã gửi'">
+            <span class="tick" [class.tick--read]="isReadByOther(msg)" i18n-title [title]="isReadByOther(msg) ? 'Đã xem' : 'Đã gửi'">
               {{ isReadByOther(msg) ? '✓✓' : '✓' }}
             </span>
           }
@@ -37,7 +37,7 @@
       </div>
     } @empty {
       <div class="empty-thread">
-        <p>Bắt đầu cuộc trò chuyện...</p>
+        <p i18n>Bắt đầu cuộc trò chuyện...</p>
       </div>
     }
 
@@ -54,7 +54,7 @@
   <!-- Upload progress -->
   @if (isUploading()) {
     <div class="upload-progress">
-      <span class="upload-progress__text">Đang tải file lên...</span>
+      <span class="upload-progress__text" i18n>Đang tải file lên...</span>
       <div class="upload-progress__bar">
         <div class="upload-progress__fill"></div>
       </div>
@@ -77,7 +77,7 @@
       class="btn-attach"
       [disabled]="isUploading()"
       (click)="attachFile()"
-      title="Đính kèm file"
+      i18n-title title="Đính kèm file"
     >
       📎
     </button>
@@ -88,7 +88,7 @@
       [ngModel]="messageContent()"
       (ngModelChange)="messageContent.set($event)"
       (input)="onTyping($event)"
-      placeholder="Nhập tin nhắn..."
+      i18n-placeholder placeholder="Nhập tin nhắn..."
       autocomplete="off"
       [disabled]="isUploading()"
     >

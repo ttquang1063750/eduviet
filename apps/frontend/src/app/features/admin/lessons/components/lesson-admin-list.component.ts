@@ -54,12 +54,12 @@ export class LessonAdminListComponent implements OnInit {
   readonly totalPages = computed(() => Math.ceil(this.total() / this.perPage));
 
   readonly statusLabels: Record<string, string> = {
-    DRAFT: 'Bản nháp',
-    IN_REVIEW: 'Đang chờ duyệt',
-    APPROVED: 'Đã duyệt',
-    PUBLISHED: 'Đã xuất bản',
-    REJECTED: 'Bị từ chối',
-    ARCHIVED: 'Lưu trữ',
+    DRAFT: $localize`Bản nháp`,
+    IN_REVIEW: $localize`Đang chờ duyệt`,
+    APPROVED: $localize`Đã duyệt`,
+    PUBLISHED: $localize`Đã xuất bản`,
+    REJECTED: $localize`Bị từ chối`,
+    ARCHIVED: $localize`Lưu trữ`,
   };
 
   ngOnInit() {
@@ -122,18 +122,20 @@ export class LessonAdminListComponent implements OnInit {
 
   async submitReview(lesson: LessonListItem) {
     const confirmed = await this.confirmService.confirm({
-      title: 'Gửi duyệt',
-      message: 'Bạn có chắc muốn gửi bài học này đi duyệt?',
-      confirmText: 'Gửi duyệt',
+      title: $localize`Gửi duyệt`,
+      message: $localize`Bạn có chắc muốn gửi bài học này đi duyệt?`,
+      confirmText: $localize`Gửi duyệt`,
     });
     if (!confirmed) return;
 
     this.lessonsService.submitReview(lesson.id).subscribe({
       next: () => {
-        this.toastService.success('Đã gửi duyệt bài học');
+        this.toastService.success($localize`Đã gửi duyệt bài học`);
         this.loadLessons();
       },
-      error: (err: unknown) => this.toastService.error(getApiErrorMessage(err)),
+      error: (err: unknown) => {
+        this.toastService.error(getApiErrorMessage(err, $localize`Gửi duyệt thất bại`));
+      },
     });
   }
 

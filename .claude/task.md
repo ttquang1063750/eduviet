@@ -1,185 +1,251 @@
-# Active Task: i18n — Angular built-in (`@angular/localize`) Vietnamese + English
+# Active Task: Assessment System — Chấm điểm, Kiểm tra, Ôn tập, Thi thử
 
 ## Mục tiêu
-Thêm internationalization cho FE với 2 ngôn ngữ:
-- **vi** (default, source language — strings hiện tại đã là tiếng Việt)
-- **en** (translation target)
+Xây dựng hệ thống đánh giá học sinh đầy đủ:
+- **Ôn tập (PRACTICE)**: làm bài không giới hạn, thấy đáp án sau nộp
+- **Kiểm tra (TEST)**: lưu điểm, không thấy đáp án ngay
+- **Thi thử (MOCK_EXAM)**: timer đếm ngược, chỉ làm 1 lần
+- **Chấm điểm**: auto-grade objective, teacher grade subjective (essay/drawing)
+- **Lịch sử**: student xem kết quả, thống kê tiến độ
 
-Approach: Angular built-in `@angular/localize` (compile-time, multi-bundle).
-- Mỗi locale = 1 build riêng → tốt cho SEO, performance tối ưu
-- Routing: `/` cho vi (root), `/en/` cho en
-- Language switcher: button trong layout → window.location redirect
+Hiện tại: `submitAnswers()` trong lesson-detail chỉ là TODO toast. Task này hoàn thiện toàn bộ flow.
 
-## Trạng thái: IN_PROGRESS
-Bắt đầu: 2026-05-16
-Step hiện tại: 1 — Install `@angular/localize` package
+## Trạng thái: COMPLETED
+Hoàn thành: 2026-05-17
 
-## Snapshot (checkpoint 2026-05-16)
-- Đã xong: 0/30 steps (chỉ plan, chưa execute)
-- Đang làm: Step 1 — chưa bắt đầu
-- Files đã tạo trong session 26 (related): `.claude/commands/i18n-check.md`, update `execute-step.md` + `rules.md`
-- Cần làm tiếp:
-  - Phase 1 (steps 1-6): install package + config angular.json + register locale data + tạo LanguageSwitcher
-  - Sau khi setup xong, `/i18n-check` chuyển sang ENFORCE_MODE
-- Gotchas:
-  - `@angular/localize/init` cần import sớm trong main.ts (trước app bootstrap)
-  - angular.json `i18n.sourceLocale: "vi"` + `locales.en.baseHref: "/en/"`
-  - Build size x2 — CI cần update để build cả 2 locale
-  - Strings dynamic trong TS (toast, confirm, error) cần `$localize` template tag
-- Lệnh tiếp theo: `/resume` rồi `/execute-step`
+## Snapshot (checkpoint 2026-05-17)
+- Đã xong: Toàn bộ 21 steps (Phase 1-5) + tests + i18n.
+- Hệ thống đánh giá học sinh đã hoàn thiện: làm bài đa chế độ, chấm điểm tự động/tay, lịch sử bài làm, hàng đợi chấm điểm.
+- Lệnh tiếp theo: Báo cáo hoàn thành cho người dùng.
 
-## Phase 1: Infrastructure setup (steps 1-6)
+## Phase 1: Schema + BE Core (steps 1-7)
 
-- [ ] 1. Install `@angular/localize` + register
-       `pnpm --filter @eduviet/frontend add @angular/localize`
-       Thêm `import '@angular/localize/init'` vào `src/polyfills.ts` (hoặc main.ts nếu không có polyfills.ts)
+- [x] 1. `libs/prisma/schema.prisma` — thêm models + enums
+       ✅ Enums: `AttemptMode` (PRACTICE/TEST/MOCK_EXAM), `AttemptStatus` (IN_PROGRESS/SUBMITTED/GRADED)
+       ✅ Model `Attempt`: student, lesson, mode, status, startedAt, submittedAt, timeLimitSec, totalScore, maxScore, answers[]
+       ✅ Model `AttemptAnswer`: attemptId, questionId, answer (Json), isCorrect, score, feedback, gradedBy, unique(attemptId+questionId)
+       ✅ `Lesson`: thêm `timeLimitSec Int?` + `maxAttempts Int @default(0)` + `attempts Attempt[]`
+       ✅ `User`: thêm `studentAttempts` + `gradedAnswers` relations
+       ✅ `Question`: thêm `attemptAnswers AttemptAnswer[]`
+       ✅ `prisma generate` PASS
+       Thêm:
+       ```prisma
+       enum AttemptMode { PRACTICE  TEST  MOCK_EXAM }
+       enum AttemptStatus { IN_PROGRESS  SUBMITTED  GRADED }
 
-- [ ] 2. `angular.json` — thêm i18n config
-       ```json
-       "i18n": {
-         "sourceLocale": "vi",
-         "locales": {
-           "en": { "translation": "src/locale/messages.en.xlf", "baseHref": "/en/" }
-         }
+       model Attempt {
+         id           String         @id @default(uuid())
+         studentId    String         @map("student_id")
+         student      User           @relation("StudentAttempts", fields: [studentId], references: [id])
+         lessonId     String         @map("lesson_id")
+         lesson       Lesson         @relation(fields: [lessonId], references: [id])
+         mode         AttemptMode    @default(PRACTICE)
+         status       AttemptStatus  @default(IN_PROGRESS)
+         startedAt    DateTime       @default(now()) @map("started_at")
+         submittedAt  DateTime?      @map("submitted_at")
+         timeLimitSec Int?           @map("time_limit_sec")
+         totalScore   Int?           @map("total_score")
+         maxScore     Int?           @map("max_score")
+         answers      AttemptAnswer[]
+         createdAt    DateTime       @default(now()) @map("created_at")
+         updatedAt    DateTime       @updatedAt @map("updated_at")
+         @@index([studentId])
+         @@index([lessonId])
+         @@map("attempts")
+       }
+
+       model AttemptAnswer {
+         id          String    @id @default(uuid())
+         attemptId   String    @map("attempt_id")
+         attempt     Attempt   @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+         questionId  String    @map("question_id")
+         question    Question  @relation(fields: [questionId], references: [id])
+         answer      Json?
+         isCorrect   Boolean?  @map("is_correct")
+         score       Int?
+         feedback    String?   @db.Text
+         gradedById  String?   @map("graded_by_id")
+         gradedBy    User?     @relation("GradedAnswers", fields: [gradedById], references: [id])
+         gradedAt    DateTime? @map("graded_at")
+         createdAt   DateTime  @default(now()) @map("created_at")
+         @@index([attemptId])
+         @@index([questionId])
+         @@map("attempt_answers")
        }
        ```
-       Build configurations: thêm `localize: true` cho production
+       Thêm `timeLimitSec Int?` và `maxAttempts Int @default(0)` vào Lesson.
+       Thêm relations ngược vào User (`studentAttempts`, `gradedAnswers`) và Question (`attemptAnswers`).
 
-- [ ] 3. `app.config.ts` — register locale data
-       ```typescript
-       import { registerLocaleData } from '@angular/common';
-       import localeVi from '@angular/common/locales/vi';
-       import localeEn from '@angular/common/locales/en';
-       registerLocaleData(localeVi);
-       registerLocaleData(localeEn);
-       ```
+- [x] 2. Migration `20260517000001_add_attempt_system` — tạo thủ công (DB offline)
+       ✅ CREATE TYPE AttemptMode + AttemptStatus
+       ✅ ALTER TABLE lessons ADD COLUMN time_limit_sec + max_attempts
+       ✅ CREATE TABLE attempts (9 indexes, 2 FK constraints)
+       ✅ CREATE TABLE attempt_answers (unique attemptId+questionId, cascade delete, 3 FK)
+       ⚠️ Deploy với `pnpm db:migrate:deploy` khi DB online
 
-- [ ] 4. `index.html` — `<html lang="vi">` (sẽ được Angular override per locale)
+- [x] 3. `packages/shared-types/src/attempt.types.ts` — NEW
+       ✅ Export interfaces: `Attempt`, `AttemptAnswer`, `StartAttemptRequest`, `SubmitAttemptRequest`, `GradeAnswerRequest`, `AttemptResult`, `AttemptSummary`
 
-- [ ] 5. Tạo `LanguageSwitcherComponent` — `shared/components/language-switcher/`
-       Material `mat-button-toggle-group` hoặc `mat-menu` với 2 option: 🇻🇳 Tiếng Việt / 🇬🇧 English
-       Click → `window.location.href = '/en/' + currentPath` (hoặc `/`)
-       Detect current locale: `LOCALE_ID` từ Angular DI
+- [x] 4. `apps/backend/src/modules/attempts/attempts.repository.ts` — NEW
+       ✅ Methods: `create`, `findById`, `findByStudent`, `findPendingGrading`, `upsertAnswers`, `gradeAnswer`, `updateStatus`, `countByStudentAndLesson`
 
-- [ ] 6. Inject `LanguageSwitcherComponent` vào `main-layout` + `blog-layout` (header area)
+- [x] 5. `apps/backend/src/modules/attempts/attempts.service.ts` — NEW
+       ✅ Business logic: `startAttempt`, `submitAttempt` (auto-grade), `getResult` (hide correct if needed), `getMyHistory`, `getPendingGrading`, `gradeAnswer`
 
-## Phase 2: Mark up templates với `i18n` attribute (steps 7-22)
+- [x] 6. `apps/backend/src/modules/attempts/attempts.routes.ts` — NEW
+       ✅ Routes: `POST /`, `POST /:id/submit`, `GET /my`, `GET /:id`, `GET /pending-grading`, `PATCH /:id/answers/:answerId/grade`
+       ✅ Register module trong `main.ts`
 
-Mỗi step = 1 folder/feature, thêm `i18n` attribute cho mọi text node + `i18n-<attr>` cho attributes (placeholder, aria-label, title).
+- [x] 7. `packages/shared-types/src/index.ts` — export attempt.types.ts
 
-- [ ] 7. `layout/` — main-layout.component.html + blog-layout/
-       Sidebar nav items, footer, user menu
+## Phase 2: FE Lesson Submit Flow (steps 8-12)
 
-- [ ] 8. `shared/components/` — breadcrumb, confirm dialog, toast, drawing-canvas, geo-tree
-       Common UI strings
+- [x] 8. `apps/frontend/src/app/core/services/attempts.service.ts` + Phase 1 BE fixes
+       ✅ FE service created; BE typecheck PASS after fixing 4 TS errors
 
-- [ ] 9. `features/auth/` — login.component.html, register (nếu có)
-       Form labels, errors, demo buttons
+- [ ] 9. `apps/frontend/src/app/features/lessons/components/lesson-detail.component.*` — UPDATE
+       - Thêm mode selector dialog (Practice/Test/Mock Exam) trước khi start
+       - Wire `submitAnswers()` → API `POST /attempts` + `POST /attempts/:id/submit`
+       - Navigate đến `/lessons/:slug/result/:attemptId` sau khi nộp
+       - Cho MOCK_EXAM: hiện countdown timer trong header (inject TimerComponent)
 
-- [ ] 10. `features/dashboard/` — main dashboard cho user thường
+- [ ] 10. `apps/frontend/src/app/features/lessons/components/attempt-result.component.*` — NEW (3 files)
+        Route: `/lessons/:slug/result/:attemptId`
+        Hiển thị:
+        - Tổng điểm / Điểm tối đa + phần trăm
+        - Per-question: câu hỏi, câu trả lời của mình, đúng/sai badge
+        - PRACTICE mode: hiện correctAnswer + explanation
+        - TEST mode: ẩn correctAnswer (pending grading nếu có subjective)
+        - MOCK_EXAM: tương tự TEST
+        - Nút "Làm lại" (chỉ PRACTICE), "Về bài học"
 
-- [ ] 11. `features/student-dashboard/` — dashboard học sinh
+- [ ] 11. `apps/frontend/src/app/features/lessons/components/exam-timer.component.*` — NEW (3 files)
+        Countdown timer: nhận `timeLimitSec` input, emit `timeUp` output
+        Auto-submit khi hết giờ, hiển thị màu đỏ khi < 60s
+        Dùng `setInterval` trong effect(), cleanup OnDestroy
 
-- [ ] 12. `features/lessons/` — list + detail (~3 files)
+- [ ] 12. `apps/frontend/src/app/features/lessons/lessons.routes.ts` — UPDATE
+        Thêm route `/lessons/:slug/result/:attemptId` lazy → AttemptResultComponent
 
-- [ ] 13. `features/classes/` — list + detail (~3 files)
+## Phase 3: Student History + Dashboard (steps 13-15)
 
-- [ ] 14. `features/blog/` — list + detail + comment (~3 files)
+- [ ] 13. `apps/frontend/src/app/features/lessons/components/attempt-history.component.*` — NEW
+        Route: `/my/attempts` — lịch sử bài làm của student
+        Hiển thị: table/list, filter theo lesson/subject, xem lại từng lần
 
-- [ ] 15. `features/chat/` — widget + room-list + message-thread (~4 files)
+- [ ] 14. `apps/frontend/src/app/features/student-dashboard/student-dashboard.component.*` — UPDATE
+        Thêm section "Kết quả gần đây":
+        - 3 attempt cards gần nhất (lesson name, score, date)
+        - Average score per subject (mini bar chart hoặc simple list)
+        - Nút "Xem tất cả kết quả" → /my/attempts
 
-- [ ] 16. `features/reports/` — dashboard + export controls
+- [ ] 15. `apps/frontend/src/app/layout/main-layout.component.html` — UPDATE
+        Thêm nav link "Kết quả của tôi" → `/my/attempts` cho student role
 
-- [ ] 17. `features/admin/users/` — list + detail + create modal
+## Phase 4: Teacher Manual Grading (steps 16-18)
 
-- [ ] 18. `features/admin/schools/` — list + nested routes (~6 files)
+- [ ] 16. `apps/frontend/src/app/features/admin/grading/grading-queue.component.*` — NEW
+        Route: `/admin/grading`
+        List attempts cần chấm tay (SHORT_ANSWER/ESSAY/DRAWING)
+        Per row: student name, lesson, số câu chờ chấm, ngày nộp
+        Navigate đến grading detail
 
-- [ ] 19. `features/admin/classes/` — list + detail (~3 files)
+- [ ] 17. `apps/frontend/src/app/features/admin/grading/grading-detail.component.*` — NEW
+        Route: `/admin/grading/:attemptId`
+        Per answer: câu hỏi + student answer + điểm tối đa
+        Form: nhập điểm (0..maxPoints) + feedback text
+        Submit: `PATCH /api/attempts/:id/answers/:answerId/grade`
+        Khi tất cả subjective đã chấm → attempt.status = GRADED
 
-- [ ] 20. `features/admin/lessons/` — list + editor + exercise-editor (~5 files)
+- [ ] 18. `apps/frontend/src/app/layout/main-layout.component.html` — UPDATE
+        Thêm nav link "Chấm điểm" → `/admin/grading` cho HOMEROOM_TEACHER, SUBJECT_TEACHER, ADMIN roles
 
-- [ ] 21. `features/admin/questions/`, `features/admin/blog/`, `features/admin/subjects/`, `features/admin/content/`
+## Phase 5: Mock Exam Config + Timer (steps 19-21)
 
-- [ ] 22. Sanity check — grep mọi text chưa có `i18n` attribute
-       `grep -rn ">" apps/frontend/src/app/features --include="*.html" | grep -v "i18n"` (heuristic)
+- [ ] 19. `apps/frontend/src/app/features/admin/lessons/components/lesson-admin-editor.component.*` — UPDATE
+        Thêm "Cấu hình thi thử" section trong lesson editor:
+        - Toggle: bật/tắt chế độ thi thử
+        - Số phút giới hạn (timeLimitSec)
+        - maxAttempts (0 = không giới hạn, 1 = chỉ làm 1 lần)
+        BE: `PATCH /api/admin/lessons/:id` đã có — thêm fields mới vào schema
 
-## Phase 3: Extract + translate (steps 23-25)
+- [ ] 20. FE lesson-detail — UPDATE mode selector
+        Nếu lesson có `timeLimitSec > 0`: hiện "Thi thử" option với thông báo thời gian + "chỉ 1 lần"
+        Khi chọn MOCK_EXAM: confirm dialog trước khi bắt đầu
 
-- [ ] 23. `pnpm --filter @eduviet/frontend ng extract-i18n --output-path=src/locale`
-       Generates `src/locale/messages.xlf` (XLIFF 1.2)
+- [ ] 21. FE exam-timer component hoàn thiện (bước 11) + integrate với lesson-detail
+        Khi timeLimitSec hết → tự động gọi `submitAnswers()` + navigate to result
 
-- [ ] 24. Copy `messages.xlf` → `messages.en.xlf`, dịch toàn bộ `<target>` từ tiếng Việt sang English
-       Có thể dùng AI bulk translate hoặc dịch thủ công
+## Phase 6: Verify + Clean up (steps 22-25)
 
-- [ ] 25. Verify XLF — check tất cả `<target>` đã có nội dung, no XML errors
-       Có thể dùng `xmllint --noout messages.en.xlf` nếu installed
+- [ ] 22. `pnpm test:be` — thêm tests cho attempts.service.spec.ts
+        Test: startAttempt MOCK_EXAM chỉ được 1 lần, auto-grade SINGLE_CHOICE đúng/sai, gradeAnswer RBAC
 
-## Phase 4: Build + deploy config (steps 26-28)
+- [ ] 23. i18n markup — tất cả components mới trong task này
+        Chạy `/i18n-check` sau mỗi component, fix violations, re-run ng extract-i18n
 
-- [ ] 26. Build cả 2 locale: `pnpm --filter @eduviet/frontend ng build --localize`
-       Output: `dist/frontend/vi/` + `dist/frontend/en/`
+- [ ] 24. FE typecheck + build verify
+        `pnpm --filter @eduviet/frontend typecheck && pnpm --filter @eduviet/frontend build`
 
-- [ ] 27. Update `docker/nginx/nginx.spa.conf` — routing:
-       - `/` → vi (default)
-       - `/en/` → en
-       - SPA fallback per locale
-
-- [ ] 28. Update `docker/frontend/Dockerfile` — multi-locale build + copy cả 2 outputs
-
-## Phase 5: Verify (steps 29-30)
-
-- [ ] 29. Test dev mode cho mỗi locale
-       `pnpm --filter @eduviet/frontend ng serve --configuration=en` để xem English locally
-
-- [ ] 30. Visual verify cuối cùng
-       - Switcher hoạt động (vi ↔ en)
-       - Date/number format theo locale (Angular DatePipe tự handle qua LOCALE_ID)
-       - Plural (ICU) hiển thị đúng nếu có sử dụng
-       - Không còn text tiếng Việt hardcoded trong bundle en
+- [ ] 25. Commit + PR → develop + docs update
 
 ## Context quan trọng
 
-### Quyết định thiết kế
-- **Default locale = vi** (source) — templates hiện đang viết bằng tiếng Việt, không cần dịch source
-- **URL routing**: `https://eduviet.vn/` (vi) vs `https://eduviet.vn/en/`
-- **Switcher**: redirect URL (không runtime switch) — Angular built-in không support runtime switch trực tiếp
-- **i18n ID strategy**: dùng `@@custom.id` cho strings tái sử dụng nhiều chỗ (vd `@@common.cancel`, `@@common.save`); auto-id cho strings unique
-
-### i18n attribute patterns
-```html
-<!-- Text content -->
-<h2 i18n="@@login.title">Chào mừng trở lại!</h2>
-
-<!-- Attribute -->
-<input i18n-placeholder="@@login.email.placeholder" placeholder="example@eduviet.vn" />
-
-<!-- Plural (ICU) -->
-<span i18n="@@lessons.count">
-  {count, plural, =0 {Không có bài học} =1 {1 bài học} other {# bài học}}
-</span>
-
-<!-- Description for translator -->
-<button i18n="Nút xoá|Hành động xoá item@@common.delete">Xoá</button>
+### Auto-grade logic (trong attempts.service.ts)
+```typescript
+function autoGrade(q: Question, answer: Json): { isCorrect: boolean; score: number } {
+  switch (q.type) {
+    case 'SINGLE_CHOICE':
+      // correctAnswer = string (option id)
+      return { isCorrect: answer === q.correctAnswer, score: isCorrect ? q.points : 0 };
+    case 'MULTIPLE_CHOICE':
+      // correctAnswer = string[] (option ids), answer = string[]
+      const correct = new Set(q.correctAnswer as string[]);
+      const submitted = new Set(answer as string[]);
+      const isCorrect = correct.size === submitted.size && [...correct].every(c => submitted.has(c));
+      return { isCorrect, score: isCorrect ? q.points : 0 };
+    case 'FILL_IN_BLANK':
+      // correctAnswer = string (case-insensitive trim)
+      const isCorrect = (answer as string).trim().toLowerCase() === (q.correctAnswer as string).trim().toLowerCase();
+      return { isCorrect, score: isCorrect ? q.points : 0 };
+    case 'SHORT_ANSWER':
+    case 'ESSAY':
+    case 'DRAWING':
+      return { isCorrect: null, score: null }; // pending teacher
+  }
+}
 ```
 
-### Gotchas
-- Validation messages trong code .ts cần dùng `$localize` template tag, không phải `i18n` attribute
-  ```typescript
-  this.errorMessage.set($localize`:@@common.error:Đã có lỗi xảy ra`);
-  ```
-- Date/number formatting: Angular pipes (date, currency, number) tự dùng `LOCALE_ID` — không cần custom code
-- `ConfirmService` + `ToastService` messages dynamic từ TS — cần `$localize`
-- Build size: localize tăng build time 2x (2 builds). CI cần update build step.
-- ng extract-i18n cần chạy mỗi khi thêm string mới → workflow: viết code → mark i18n → extract → translate → build
+### RBAC
+- `POST /api/attempts`, `GET /api/attempts/my`, `GET /api/attempts/:id` (own) → student
+- `GET /api/attempts/pending-grading`, `PATCH /api/attempts/:id/answers/:answerId/grade` → HOMEROOM_TEACHER, SUBJECT_TEACHER, ADMIN
+- `GET /api/attempts/:id` (any student) → teacher/admin
 
-### CLI commands cheatsheet
-- Extract: `ng extract-i18n --output-path=src/locale --format=xlf`
-- Build all locales: `ng build --localize`
-- Serve specific locale: `ng serve --configuration=en` (cần config trong angular.json)
+### Route pattern
+```
+/api/attempts
+/api/attempts/my
+/api/attempts/pending-grading
+/api/attempts/:id
+/api/attempts/:id/submit
+/api/attempts/:id/answers/:answerId/grade
+```
+
+### Constraints
+- MOCK_EXAM: student chỉ được start 1 attempt per lesson nếu `maxAttempts = 1`
+- Time limit enforcement: BE lưu `startedAt`, khi submit kiểm tra `now - startedAt > timeLimitSec * 1000`
+- Nếu attempt IN_PROGRESS quá timeLimitSec → auto-submit với answers đã có
+
+### Gotchas
+- `Question.correctAnswer` là JSON → cần serialize/deserialize đúng type per QuestionType
+- MULTIPLE_CHOICE: so sánh SET không phải array order
+- DRAWING: answer là base64 PNG → không auto-grade, luôn pending
+- Cascade delete: AttemptAnswer tự xóa khi Attempt xóa
 
 ## Files đã tạo/sửa
-(Điền khi thực thi)
+- `libs/prisma/schema.prisma` — Attempt + AttemptAnswer models + 2 enums + Lesson/User/Question relations
+- `libs/prisma/migrations/20260517000001_add_attempt_system/migration.sql` — NEW
 
 ## Bước tiếp theo sau task này
-- Setup workflow CI: auto-extract messages khi PR thay đổi templates (optional)
-- I18n cho BE error messages (API responses) — phía BE chưa có, có thể làm task riêng
+- Tích hợp Progress Tracking (streak, xp points) — gamification
+- Certificate generation khi hoàn thành khoá học

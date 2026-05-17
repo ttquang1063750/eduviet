@@ -1,7 +1,7 @@
 @if (loading()) {
-  <div class="loading-state"><div class="spinner"></div><p>Đang tải bài viết...</p></div>
+  <div class="loading-state"><div class="spinner"></div><p i18n>Đang tải bài viết...</p></div>
 } @else if (error()) {
-  <div class="error-state"><p>{{ error() }}</p><a routerLink="/blog" class="btn btn--outline">← Quay lại Blog</a></div>
+  <div class="error-state"><p>{{ error() }}</p><a routerLink="/blog" class="btn btn--outline" i18n>← Quay lại Blog</a></div>
 } @else if (post(); as p) {
   <div class="detail-layout">
 
@@ -26,9 +26,9 @@
             <span class="meta-sep">·</span>
             <span class="meta-date">{{ p.publishedAt | date:'dd/MM/yyyy' }}</span>
             <span class="meta-sep">·</span>
-            <span>{{ totalComments() }} bình luận</span>
+            <span i18n>{{ totalComments() }} bình luận</span>
             <span class="meta-sep">·</span>
-            <span>👁 {{ p.viewCount | number }} lượt xem</span>
+            <span i18n>👁 {{ p.viewCount | number }} lượt xem</span>
           </div>
         </header>
 
@@ -37,7 +37,7 @@
         <!-- Related posts -->
         @if (relatedPosts().length > 0) {
           <section class="related-section">
-            <h3 class="related-title">Bài viết liên quan</h3>
+            <h3 class="related-title" i18n>Bài viết liên quan</h3>
             <div class="related-grid">
               @for (rp of relatedPosts(); track rp.id) {
                 <a [routerLink]="['/blog', rp.slug]" class="related-card">
@@ -58,26 +58,30 @@
 
         <!-- Comments -->
         <section class="comments-section">
-          <h2 class="comments-title">Bình luận ({{ totalComments() }})</h2>
+          <h2 class="comments-title" i18n>Bình luận ({{ totalComments() }})</h2>
 
           @if (isLoggedIn()) {
             <form class="comment-form" [formGroup]="commentForm" (ngSubmit)="submitComment()">
               <textarea
                 formControlName="content"
                 class="comment-textarea"
-                placeholder="Viết bình luận của bạn..."
+                i18n-placeholder placeholder="Viết bình luận của bạn..."
                 rows="3"
               ></textarea>
               <button type="submit" class="btn btn--primary" [disabled]="commentForm.invalid || submitting()">
-                {{ submitting() ? 'Đang gửi...' : 'Gửi bình luận' }}
+                @if (submitting()) {
+                  <span i18n>Đang gửi...</span>
+                } @else {
+                  <span i18n>Gửi bình luận</span>
+                }
               </button>
             </form>
           } @else {
-            <p class="login-prompt"><a routerLink="/auth/login">Đăng nhập</a> để bình luận.</p>
+            <p class="login-prompt" i18n><a routerLink="/auth/login">Đăng nhập</a> để bình luận.</p>
           }
 
           @if (p.comments.length === 0) {
-            <p class="no-comments">Chưa có bình luận nào. Hãy là người đầu tiên!</p>
+            <p class="no-comments" i18n>Chưa có bình luận nào. Hãy là người đầu tiên!</p>
           } @else {
             <div class="comments-list">
               @for (comment of p.comments; track comment.id) {
@@ -88,17 +92,21 @@
                   </div>
                   <p class="comment__content">{{ comment.content }}</p>
                   @if (isLoggedIn()) {
-                    <button class="reply-btn" (click)="startReply(comment.id)">Trả lời</button>
+                    <button class="reply-btn" (click)="startReply(comment.id)" i18n>Trả lời</button>
                   }
                   @if (replyingTo() === comment.id) {
                     <form class="reply-form" [formGroup]="replyForm" (ngSubmit)="submitReply(comment.id)">
                       <textarea formControlName="content" class="comment-textarea comment-textarea--sm"
-                        placeholder="Viết trả lời..." rows="2"></textarea>
+                        i18n-placeholder placeholder="Viết trả lời..." rows="2"></textarea>
                       <div class="reply-actions">
                         <button type="submit" class="btn btn--primary btn--sm" [disabled]="replyForm.invalid || submitting()">
-                          {{ submitting() ? 'Đang gửi...' : 'Trả lời' }}
+                          @if (submitting()) {
+                            <span i18n>Đang gửi...</span>
+                          } @else {
+                            <span i18n>Trả lời</span>
+                          }
                         </button>
-                        <button type="button" class="btn btn--outline btn--sm" (click)="cancelReply()">Hủy</button>
+                        <button type="button" class="btn btn--outline btn--sm" (click)="cancelReply()" i18n>Hủy</button>
                       </div>
                     </form>
                   }
@@ -126,9 +134,9 @@
     <!-- ── Sidebar phải ────────────────────────────────────────────────── -->
     <aside class="detail-sidebar">
       <div class="sidebar-card">
-        <h4 class="sidebar-card__title">🔥 Đọc nhiều nhất</h4>
+        <h4 class="sidebar-card__title" i18n>🔥 Đọc nhiều nhất</h4>
         @if (topViewed().length === 0) {
-          <p class="sidebar-empty">Chưa có dữ liệu</p>
+          <p class="sidebar-empty" i18n>Chưa có dữ liệu</p>
         } @else {
           <ol class="top-viewed-list">
             @for (tp of topViewed(); track tp.id; let i = $index) {
@@ -136,7 +144,7 @@
                 <span class="top-viewed-item__rank">{{ i + 1 }}</span>
                 <a [routerLink]="['/blog', tp.slug]" class="top-viewed-item__link">
                   <span class="top-viewed-item__title">{{ tp.title }}</span>
-                  <span class="top-viewed-item__views">👁 {{ tp.viewCount | number }}</span>
+                  <span class="top-viewed-item__views" i18n>👁 {{ tp.viewCount | number }}</span>
                 </a>
               </li>
             }

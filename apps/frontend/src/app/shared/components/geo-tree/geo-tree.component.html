@@ -1,12 +1,12 @@
 @if (loading()) {
   <div class="geo-tree__loading">
     <span class="geo-tree__spinner"></span>
-    <span>Đang tải...</span>
+    <span i18n>Đang tải...</span>
   </div>
 }
 
 @if (!loading() && nodes().length === 0) {
-  <p class="geo-tree__empty">Không có dữ liệu địa lý.</p>
+  <p class="geo-tree__empty" i18n>Không có dữ liệu địa lý.</p>
 }
 
 <ul class="geo-tree__list" role="tree">

@@ -1,12 +1,12 @@
 <section class="class-list-page">
   <header class="page-header">
-    <h1 class="page-title">Danh sách lớp học</h1>
+    <h1 class="page-title" i18n>Danh sách lớp học</h1>
     <span class="page-subtitle">{{ total() }} lớp học</span>
   </header>
 
   <div class="filter-bar" [formGroup]="filterForm">
     <select formControlName="grade" class="filter-select">
-      <option value="">Tất cả khối</option>
+      <option value="" i18n>Tất cả khối</option>
       @for (g of grades; track g) {
         <option [value]="g">Khối {{ g }}</option>
       }
@@ -15,18 +15,18 @@
     <input
       formControlName="academicYear"
       class="filter-input"
-      placeholder="Năm học (vd: 2024-2025)"
+      i18n-placeholder placeholder="Năm học (vd: 2024-2025)"
     />
   </div>
 
   @if (loading()) {
     <div class="loading-state">
       <div class="spinner"></div>
-      <p>Đang tải danh sách lớp...</p>
+      <p i18n>Đang tải danh sách lớp...</p>
     </div>
   } @else if (classes().length === 0) {
     <div class="empty-state">
-      <p>Không có lớp học nào.</p>
+      <p i18n>Không có lớp học nào.</p>
     </div>
   } @else {
     <div class="class-grid">

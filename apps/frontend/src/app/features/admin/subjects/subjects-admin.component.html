@@ -3,12 +3,12 @@
   <!-- Header -->
   <div class="page-header">
     <div>
-      <h2 class="page-header__title">Quản lý môn học</h2>
-      <p class="page-header__sub text-muted">{{ subjects().length }} môn / {{ subjects().length + availableCodes().length }} tổng</p>
+      <h2 class="page-header__title" i18n>Quản lý môn học</h2>
+      <p class="page-header__sub text-muted" i18n>{{ subjects().length }} môn / {{ subjects().length + availableCodes().length }} tổng</p>
     </div>
     @if (availableCodes().length > 0) {
       <button mat-flat-button color="primary" (click)="openCreate()">
-        <mat-icon>add</mat-icon> Thêm môn học
+        <mat-icon>add</mat-icon> <span i18n>Thêm môn học</span>
       </button>
     }
   </div>
@@ -16,7 +16,7 @@
   <!-- Loading -->
   @if (loading()) {
     <div class="loading-state">
-      <p>Đang tải danh sách môn học...</p>
+      <p i18n>Đang tải danh sách môn học...</p>
     </div>
   }
 
@@ -42,7 +42,7 @@
               <button
                 mat-icon-button
                 (click)="openEdit(subject)"
-                matTooltip="Chỉnh sửa"
+                i18n-matTooltip matTooltip="Chỉnh sửa"
               >
                 <mat-icon>edit</mat-icon>
               </button>
@@ -50,7 +50,7 @@
                 mat-icon-button
                 color="warn"
                 (click)="onDelete(subject)"
-                matTooltip="Xóa"
+                i18n-matTooltip matTooltip="Xóa"
               >
                 <mat-icon>delete</mat-icon>
               </button>
@@ -60,7 +60,7 @@
       } @empty {
         <div class="empty-state">
           <mat-icon class="huge-icon">school</mat-icon>
-          <p>Chưa có môn học nào. Nhấn "Thêm môn học" để bắt đầu.</p>
+          <p i18n>Chưa có môn học nào. Nhấn "Thêm môn học" để bắt đầu.</p>
         </div>
       }
     </div>
@@ -73,7 +73,7 @@
   <div class="modal-overlay" (click)="closeModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>{{ editingId() ? 'Chỉnh sửa môn học' : 'Thêm môn học mới' }}</h2>
+        <h2 i18n>{{ editingId() ? 'Chỉnh sửa môn học' : 'Thêm môn học mới' }}</h2>
         <button mat-icon-button (click)="closeModal()">
           <mat-icon>close</mat-icon>
         </button>
@@ -84,7 +84,7 @@
           <div class="form-grid">
             <!-- Mã môn (chỉ enable khi tạo mới) -->
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Mã môn học</mat-label>
+              <mat-label i18n>Mã môn học</mat-label>
               @if (!editingId()) {
                 <mat-select formControlName="code" required>
                   @for (code of availableCodes(); track code) {
@@ -96,7 +96,7 @@
               }
               <!-- mat-hint phải render unconditionally — không đặt trong @if/@else
                    vì Angular Material không thể project qua control flow -->
-              <mat-hint>{{ editingId() ? 'Mã môn không thể thay đổi sau khi tạo' : '' }}</mat-hint>
+              <mat-hint>@if (editingId()) { <span i18n>Mã môn không thể thay đổi sau khi tạo</span> }</mat-hint>
             </mat-form-field>
 
             <!-- AI Suggest button -->
@@ -110,42 +110,46 @@
                   (click)="onAutoSuggest()"
                 >
                   <mat-icon>auto_awesome</mat-icon>
-                  {{ suggesting() ? 'Đang gợi ý...' : 'AI tự điền thông tin' }}
+                  @if (suggesting()) {
+                    <span i18n>Đang gợi ý...</span>
+                  } @else {
+                    <span i18n>AI tự điền thông tin</span>
+                  }
                 </button>
-                <span class="suggest-hint">AI sẽ tự điền tên, màu sắc và biểu tượng.</span>
+                <span class="suggest-hint" i18n>AI sẽ tự điền tên, màu sắc và biểu tượng.</span>
               </div>
             }
 
             <!-- Tên tiếng Việt -->
             <mat-form-field appearance="outline">
-              <mat-label>Tên tiếng Việt</mat-label>
-              <input matInput formControlName="name" placeholder="VD: Toán học" maxlength="100" required />
+              <mat-label i18n>Tên tiếng Việt</mat-label>
+              <input matInput formControlName="name" i18n-placeholder placeholder="VD: Toán học" maxlength="100" required />
             </mat-form-field>
 
             <!-- Tên tiếng Anh -->
             <mat-form-field appearance="outline">
-              <mat-label>Tên tiếng Anh</mat-label>
-              <input matInput formControlName="nameEn" placeholder="VD: Mathematics" maxlength="100" required />
+              <mat-label i18n>Tên tiếng Anh</mat-label>
+              <input matInput formControlName="nameEn" i18n-placeholder placeholder="VD: Mathematics" maxlength="100" required />
             </mat-form-field>
 
             <!-- Màu + Icon -->
             <div class="form-row full-width">
               <mat-form-field appearance="outline" class="color-field">
-                <mat-label>Màu chủ đạo</mat-label>
-                <input matInput formControlName="color" placeholder="#4A90E2" maxlength="7" />
+                <mat-label i18n>Màu chủ đạo</mat-label>
+                <input matInput formControlName="color" i18n-placeholder placeholder="#4A90E2" maxlength="7" />
                 <input type="color" formControlName="color" class="color-swatch" matSuffix />
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="icon-field">
-                <mat-label>Biểu tượng (emoji)</mat-label>
-                <input matInput formControlName="iconUrl" placeholder="VD: 📐" maxlength="4" />
+                <mat-label i18n>Biểu tượng (emoji)</mat-label>
+                <input matInput formControlName="iconUrl" i18n-placeholder placeholder="VD: 📐" maxlength="4" />
               </mat-form-field>
             </div>
 
             <!-- Preview -->
             @if (subjectForm.get('name')?.value) {
               <div class="preview-row full-width">
-                <span class="preview-label">Xem trước:</span>
+                <span class="preview-label" i18n>Xem trước:</span>
                 <div
                   class="preview-chip"
                   [style.background-color]="subjectForm.get('color')?.value + '20'"
@@ -162,7 +166,7 @@
           </div>
 
           <div class="form-actions">
-            <button mat-button type="button" (click)="closeModal()">Hủy</button>
+            <button mat-button type="button" (click)="closeModal()" i18n>Hủy</button>
             <button
               mat-flat-button
               color="primary"
@@ -170,7 +174,13 @@
               [disabled]="subjectForm.invalid || saving()"
             >
               <mat-icon>save</mat-icon>
-              {{ saving() ? 'Đang lưu...' : (editingId() ? 'Lưu thay đổi' : 'Tạo môn học') }}
+              @if (saving()) {
+                <span i18n>Đang lưu...</span>
+              } @else if (editingId()) {
+                <span i18n>Lưu thay đổi</span>
+              } @else {
+                <span i18n>Tạo môn học</span>
+              }
             </button>
           </div>
         </form>

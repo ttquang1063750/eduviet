@@ -68,7 +68,7 @@ export class BlogDetailComponent implements OnInit {
         }
       },
       error: () => {
-        this.error.set('Không thể tải bài viết.');
+        this.error.set($localize`Không thể tải bài viết.`);
         this.loading.set(false);
       },
     });

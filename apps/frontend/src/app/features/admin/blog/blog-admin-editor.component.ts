@@ -229,7 +229,7 @@ export class BlogAdminEditorComponent implements OnInit {
             this.quillInstance.insertEmbed(range.index, 'image', data.url, 'user');
             this.quillInstance.setSelection(range.index + 1);
           },
-          error: () => this.toastService.error('Upload ảnh thất bại'),
+          error: () => this.toastService.error($localize`Upload ảnh thất bại`),
         });
     };
   }
@@ -259,12 +259,12 @@ export class BlogAdminEditorComponent implements OnInit {
         this.postStatus.set(post.status);
         this.slugPreview.set(post.slug);
         this.toastService.success(
-          this.isEditMode() ? 'Đã lưu bài viết' : 'Đã tạo bài viết',
+          this.isEditMode() ? $localize`Đã lưu bài viết` : $localize`Đã tạo bài viết`,
         );
         this.saving.set(false);
       },
       error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err, 'Lưu bài viết thất bại'));
+        this.toastService.error(getApiErrorMessage(err, $localize`Lưu bài viết thất bại`));
         this.saving.set(false);
       },
     });
@@ -273,13 +273,13 @@ export class BlogAdminEditorComponent implements OnInit {
   async onSubmitForReview(): Promise<void> {
     const id = this.postId();
     if (!id) {
-      this.toastService.error('Hãy lưu bài viết trước khi gửi duyệt.');
+      this.toastService.error($localize`Hãy lưu bài viết trước khi gửi duyệt.`);
       return;
     }
     const confirmed = await this.confirmService.confirm({
-      title: 'Gửi bài để duyệt',
-      message: 'Gửi bài viết này lên để CONTENT_REVIEWER/APPROVER xem xét?',
-      confirmText: 'Gửi duyệt',
+      title: $localize`Gửi bài để duyệt`,
+      message: $localize`Gửi bài viết này lên để CONTENT_REVIEWER/APPROVER xem xét?`,
+      confirmText: $localize`Gửi duyệt`,
       type: 'primary',
     });
     if (!confirmed) return;
@@ -288,11 +288,11 @@ export class BlogAdminEditorComponent implements OnInit {
     this.blogService.submitForReview(id).subscribe({
       next: () => {
         this.postStatus.set('REVIEW');
-        this.toastService.success('Đã gửi bài viết lên duyệt!');
+        this.toastService.success($localize`Đã gửi bài viết lên duyệt!`);
         this.submitting.set(false);
       },
       error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err, 'Gửi duyệt thất bại'));
+        this.toastService.error(getApiErrorMessage(err, $localize`Gửi duyệt thất bại`));
         this.submitting.set(false);
       },
     });
@@ -301,20 +301,20 @@ export class BlogAdminEditorComponent implements OnInit {
   async onPublish(): Promise<void> {
     const id = this.postId();
     if (!id) {
-      this.toastService.error('Hãy lưu bài viết trước khi xuất bản.');
+      this.toastService.error($localize`Hãy lưu bài viết trước khi xuất bản.`);
       return;
     }
     const confirmed = await this.confirmService.confirm({
-      title: 'Xuất bản bài viết',
-      message: 'Bài viết sẽ hiển thị công khai ngay lập tức. Tiếp tục?',
-      confirmText: 'Xuất bản',
+      title: $localize`Xuất bản bài viết`,
+      message: $localize`Bài viết sẽ hiển thị công khai ngay lập tức. Tiếp tục?`,
+      confirmText: $localize`Xuất bản`,
       type: 'primary',
     });
     if (!confirmed) return;
 
     // Auto-save nội dung hiện tại trước khi publish
     if (this.postForm.invalid) {
-      this.toastService.error('Nội dung chưa hợp lệ, vui lòng kiểm tra lại.');
+      this.toastService.error($localize`Nội dung chưa hợp lệ, vui lòng kiểm tra lại.`);
       return;
     }
     this.saving.set(true);
@@ -332,16 +332,16 @@ export class BlogAdminEditorComponent implements OnInit {
         this.blogService.publish(id).subscribe({
           next: () => {
             this.postStatus.set('PUBLISHED');
-            this.toastService.success('Đã xuất bản bài viết!');
+            this.toastService.success($localize`Đã xuất bản bài viết!`);
             this.router.navigate(['/admin/blog']);
           },
           error: (err: unknown) => {
-            this.toastService.error(getApiErrorMessage(err, 'Xuất bản thất bại'));
+            this.toastService.error(getApiErrorMessage(err, $localize`Xuất bản thất bại`));
           },
         });
       },
       error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err, 'Lưu thất bại trước khi xuất bản'));
+        this.toastService.error(getApiErrorMessage(err, $localize`Lưu thất bại trước khi xuất bản`));
         this.saving.set(false);
       },
     });

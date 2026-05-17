@@ -3,11 +3,15 @@
   <!-- Header -->
   <div class="detail-header">
     <div class="detail-header__left">
-      <a mat-icon-button [routerLink]="backUrl" matTooltip="Quay lại">
+      <a mat-icon-button [routerLink]="backUrl" i18n-matTooltip matTooltip="Quay lại">
         <mat-icon>arrow_back</mat-icon>
       </a>
       <h2 class="detail-header__title">
-        {{ isEditMode() ? 'Chỉnh sửa lớp học' : 'Tạo lớp học mới' }}
+        @if (isEditMode()) {
+          <span i18n>Chỉnh sửa lớp học</span>
+        } @else {
+          <span i18n>Tạo lớp học mới</span>
+        }
       </h2>
     </div>
     @if (isEditMode()) {
@@ -15,7 +19,7 @@
         mat-stroked-button
         [routerLink]="[...backUrl, classId(), 'students']"
       >
-        <mat-icon>people</mat-icon> Danh sách học sinh
+        <mat-icon>people</mat-icon> <span i18n>Danh sách học sinh</span>
       </a>
     }
   </div>
@@ -27,38 +31,38 @@
 
         <!-- Tên lớp -->
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Tên lớp</mat-label>
-          <input matInput formControlName="name" placeholder="Ví dụ: 10A1, 12B3..." required />
-          <mat-error>Tên lớp là bắt buộc</mat-error>
+          <mat-label i18n>Tên lớp</mat-label>
+          <input matInput formControlName="name" i18n-placeholder placeholder="Ví dụ: 10A1, 12B3..." required />
+          <mat-error i18n>Tên lớp là bắt buộc</mat-error>
         </mat-form-field>
 
         <!-- Khối -->
         <mat-form-field appearance="outline">
-          <mat-label>Khối</mat-label>
+          <mat-label i18n>Khối</mat-label>
           <mat-select formControlName="grade">
             @for (g of grades; track g) {
-              <mat-option [value]="g">Khối {{ g }}</mat-option>
+              <mat-option [value]="g" i18n>Khối {{ g }}</mat-option>
             }
           </mat-select>
-          <mat-error>Vui lòng chọn khối</mat-error>
+          <mat-error i18n>Vui lòng chọn khối</mat-error>
         </mat-form-field>
 
         <!-- Năm học -->
         <mat-form-field appearance="outline">
-          <mat-label>Năm học</mat-label>
-          <input matInput formControlName="academicYear" placeholder="2025-2026" required />
-          <mat-error>Năm học là bắt buộc</mat-error>
+          <mat-label i18n>Năm học</mat-label>
+          <input matInput formControlName="academicYear" i18n-placeholder placeholder="2025-2026" required />
+          <mat-error i18n>Năm học là bắt buộc</mat-error>
         </mat-form-field>
 
         <!-- Giáo viên chủ nhiệm (autocomplete) -->
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Giáo viên chủ nhiệm</mat-label>
+          <mat-label i18n>Giáo viên chủ nhiệm</mat-label>
           <input
             matInput
             [value]="teacherSearch()"
             (input)="onTeacherInput($event)"
             [matAutocomplete]="teacherAuto"
-            placeholder="Tìm theo tên..."
+            i18n-placeholder placeholder="Tìm theo tên..."
           />
           <mat-icon matPrefix>person</mat-icon>
           @if (loadingTeachers()) {
@@ -76,10 +80,10 @@
               </mat-option>
             }
             @if (teachers().length === 0 && !loadingTeachers()) {
-              <mat-option disabled>Không tìm thấy giáo viên</mat-option>
+              <mat-option disabled i18n>Không tìm thấy giáo viên</mat-option>
             }
           </mat-autocomplete>
-          <mat-hint>Không bắt buộc — có thể cập nhật sau</mat-hint>
+          <mat-hint i18n>Không bắt buộc — có thể cập nhật sau</mat-hint>
         </mat-form-field>
 
       </div>
@@ -97,10 +101,14 @@
           } @else {
             <mat-icon>save</mat-icon>
           }
-          {{ isEditMode() ? 'Cập nhật' : 'Tạo lớp' }}
+          @if (isEditMode()) {
+            <span i18n>Cập nhật</span>
+          } @else {
+            <span i18n>Tạo lớp</span>
+          }
         </button>
 
-        <a mat-stroked-button [routerLink]="backUrl">
+        <a mat-stroked-button [routerLink]="backUrl" i18n>
           Hủy
         </a>
 
@@ -112,7 +120,7 @@
             (click)="onDelete()"
             class="delete-btn"
           >
-            <mat-icon>delete</mat-icon> Xóa lớp
+            <mat-icon>delete</mat-icon> <span i18n>Xóa lớp</span>
           </button>
         }
       </div>

@@ -143,19 +143,19 @@ export class UsersAdminComponent {
   async saveUser() {
     const data = this.newUser();
     if (!data.email || !data.fullName || !data.password || !data.roles?.length) {
-      this.toastService.warning('Vui lòng điền đầy đủ thông tin bắt buộc');
+      this.toastService.warning($localize`Vui lòng điền đầy đủ thông tin bắt buộc`);
       return;
     }
 
     this.isSaving.set(true);
     try {
       await this.usersService.create(data).toPromise();
-      this.toastService.success('Tạo người dùng thành công');
+      this.toastService.success($localize`Tạo người dùng thành công`);
       this.closeCreateModal();
       this.fetchUsers(); // Refresh list
     } catch (error: unknown) {
       console.error('Failed to create user', error);
-      this.toastService.error(getApiErrorMessage(error, 'Có lỗi xảy ra khi tạo người dùng'));
+      this.toastService.error(getApiErrorMessage(error, $localize`Có lỗi xảy ra khi tạo người dùng`));
     } finally {
       this.isSaving.set(false);
     }
@@ -163,17 +163,17 @@ export class UsersAdminComponent {
 
   roleLabel(role: string): string {
     const labels: Record<string, string> = {
-      SUPER_ADMIN: 'Super Admin',
-      PROVINCE_ADMIN: 'Admin Tỉnh',
-      DISTRICT_ADMIN: 'Admin Huyện',
-      SCHOOL_ADMIN: 'Admin Trường',
-      CONTENT_CREATOR: 'Soạn thảo',
-      CONTENT_REVIEWER: 'Reviewer',
-      CONTENT_APPROVER: 'Phê duyệt',
-      SUBJECT_TEACHER: 'Giáo viên',
-      HOMEROOM_TEACHER: 'GV Chủ nhiệm',
-      STUDENT: 'Học sinh',
-      PARENT: 'Phụ huynh',
+      SUPER_ADMIN: $localize`Super Admin`,
+      PROVINCE_ADMIN: $localize`Admin Tỉnh`,
+      DISTRICT_ADMIN: $localize`Admin Huyện`,
+      SCHOOL_ADMIN: $localize`Admin Trường`,
+      CONTENT_CREATOR: $localize`Soạn thảo`,
+      CONTENT_REVIEWER: $localize`Reviewer`,
+      CONTENT_APPROVER: $localize`Phê duyệt`,
+      SUBJECT_TEACHER: $localize`Giáo viên`,
+      HOMEROOM_TEACHER: $localize`GV Chủ nhiệm`,
+      STUDENT: $localize`Học sinh`,
+      PARENT: $localize`Phụ huynh`,
     };
     return labels[role] ?? role;
   }

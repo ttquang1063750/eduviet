@@ -3,23 +3,23 @@
   <!-- ── Cột trái: danh sách bài viết ──────────────────────────────────── -->
   <section class="blog-list-main">
     <header class="page-header">
-      <h1 class="page-title">Blog</h1>
-      <span class="page-subtitle">{{ total() }} bài viết</span>
+      <h1 class="page-title" i18n>Blog</h1>
+      <span class="page-subtitle" i18n>{{ total() }} bài viết</span>
     </header>
 
     <div class="filter-bar" [formGroup]="filterForm">
-      <input formControlName="search" class="filter-input" placeholder="🔍 Tìm kiếm bài viết..." />
-      <input formControlName="tag" class="filter-input" placeholder="🏷 Lọc theo tag..." />
+      <input formControlName="search" class="filter-input" i18n-placeholder placeholder="🔍 Tìm kiếm bài viết..." />
+      <input formControlName="tag" class="filter-input" i18n-placeholder placeholder="🏷 Lọc theo tag..." />
     </div>
 
     @if (loading()) {
       <div class="loading-state">
         <div class="spinner"></div>
-        <p>Đang tải bài viết...</p>
+        <p i18n>Đang tải bài viết...</p>
       </div>
     } @else if (posts().length === 0) {
       <div class="empty-state">
-        <p>Không tìm thấy bài viết nào.</p>
+        <p i18n>Không tìm thấy bài viết nào.</p>
       </div>
     } @else {
       <div class="post-grid">
@@ -44,9 +44,9 @@
                 <span class="meta-sep">·</span>
                 <span>{{ post.publishedAt | date:'dd/MM/yyyy' }}</span>
                 <span class="meta-sep">·</span>
-                <span>{{ post._count.comments }} bình luận</span>
+                <span i18n>{{ post._count.comments }} bình luận</span>
                 <span class="meta-sep">·</span>
-                <span>👁 {{ post.viewCount | number }}</span>
+                <span i18n>👁 {{ post.viewCount | number }}</span>
               </div>
             </div>
           </a>
@@ -68,9 +68,9 @@
   <!-- ── Sidebar phải: top viewed ──────────────────────────────────────── -->
   <aside class="blog-list-sidebar">
     <div class="sidebar-card">
-      <h4 class="sidebar-card__title">🔥 Đọc nhiều nhất</h4>
+      <h4 class="sidebar-card__title" i18n>🔥 Đọc nhiều nhất</h4>
       @if (topViewed().length === 0) {
-        <p class="sidebar-empty">Chưa có dữ liệu</p>
+        <p class="sidebar-empty" i18n>Chưa có dữ liệu</p>
       } @else {
         <ol class="top-viewed-list">
           @for (tp of topViewed(); track tp.id; let i = $index) {
@@ -78,7 +78,7 @@
               <span class="top-viewed-item__rank">{{ i + 1 }}</span>
               <a [routerLink]="['/blog', tp.slug]" class="top-viewed-item__link">
                 <span class="top-viewed-item__title">{{ tp.title }}</span>
-                <span class="top-viewed-item__views">👁 {{ tp.viewCount | number }}</span>
+                <span class="top-viewed-item__views" i18n>👁 {{ tp.viewCount | number }}</span>
               </a>
             </li>
           }

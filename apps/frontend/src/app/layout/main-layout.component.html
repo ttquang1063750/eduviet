@@ -17,7 +17,7 @@
       </div>
       <span class="brand-text" [style.display]="collapsed() ? 'none' : ''">EduViet</span>
       <button mat-icon-button class="toggle-btn" (click)="toggleSidebar()"
-        [matTooltip]="collapsed() ? 'Mở rộng menu' : 'Thu gọn menu'"
+        [matTooltip]="toggleTooltip()"
         matTooltipPosition="right">
         <mat-icon>{{ collapsed() ? 'menu' : 'menu_open' }}</mat-icon>
       </button>
@@ -44,100 +44,111 @@
          routerLinkActive #rla0="routerLinkActive"
          [activated]="rla0.isActive"
          [routerLinkActiveOptions]="{ exact: true }"
-         [matTooltip]="collapsed() ? 'Tổng quan' : ''"
+         i18n-matTooltip matTooltip="Tổng quan"
          matTooltipPosition="right">
         <mat-icon matListItemIcon>home</mat-icon>
-        <span matListItemTitle [style.display]="collapsed() ? 'none' : ''">Tổng quan</span>
+        <span matListItemTitle i18n [style.display]="collapsed() ? 'none' : ''">Tổng quan</span>
       </a>
 
       <a mat-list-item routerLink="/lessons"
          routerLinkActive #rla1="routerLinkActive"
          [activated]="rla1.isActive"
-         [matTooltip]="collapsed() ? 'Bài học' : ''"
+         i18n-matTooltip matTooltip="Bài học"
          matTooltipPosition="right">
         <mat-icon matListItemIcon>menu_book</mat-icon>
-        <span matListItemTitle [style.display]="collapsed() ? 'none' : ''">Bài học</span>
+        <span matListItemTitle i18n [style.display]="collapsed() ? 'none' : ''">Bài học</span>
       </a>
 
       @if (isStudent()) {
         <a mat-list-item routerLink="/student"
            routerLinkActive #rla2="routerLinkActive"
            [activated]="rla2.isActive"
-           [matTooltip]="collapsed() ? 'Trang của tôi' : ''"
+           i18n-matTooltip matTooltip="Trang của tôi"
            matTooltipPosition="right">
           <mat-icon matListItemIcon>school</mat-icon>
-          <span matListItemTitle [style.display]="collapsed() ? 'none' : ''">Trang của tôi</span>
+          <span matListItemTitle i18n [style.display]="collapsed() ? 'none' : ''">Trang của tôi</span>
+        </a>
+
+        <a mat-list-item routerLink="/my/attempts"
+           routerLinkActive #rla2b="routerLinkActive"
+           [activated]="rla2b.isActive"
+           i18n-matTooltip matTooltip="Kết quả của tôi"
+           matTooltipPosition="right">
+          <mat-icon matListItemIcon>history_edu</mat-icon>
+          <span matListItemTitle i18n [style.display]="collapsed() ? 'none' : ''">Kết quả của tôi</span>
         </a>
       }
 
       <a mat-list-item routerLink="/blog"
          routerLinkActive #rla3="routerLinkActive"
          [activated]="rla3.isActive"
-         [matTooltip]="collapsed() ? 'Blog' : ''"
+         i18n-matTooltip matTooltip="Blog"
          matTooltipPosition="right">
         <mat-icon matListItemIcon>article</mat-icon>
-        <span matListItemTitle [style.display]="collapsed() ? 'none' : ''">Blog</span>
+        <span matListItemTitle i18n [style.display]="collapsed() ? 'none' : ''">Blog</span>
       </a>
 
       @if (canViewReports()) {
         <a mat-list-item routerLink="/reports"
            routerLinkActive #rla4="routerLinkActive"
            [activated]="rla4.isActive"
-           [matTooltip]="collapsed() ? 'Báo cáo' : ''"
+           i18n-matTooltip matTooltip="Báo cáo"
            matTooltipPosition="right">
           <mat-icon matListItemIcon>bar_chart</mat-icon>
-          <span matListItemTitle [style.display]="collapsed() ? 'none' : ''">Báo cáo</span>
+          <span matListItemTitle i18n [style.display]="collapsed() ? 'none' : ''">Báo cáo</span>
         </a>
       }
 
       <!-- ── Admin section ── -->
       @if (isAdmin()) {
         <mat-list-item class="nav-section-title"
-          [style.display]="collapsed() ? 'none' : ''">Quản trị</mat-list-item>
+          [style.display]="collapsed() ? 'none' : ''">
+          <span i18n>Quản trị</span>
+        </mat-list-item>
 
         <a mat-list-item routerLink="/admin/users"
            routerLinkActive #rla5="routerLinkActive"
            [activated]="rla5.isActive"
-           [matTooltip]="collapsed() ? 'Người dùng' : ''"
+           i18n-matTooltip matTooltip="Người dùng"
            matTooltipPosition="right">
           <mat-icon matListItemIcon>group</mat-icon>
-          <span matListItemTitle [style.display]="collapsed() ? 'none' : ''">Người dùng</span>
+          <span matListItemTitle i18n [style.display]="collapsed() ? 'none' : ''">Người dùng</span>
         </a>
 
         <a mat-list-item routerLink="/admin/schools"
            routerLinkActive #rla6="routerLinkActive"
            [activated]="rla6.isActive"
-           [matTooltip]="collapsed() ? 'Trường học' : ''"
+           i18n-matTooltip matTooltip="Trường học"
            matTooltipPosition="right">
           <mat-icon matListItemIcon>account_balance</mat-icon>
-          <span matListItemTitle [style.display]="collapsed() ? 'none' : ''">Trường học</span>
+          <span matListItemTitle i18n [style.display]="collapsed() ? 'none' : ''">Trường học</span>
         </a>
 
         <a mat-list-item routerLink="/admin/classes"
            routerLinkActive #rla7="routerLinkActive"
            [activated]="rla7.isActive"
-           [matTooltip]="collapsed() ? 'Lớp học' : ''"
+           i18n-matTooltip matTooltip="Lớp học"
            matTooltipPosition="right">
           <mat-icon matListItemIcon>domain</mat-icon>
-          <span matListItemTitle [style.display]="collapsed() ? 'none' : ''">Lớp học</span>
+          <span matListItemTitle i18n [style.display]="collapsed() ? 'none' : ''">Lớp học</span>
         </a>
 
         <a mat-list-item routerLink="/admin/subjects"
            routerLinkActive #rla8="routerLinkActive"
            [activated]="rla8.isActive"
-           [matTooltip]="collapsed() ? 'Môn học' : ''"
+           i18n-matTooltip matTooltip="Môn học"
            matTooltipPosition="right">
           <mat-icon matListItemIcon>calculate</mat-icon>
-          <span matListItemTitle [style.display]="collapsed() ? 'none' : ''">Môn học</span>
+          <span matListItemTitle i18n [style.display]="collapsed() ? 'none' : ''">Môn học</span>
         </a>
 
         <a mat-list-item routerLink="/admin/blog"
            routerLinkActive #rla9="routerLinkActive"
            [activated]="rla9.isActive"
-           [matTooltip]="collapsed() ? 'Blog (quản trị)' : ''"
+           [matTooltip]="blogAdminTooltip()"
            matTooltipPosition="right">
           <mat-icon matListItemIcon>edit_note</mat-icon>
-          <span matListItemTitle [style.display]="collapsed() ? 'none' : ''">Blog (quản trị)</span>
+          <span matListItemTitle i18n [style.display]="collapsed() ? 'none' : ''">Blog (quản trị)</span>
         </a>
       }
 
@@ -145,34 +156,45 @@
       @if (isAdmin() || isContentRole()) {
         @if (!isAdmin()) {
           <mat-list-item class="nav-section-title"
-            [style.display]="collapsed() ? 'none' : ''">Nội dung</mat-list-item>
+            [style.display]="collapsed() ? 'none' : ''">
+            <span i18n>Nội dung</span>
+          </mat-list-item>
         }
 
         <a mat-list-item routerLink="/admin/questions"
            routerLinkActive #rla10="routerLinkActive"
            [activated]="rla10.isActive"
-           [matTooltip]="collapsed() ? 'Ngân hàng câu hỏi' : ''"
+           i18n-matTooltip matTooltip="Ngân hàng câu hỏi"
            matTooltipPosition="right">
           <mat-icon matListItemIcon>folder_open</mat-icon>
-          <span matListItemTitle [style.display]="collapsed() ? 'none' : ''">Ngân hàng câu hỏi</span>
+          <span matListItemTitle i18n [style.display]="collapsed() ? 'none' : ''">Ngân hàng câu hỏi</span>
         </a>
 
         <a mat-list-item routerLink="/admin/lessons"
            routerLinkActive #rla11="routerLinkActive"
            [activated]="rla11.isActive"
-           [matTooltip]="collapsed() ? 'Quản lý bài học' : ''"
+           i18n-matTooltip matTooltip="Quản lý bài học"
            matTooltipPosition="right">
           <mat-icon matListItemIcon>book</mat-icon>
-          <span matListItemTitle [style.display]="collapsed() ? 'none' : ''">Quản lý bài học</span>
+          <span matListItemTitle i18n [style.display]="collapsed() ? 'none' : ''">Quản lý bài học</span>
         </a>
 
         <a mat-list-item routerLink="/admin/content"
            routerLinkActive #rla12="routerLinkActive"
            [activated]="rla12.isActive"
-           [matTooltip]="collapsed() ? 'Kiểm duyệt' : ''"
+           i18n-matTooltip matTooltip="Kiểm duyệt"
            matTooltipPosition="right">
           <mat-icon matListItemIcon>fact_check</mat-icon>
-          <span matListItemTitle [style.display]="collapsed() ? 'none' : ''">Kiểm duyệt</span>
+          <span matListItemTitle i18n [style.display]="collapsed() ? 'none' : ''">Kiểm duyệt</span>
+        </a>
+
+        <a mat-list-item routerLink="/admin/grading"
+           routerLinkActive #rla13="routerLinkActive"
+           [activated]="rla13.isActive"
+           i18n-matTooltip matTooltip="Chấm điểm"
+           matTooltipPosition="right">
+          <mat-icon matListItemIcon>grading</mat-icon>
+          <span matListItemTitle i18n [style.display]="collapsed() ? 'none' : ''">Chấm điểm</span>
         </a>
       }
 
@@ -181,12 +203,17 @@
     <!-- Logout -->
     <mat-nav-list class="logout-list">
       <a mat-list-item (click)="logout()" class="logout-item"
-         [matTooltip]="collapsed() ? 'Đăng xuất' : ''"
+         i18n-matTooltip matTooltip="Đăng xuất"
          matTooltipPosition="right">
         <mat-icon matListItemIcon>logout</mat-icon>
-        <span matListItemTitle [style.display]="collapsed() ? 'none' : ''">Đăng xuất</span>
+        <span matListItemTitle i18n [style.display]="collapsed() ? 'none' : ''">Đăng xuất</span>
       </a>
     </mat-nav-list>
+
+    <!-- Language switcher — ẩn khi collapsed -->
+    <div class="sidebar-lang" [style.display]="collapsed() ? 'none' : ''">
+      <app-language-switcher />
+    </div>
 
   </mat-sidenav>
 

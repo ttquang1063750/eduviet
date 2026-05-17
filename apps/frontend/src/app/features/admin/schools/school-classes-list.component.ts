@@ -112,9 +112,9 @@ export class SchoolClassesListComponent implements OnInit {
 
   async onDelete(cls: ClassItem): Promise<void> {
     const confirmed = await this.confirmService.confirm({
-      title: 'Xóa lớp học',
-      message: `Xóa lớp "${cls.name}"? Toàn bộ dữ liệu liên quan sẽ bị xóa.`,
-      confirmText: 'Xóa',
+      title: $localize`Xóa lớp học`,
+      message: $localize`Xóa lớp "${cls.name}"? Toàn bộ dữ liệu liên quan sẽ bị xóa.`,
+      confirmText: $localize`Xóa`,
       type: 'danger',
     });
     if (!confirmed) return;
@@ -123,10 +123,10 @@ export class SchoolClassesListComponent implements OnInit {
       next: () => {
         this.classes.update((list) => list.filter((c) => c.id !== cls.id));
         this.total.update((t) => t - 1);
-        this.toastService.success('Đã xóa lớp học');
+        this.toastService.success($localize`Đã xóa lớp học`);
       },
       error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err, 'Xóa thất bại'));
+        this.toastService.error(getApiErrorMessage(err, $localize`Xóa thất bại`));
       },
     });
   }

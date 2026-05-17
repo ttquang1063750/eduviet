@@ -1,0 +1,57 @@
+.page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+  h1 { font-size: 1.75rem; font-weight: 800; margin: 0; }
+  .page-subtitle { color: #6b7280; }
+}
+
+.table-card {
+  border-radius: 16px !important;
+}
+
+.queue-table {
+  width: 100%;
+}
+
+.student-cell {
+  display: flex;
+  flex-direction: column;
+  .email { font-size: 0.75rem; color: #9ca3af; }
+}
+
+.pending-badge {
+  background: #fff7ed;
+  color: #9a3412;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #ffedd5;
+}
+
+.loading-state, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4rem 1rem;
+  gap: 1rem;
+  color: #6b7280;
+}
+
+.pagination {
+  margin-top: 1.5rem;
+  text-align: right;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+mat-header-cell {
+  font-weight: 700;
+  color: #374151;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}

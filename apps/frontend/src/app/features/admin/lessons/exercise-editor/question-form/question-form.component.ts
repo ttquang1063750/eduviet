@@ -76,28 +76,28 @@ export class QuestionFormComponent {
   );
 
   readonly questionTypes: { value: QuestionType; label: string }[] = [
-    { value: 'SINGLE_CHOICE', label: 'Một đáp án' },
-    { value: 'MULTIPLE_CHOICE', label: 'Nhiều đáp án' },
-    { value: 'FILL_IN_BLANK', label: 'Điền vào chỗ trống' },
-    { value: 'SHORT_ANSWER', label: 'Trả lời ngắn' },
-    { value: 'ESSAY', label: 'Tự luận' },
-    { value: 'DRAWING', label: 'Vẽ / Sơ đồ' },
+    { value: 'SINGLE_CHOICE', label: $localize`Một đáp án` },
+    { value: 'MULTIPLE_CHOICE', label: $localize`Nhiều đáp án` },
+    { value: 'FILL_IN_BLANK', label: $localize`Điền vào chỗ trống` },
+    { value: 'SHORT_ANSWER', label: $localize`Trả lời ngắn` },
+    { value: 'ESSAY', label: $localize`Tự luận` },
+    { value: 'DRAWING', label: $localize`Vẽ / Sơ đồ` },
   ];
 
   readonly questionTypeLabels: Record<string, string> = {
-    SINGLE_CHOICE: 'Một đáp án',
-    MULTIPLE_CHOICE: 'Nhiều đáp án',
-    FILL_IN_BLANK: 'Điền vào ô trống',
-    SHORT_ANSWER: 'Trả lời ngắn',
-    ESSAY: 'Tự luận',
-    DRAWING: 'Vẽ / Sơ đồ',
+    SINGLE_CHOICE: $localize`Một đáp án`,
+    MULTIPLE_CHOICE: $localize`Nhiều đáp án`,
+    FILL_IN_BLANK: $localize`Điền vào ô trống`,
+    SHORT_ANSWER: $localize`Trả lời ngắn`,
+    ESSAY: $localize`Tự luận`,
+    DRAWING: $localize`Vẽ / Sơ đồ`,
   };
 
   readonly difficultyOptions = [
-    { value: 'EASY', label: 'Dễ' },
-    { value: 'MEDIUM', label: 'Trung bình' },
-    { value: 'HARD', label: 'Khó' },
-    { value: 'ADVANCED', label: 'Nâng cao' },
+    { value: 'EASY', label: $localize`Dễ` },
+    { value: 'MEDIUM', label: $localize`Trung bình` },
+    { value: 'HARD', label: $localize`Khó` },
+    { value: 'ADVANCED', label: $localize`Nâng cao` },
   ];
 
   readonly form = this.fb.nonNullable.group({
@@ -257,7 +257,7 @@ export class QuestionFormComponent {
           this.saved.emit(res.data);
         },
         error: (err: unknown) => {
-          this.toastService.error(getApiErrorMessage(err));
+          this.toastService.error(getApiErrorMessage(err, $localize`Cập nhật thất bại`));
           this.saving.set(false);
         },
       });
@@ -268,7 +268,7 @@ export class QuestionFormComponent {
           this.saved.emit(res.data);
         },
         error: (err: unknown) => {
-          this.toastService.error(getApiErrorMessage(err));
+          this.toastService.error(getApiErrorMessage(err, $localize`Tạo câu hỏi thất bại`));
           this.saving.set(false);
         },
       });

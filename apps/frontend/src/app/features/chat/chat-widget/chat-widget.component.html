@@ -4,11 +4,11 @@
     <div class="chat-popup">
       <div class="chat-header">
         <div class="header-info">
-          <h3>Trò chuyện</h3>
+          <h3 i18n>Trò chuyện</h3>
           @if (chatService.isConnected()) {
-            <span class="status-online" title="Đã kết nối"></span>
+            <span class="status-online" i18n-title title="Đã kết nối"></span>
           } @else {
-            <span class="status-offline" title="Mất kết nối"></span>
+            <span class="status-offline" i18n-title title="Mất kết nối"></span>
           }
         </div>
         <button class="btn-close" (click)="closeChat()">
@@ -21,7 +21,7 @@
           <app-room-list></app-room-list>
         } @else {
           <div class="room-header-back">
-            <button class="btn-back" (click)="chatService.setActiveRoom(null)">← Quay lại</button>
+            <button class="btn-back" (click)="chatService.setActiveRoom(null)" i18n>← Quay lại</button>
           </div>
           <app-message-thread></app-message-thread>
         }

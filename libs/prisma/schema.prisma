@@ -64,6 +64,18 @@ enum ChatRoomType {
   STAFF
 }
 
+enum AttemptMode {
+  PRACTICE
+  TEST
+  MOCK_EXAM
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  GRADED
+}
+
 // ===========================
 // GEO HIERARCHY
 // ===========================
@@ -197,6 +209,8 @@ model User {
   createdLessons     Lesson[]             @relation("LessonCreator")
   reviewedLessons    Lesson[]             @relation("LessonReviewer")
   createdQuestions   Question[]
+  studentAttempts    Attempt[]        @relation("StudentAttempts")
+  gradedAnswers      AttemptAnswer[]  @relation("GradedAnswers")
   blogPosts          BlogPost[]
   comments           Comment[]
   studentParents     ParentStudent[]      @relation("ParentRelation")
@@ -264,6 +278,8 @@ model Lesson {
   estimatedMinutes   Int            @default(30) @map("estimated_minutes")
   status             ContentStatus  @default(DRAFT)
   randomizeQuestions Boolean        @default(false) @map("randomize_questions")
+  timeLimitSec       Int?           @map("time_limit_sec")
+  maxAttempts        Int            @default(0) @map("max_attempts")
   creatorId          String         @map("creator_id")
   creator            User           @relation("LessonCreator", fields: [creatorId], references: [id])
   reviewerId         String?        @map("reviewer_id")
@@ -272,6 +288,7 @@ model Lesson {
   publishedAt        DateTime?      @map("published_at")
   scheduledAt        DateTime?      @map("scheduled_at")
   lessonQuestions    LessonQuestion[]
+  attempts           Attempt[]
   createdAt          DateTime       @default(now()) @map("created_at")
   updatedAt        DateTime      @updatedAt @map("updated_at")
   deletedAt        DateTime?     @map("deleted_at")
@@ -297,10 +314,11 @@ model Question {
   tags          String[]       @default([])
   creatorId     String         @map("creator_id")
   creator       User           @relation(fields: [creatorId], references: [id])
-  lessonLinks   LessonQuestion[]
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt @map("updated_at")
-  deletedAt     DateTime?      @map("deleted_at")
+  lessonLinks     LessonQuestion[]
+  attemptAnswers  AttemptAnswer[]
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+  deletedAt       DateTime?      @map("deleted_at")
 
   @@index([subjectId])
   @@index([creatorId])
@@ -438,6 +456,54 @@ model Notification {
 
   @@index([userId, isRead])
   @@map("notifications")
+}
+
+// ===========================
+// ASSESSMENT / ATTEMPTS
+// ===========================
+
+model Attempt {
+  id           String        @id @default(uuid())
+  studentId    String        @map("student_id")
+  student      User          @relation("StudentAttempts", fields: [studentId], references: [id])
+  lessonId     String        @map("lesson_id")
+  lesson       Lesson        @relation(fields: [lessonId], references: [id])
+  mode         AttemptMode   @default(PRACTICE)
+  status       AttemptStatus @default(IN_PROGRESS)
+  startedAt    DateTime      @default(now()) @map("started_at")
+  submittedAt  DateTime?     @map("submitted_at")
+  timeLimitSec Int?          @map("time_limit_sec")
+  totalScore   Int?          @map("total_score")
+  maxScore     Int?          @map("max_score")
+  answers      AttemptAnswer[]
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  @@index([studentId])
+  @@index([lessonId])
+  @@index([studentId, lessonId])
+  @@map("attempts")
+}
+
+model AttemptAnswer {
+  id          String    @id @default(uuid())
+  attemptId   String    @map("attempt_id")
+  attempt     Attempt   @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId  String    @map("question_id")
+  question    Question  @relation(fields: [questionId], references: [id])
+  answer      Json?
+  isCorrect   Boolean?  @map("is_correct")
+  score       Int?
+  feedback    String?   @db.Text
+  gradedById  String?   @map("graded_by_id")
+  gradedBy    User?     @relation("GradedAnswers", fields: [gradedById], references: [id])
+  gradedAt    DateTime? @map("graded_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@unique([attemptId, questionId])
+  @@index([attemptId])
+  @@index([questionId])
+  @@map("attempt_answers")
 }
 
 // ===========================

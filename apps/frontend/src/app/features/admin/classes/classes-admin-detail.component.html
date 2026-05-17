@@ -1,10 +1,10 @@
 <div class="admin-container">
   <div class="page-header">
     <div class="header-left">
-      <a mat-icon-button [routerLink]="backUrl()" matTooltip="Quay lại">
+      <a mat-icon-button [routerLink]="backUrl()" i18n-matTooltip matTooltip="Quay lại">
         <mat-icon>arrow_back</mat-icon>
       </a>
-      <h1>{{ isEditMode() ? 'Chỉnh sửa lớp học' : 'Tạo lớp học mới' }}</h1>
+      <h1 i18n>{{ isEditMode() ? 'Chỉnh sửa lớp học' : 'Tạo lớp học mới' }}</h1>
     </div>
   </div>
 
@@ -14,35 +14,35 @@
         <div class="form-grid">
           <!-- Tên lớp -->
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Tên lớp</mat-label>
-            <input matInput formControlName="name" placeholder="VD: 10A1, 11B2..." required />
+            <mat-label i18n>Tên lớp</mat-label>
+            <input matInput formControlName="name" i18n-placeholder placeholder="VD: 10A1, 11B2..." required />
             <mat-icon matSuffix>class</mat-icon>
           </mat-form-field>
 
           <!-- Khối lớp -->
           <mat-form-field appearance="outline">
-            <mat-label>Khối</mat-label>
+            <mat-label i18n>Khối</mat-label>
             <mat-select formControlName="grade" required>
               @for (g of [1,2,3,4,5,6,7,8,9,10,11,12]; track g) {
-                <mat-option [value]="g">Khối {{ g }}</mat-option>
+                <mat-option [value]="g" i18n>Khối {{ g }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
 
           <!-- Năm học -->
           <mat-form-field appearance="outline">
-            <mat-label>Năm học</mat-label>
-            <input matInput formControlName="academicYear" placeholder="VD: 2025-2026" required />
+            <mat-label i18n>Năm học</mat-label>
+            <input matInput formControlName="academicYear" i18n-placeholder placeholder="VD: 2025-2026" required />
             <mat-icon matSuffix>calendar_today</mat-icon>
           </mat-form-field>
 
           <!-- Trường học (Autocomplete) -->
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Trường học</mat-label>
+            <mat-label i18n>Trường học</mat-label>
             <input
               matInput
               [matAutocomplete]="schoolAuto"
-              placeholder="Tìm kiếm trường..."
+              i18n-placeholder placeholder="Tìm kiếm trường..."
               [value]="selectedSchool()?.name || schoolSearch()"
               (input)="onSchoolSearchInput($event)"
               (focus)="openSchoolDropdown()"
@@ -64,11 +64,11 @@
 
           <!-- Giáo viên chủ nhiệm (Autocomplete, phụ thuộc trường) -->
           <mat-form-field appearance="outline" class="full-width" [class.disabled]="!selectedSchool()">
-            <mat-label>Giáo viên chủ nhiệm</mat-label>
+            <mat-label i18n>Giáo viên chủ nhiệm</mat-label>
             <input
               matInput
               [matAutocomplete]="teacherAuto"
-              placeholder="Tìm giáo viên..."
+              i18n-placeholder placeholder="Tìm giáo viên..."
               [value]="selectedTeacher()?.fullName || teacherSearch()"
               (input)="onTeacherSearchInput($event)"
               (focus)="openTeacherDropdown()"
@@ -80,7 +80,7 @@
               </button>
             }
             <mat-icon matSuffix>person</mat-icon>
-            <mat-hint>@if (!selectedSchool()) { Chọn trường trước để xem danh sách giáo viên }</mat-hint>
+            <mat-hint>@if (!selectedSchool()) { <span i18n>Chọn trường trước để xem danh sách giáo viên</span> }</mat-hint>
             <mat-autocomplete #teacherAuto="matAutocomplete">
               @for (teacher of teachers(); track teacher.id) {
                 <mat-option [value]="teacher.fullName" (onSelectionChange)="selectTeacher(teacher)">
@@ -92,7 +92,7 @@
         </div>
 
         <div class="form-actions">
-          <button mat-button type="button" [routerLink]="backUrl()">Hủy</button>
+          <button mat-button type="button" [routerLink]="backUrl()" i18n>Hủy</button>
           <button
             mat-flat-button
             color="primary"
@@ -100,7 +100,13 @@
             [disabled]="classForm.invalid || saving()"
           >
             <mat-icon>save</mat-icon>
-            {{ saving() ? 'Đang lưu...' : (isEditMode() ? 'Lưu thay đổi' : 'Tạo lớp') }}
+            @if (saving()) {
+              <span i18n>Đang lưu...</span>
+            } @else if (isEditMode()) {
+              <span i18n>Lưu thay đổi</span>
+            } @else {
+              <span i18n>Tạo lớp</span>
+            }
           </button>
         </div>
       </form>
@@ -112,14 +118,18 @@
     <mat-card class="students-card">
       <mat-card-content>
         <div class="students-header">
-          <h3>
+          <h3 i18n>
             <mat-icon>people</mat-icon>
             Danh sách học sinh
             <span class="count-badge">{{ enrollments().length }}</span>
           </h3>
           <button mat-stroked-button (click)="toggleAddStudent()">
             <mat-icon>{{ showAddStudent() ? 'close' : 'person_add' }}</mat-icon>
-            {{ showAddStudent() ? 'Đóng' : 'Thêm học sinh' }}
+            @if (showAddStudent()) {
+              <span i18n>Đóng</span>
+            } @else {
+              <span i18n>Thêm học sinh</span>
+            }
           </button>
         </div>
 
@@ -127,12 +137,12 @@
         @if (showAddStudent()) {
           <div class="add-student-panel">
             <mat-form-field appearance="outline" class="search-field">
-              <mat-label>Tìm học sinh theo tên hoặc email</mat-label>
+              <mat-label i18n>Tìm học sinh theo tên hoặc email</mat-label>
               <input
                 matInput
                 [value]="studentSearchTerm()"
                 (input)="onStudentSearchInput($event)"
-                placeholder="VD: Nguyễn Văn A..."
+                i18n-placeholder placeholder="VD: Nguyễn Văn A..."
                 autocomplete="off"
               />
               <mat-icon matSuffix>search</mat-icon>
@@ -141,7 +151,7 @@
             @if (searchingStudents()) {
               <div class="search-loading">
                 <mat-spinner diameter="24"></mat-spinner>
-                <span>Đang tải...</span>
+                <span i18n>Đang tải...</span>
               </div>
             } @else {
               <div
@@ -150,9 +160,14 @@
               >
                 @if (studentResults().length === 0) {
                   <p class="no-results">
-                    {{ studentSearchTerm() ? 'Không tìm thấy học sinh phù hợp (hoặc đã có trong lớp).' : 'Không có học sinh nào.' }}
+                    @if (studentSearchTerm()) {
+                      <span i18n>Không tìm thấy học sinh phù hợp (hoặc đã có trong lớp).</span>
+                    } @else {
+                      <span i18n>Không có học sinh nào.</span>
+                    }
                   </p>
-                } @else {
+                }
+ @else {
                   @for (student of studentResults(); track student.id) {
                     <div class="result-row">
                       <div class="student-info">
@@ -170,18 +185,18 @@
                         } @else {
                           <mat-icon>add</mat-icon>
                         }
-                        Thêm vào lớp
+                        <span i18n>Thêm vào lớp</span>
                       </button>
                     </div>
                   }
                   @if (loadingMoreStudents()) {
                     <div class="load-more-spinner">
                       <mat-spinner diameter="20"></mat-spinner>
-                      <span>Đang tải thêm...</span>
+                      <span i18n>Đang tải thêm...</span>
                     </div>
                   }
                   @if (!studentHasMore() && studentResults().length > 0) {
-                    <p class="end-of-list">Đã hiển thị tất cả kết quả</p>
+                    <p class="end-of-list" i18n>Đã hiển thị tất cả kết quả</p>
                   }
                 }
               </div>
@@ -193,7 +208,7 @@
         @if (enrollments().length === 0) {
           <div class="empty-students">
             <mat-icon>person_off</mat-icon>
-            <p>Lớp chưa có học sinh nào.</p>
+            <p i18n>Lớp chưa có học sinh nào.</p>
           </div>
         } @else {
           <div class="student-list">
@@ -209,7 +224,7 @@
                 <button
                   mat-icon-button
                   color="warn"
-                  matTooltip="Xóa khỏi lớp"
+                  i18n-matTooltip matTooltip="Xóa khỏi lớp"
                   (click)="unenroll(enrollment)"
                 >
                   <mat-icon>person_remove</mat-icon>
