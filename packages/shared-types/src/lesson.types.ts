@@ -23,6 +23,11 @@ export interface LessonAssignment {
   dueDate?: string | null;
   createdAt: string;
   updatedAt: string;
+  // Populated relations (present when included by BE)
+  school?: { id: string; name: string } | null;
+  class?: { id: string; name: string; grade: number } | null;
+  user?: { id: string; fullName: string } | null;
+  assignedBy?: { id: string; fullName: string } | null;
 }
 
 export interface Lesson {

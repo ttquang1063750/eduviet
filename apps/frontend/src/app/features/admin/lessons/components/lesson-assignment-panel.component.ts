@@ -1,6 +1,5 @@
-import { Component, inject, signal, input, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { Component, inject, signal, input, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { LessonAssignmentsService } from '../../../../core/services/lesson-assignments.service';
 import { SchoolsService } from '../../../../core/services/schools.service';
 import { ClassesService, ClassItem } from '../../../../core/services/classes.service';
@@ -29,9 +28,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 @Component({
   selector: 'app-lesson-assignment-panel',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
-    FormsModule,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
@@ -58,14 +56,14 @@ export class LessonAssignmentPanelComponent implements OnInit {
 
   lessonId = input.required<string>();
 
-  assignments = signal<LessonAssignment[]>([]);
-  loading = signal(false);
-  submitting = signal(false);
+  readonly assignments = signal<LessonAssignment[]>([]);
+  readonly loading = signal(false);
+  readonly submitting = signal(false);
 
   // Form targets
-  schools = signal<School[]>([]);
-  classes = signal<ClassItem[]>([]);
-  students = signal<User[]>([]);
+  readonly schools = signal<School[]>([]);
+  readonly classes = signal<ClassItem[]>([]);
+  readonly students = signal<User[]>([]);
 
   assignmentForm = this.fb.group({
     scope: ['CLASS' as AssignmentScope, Validators.required],
@@ -158,7 +156,7 @@ export class LessonAssignmentPanelComponent implements OnInit {
     }
   }
 
-  getTargetName(assignment: any): string {
+  getTargetName(assignment: LessonAssignment): string {
     if (assignment.school) return $localize`Trường: ${assignment.school.name}`;
     if (assignment.class) return $localize`Lớp: ${assignment.class.name}`;
     if (assignment.user) return $localize`HS: ${assignment.user.fullName}`;
