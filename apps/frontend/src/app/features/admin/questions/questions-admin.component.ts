@@ -59,18 +59,18 @@ export class QuestionsAdminComponent implements OnInit {
   });
 
   readonly questionTypeLabels: Record<string, string | undefined> = {
-    SINGLE_CHOICE: 'Một đáp án',
-    MULTIPLE_CHOICE: 'Nhiều đáp án',
-    FILL_IN_BLANK: 'Điền chỗ trống',
-    SHORT_ANSWER: 'Trả lời ngắn',
-    ESSAY: 'Tự luận',
-    DRAWING: 'Vẽ / Sơ đồ',
+    SINGLE_CHOICE: $localize`Một đáp án`,
+    MULTIPLE_CHOICE: $localize`Nhiều đáp án`,
+    FILL_IN_BLANK: $localize`Điền chỗ trống`,
+    SHORT_ANSWER: $localize`Trả lời ngắn`,
+    ESSAY: $localize`Tự luận`,
+    DRAWING: $localize`Vẽ / Sơ đồ`,
   };
 
   readonly difficultyLabels: Record<string, string | undefined> = {
-    EASY: 'Dễ',
-    MEDIUM: 'Trung bình',
-    HARD: 'Khó',
+    EASY: $localize`Dễ`,
+    MEDIUM: $localize`Trung bình`,
+    HARD: $localize`Khó`,
   };
 
   ngOnInit() {
@@ -102,7 +102,7 @@ export class QuestionsAdminComponent implements OnInit {
           this.loading.set(false);
         },
         error: (err: unknown) => {
-          this.toastService.error(getApiErrorMessage(err));
+          this.toastService.error(getApiErrorMessage(err, $localize`Không thể tải danh sách câu hỏi`));
           this.loading.set(false);
         },
       });
@@ -130,19 +130,21 @@ export class QuestionsAdminComponent implements OnInit {
 
   async deleteQuestion(q: Question) {
     const confirmed = await this.confirmService.confirm({
-      title: 'Xoá câu hỏi',
-      message: `Bạn có chắc muốn xoá câu hỏi này? Hành động không thể hoàn tác.`,
-      confirmText: 'Xoá',
+      title: $localize`Xoá câu hỏi`,
+      message: $localize`Bạn có chắc muốn xoá câu hỏi này? Hành động không thể hoàn tác.`,
+      confirmText: $localize`Xoá`,
       type: 'danger',
     });
     if (!confirmed) return;
 
     this.questionsService.delete(q.id).subscribe({
       next: () => {
-        this.toastService.success('Đã xoá câu hỏi');
+        this.toastService.success($localize`Đã xoá câu hỏi`);
         this.loadQuestions();
       },
-      error: (err: unknown) => this.toastService.error(getApiErrorMessage(err)),
+      error: (err: unknown) => {
+        this.toastService.error(getApiErrorMessage(err, $localize`Xoá thất bại`));
+      },
     });
   }
 

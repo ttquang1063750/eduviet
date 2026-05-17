@@ -18,7 +18,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-17 — session 27: i18n Phase 1 setup + Phase 2 markup steps 7-13)
+## Trạng thái hiện tại (cập nhật 2026-05-17 — session 27: i18n Phase 1-5 Hoàn tất)
 
 ### ✅ Đã hoàn thành
 

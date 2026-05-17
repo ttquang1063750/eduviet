@@ -62,7 +62,7 @@ export class QuestionEditorComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err));
+        this.toastService.error(getApiErrorMessage(err, $localize`Không thể tải thông tin câu hỏi`));
         this.router.navigate(['/admin/questions']);
       },
     });
@@ -70,7 +70,7 @@ export class QuestionEditorComponent implements OnInit {
 
   onSaved(_q: Question) {
     this.toastService.success(
-      this.isEdit() ? 'Đã cập nhật câu hỏi' : 'Đã tạo câu hỏi mới'
+      this.isEdit() ? $localize`Đã cập nhật câu hỏi` : $localize`Đã tạo câu hỏi mới`
     );
     this.router.navigate(['/admin/questions']);
   }

@@ -68,7 +68,7 @@ export class SchoolsAdminListComponent implements OnInit {
   selectedGeo = signal<GeoNodeSelected | null>(null);
   selectedGeoLabel = computed(() => {
     const geo = this.selectedGeo();
-    return geo ? geo.name : 'Tất cả';
+    return geo ? geo.name : $localize`Tất cả`;
   });
 
   /** Show tree only for admins with geographic scope */
@@ -125,9 +125,9 @@ export class SchoolsAdminListComponent implements OnInit {
 
   async onDelete(school: School): Promise<void> {
     const confirmed = await this.confirmService.confirm({
-      title: 'Xóa trường học',
-      message: `Xóa trường "${school.name}"? Thao tác này không thể hoàn tác.`,
-      confirmText: 'Xóa',
+      title: $localize`Xóa trường học`,
+      message: $localize`Xóa trường "${school.name}"? Thao tác này không thể hoàn tác.`,
+      confirmText: $localize`Xóa`,
       type: 'danger',
     });
     if (!confirmed) return;
@@ -136,10 +136,10 @@ export class SchoolsAdminListComponent implements OnInit {
       next: () => {
         this.schools.update((list) => list.filter((s) => s.id !== school.id));
         this.total.update((t) => t - 1);
-        this.toastService.success('Đã xóa trường học');
+        this.toastService.success($localize`Đã xóa trường học`);
       },
       error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err, 'Xóa thất bại'));
+        this.toastService.error(getApiErrorMessage(err, $localize`Xóa thất bại`));
       },
     });
   }

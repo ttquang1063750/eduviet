@@ -3,30 +3,30 @@
   <!-- Header -->
   <div class="page-header">
     <div>
-      <h2 class="page-header__title">Quản lý Blog</h2>
+      <h2 class="page-header__title" i18n>Quản lý Blog</h2>
       @if (!loading()) {
-        <p class="page-header__sub text-muted">{{ total() }} bài viết</p>
+        <p class="page-header__sub text-muted" i18n>{{ total() }} bài viết</p>
       }
     </div>
     <a mat-flat-button color="primary" routerLink="new">
-      <mat-icon>add</mat-icon> Viết bài mới
+      <mat-icon>add</mat-icon> <span i18n>Viết bài mới</span>
     </a>
   </div>
 
   <!-- Filters -->
   <div class="filter-bar">
     <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field">
-      <mat-label>Tìm kiếm bài viết</mat-label>
+      <mat-label i18n>Tìm kiếm bài viết</mat-label>
       <input
         matInput
         [formControl]="searchControl"
-        placeholder="Tiêu đề, nội dung..."
+        i18n-placeholder placeholder="Tiêu đề, nội dung..."
       />
       <mat-icon matPrefix>search</mat-icon>
     </mat-form-field>
 
     <mat-form-field appearance="outline" subscriptSizing="dynamic" class="status-field">
-      <mat-label>Trạng thái</mat-label>
+      <mat-label i18n>Trạng thái</mat-label>
       <mat-select [value]="statusFilter()" (selectionChange)="statusFilter.set($event.value); page.set(1); loadPosts()">
         @for (s of statuses; track s.value) {
           <mat-option [value]="s.value">{{ s.label }}</mat-option>
@@ -38,19 +38,20 @@
   <!-- Table -->
   @if (loading()) {
     <div class="loading-state">
-      <p>Đang tải bài viết...</p>
+      <p i18n>Đang tải bài viết...</p>
     </div>
-  } @else {
+  }
+ @else {
     <div class="table-container">
       <table class="data-table">
         <thead>
           <tr>
-            <th>Tiêu đề</th>
-            <th>Tác giả</th>
-            <th>Trạng thái</th>
-            <th>Tags</th>
-            <th>Ngày tạo</th>
-            <th class="col-actions">Thao tác</th>
+            <th i18n>Tiêu đề</th>
+            <th i18n>Tác giả</th>
+            <th i18n>Trạng thái</th>
+            <th i18n>Tags</th>
+            <th i18n>Ngày tạo</th>
+            <th class="col-actions" i18n>Thao tác</th>
           </tr>
         </thead>
         <tbody>
@@ -78,30 +79,30 @@
               </td>
               <td class="date text-muted">{{ post.createdAt | date:'dd/MM/yyyy' }}</td>
               <td class="col-actions">
-                <button mat-icon-button [matMenuTriggerFor]="menu" matTooltip="Thao tác">
+                <button mat-icon-button [matMenuTriggerFor]="menu" i18n-matTooltip matTooltip="Thao tác">
                   <mat-icon>more_vert</mat-icon>
                 </button>
                 <mat-menu #menu="matMenu">
                   <a mat-menu-item [routerLink]="[post.id, 'edit']">
                     <mat-icon>edit</mat-icon>
-                    <span>Chỉnh sửa</span>
+                    <span i18n>Chỉnh sửa</span>
                   </a>
                   @if (post.status === 'APPROVED') {
                     <button mat-menu-item (click)="onPublish(post)">
                       <mat-icon>publish</mat-icon>
-                      <span>Xuất bản</span>
+                      <span i18n>Xuất bản</span>
                     </button>
                   }
                   <button mat-menu-item (click)="onDelete(post)" class="text-danger">
                     <mat-icon color="warn">delete</mat-icon>
-                    <span class="text-danger">Xóa bài viết</span>
+                    <span class="text-danger" i18n>Xóa bài viết</span>
                   </button>
                 </mat-menu>
               </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="6" class="empty-row text-center py-8 text-muted">Không có bài viết nào.</td>
+              <td colspan="6" class="empty-row text-center py-8 text-muted" i18n>Không có bài viết nào.</td>
             </tr>
           }
         </tbody>
@@ -113,11 +114,11 @@
   @if (total() > perPage) {
     <div class="pagination">
       <button mat-stroked-button [disabled]="page() === 1" (click)="onPageChange(page() - 1)">
-        <mat-icon>chevron_left</mat-icon> Trước
+        <mat-icon>chevron_left</mat-icon> <span i18n>Trước</span>
       </button>
-      <span class="page-info">Trang {{ page() }} / {{ totalPages() }}</span>
+      <span class="page-info" i18n>Trang {{ page() }} / {{ totalPages() }}</span>
       <button mat-stroked-button [disabled]="page() >= totalPages()" (click)="onPageChange(page() + 1)">
-        Sau <mat-icon>chevron_right</mat-icon>
+        <span i18n>Sau</span> <mat-icon>chevron_right</mat-icon>
       </button>
     </div>
   }

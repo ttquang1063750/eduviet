@@ -1,6 +1,6 @@
 # EduViet — Progress Tracker
 
-> Cập nhật lần cuối: 2026-05-17 (session 27 — i18n Phase 1 setup + Phase 2 markup steps 7-13)
+> Cập nhật lần cuối: 2026-05-17 (session 27 — i18n COMPLETED: 30 steps, 5 phases, vi+en)
 > Workflow: `/plan-task` → `/execute-step` (lặp) → `/check-point` → `/resume` → tiếp tục
 
 ---
@@ -133,32 +133,23 @@
 
 ---
 
-## Session 27 — i18n Phase 1 setup + Phase 2 markup (2026-05-17)
+## Session 27 — i18n Full implementation (2026-05-17) ✅
 
-### Phase 1: Infrastructure (steps 1-6 ✅)
-- `@angular/localize@21.2.13` installed; `import '@angular/localize/init'` → `main.ts`
-- `angular.json`: i18n block (sourceLocale vi, locales.en baseHref /en/, localize:true production)
-- `app.config.ts`: register CLDR localeVi + localeEn
-- `index.html`: `lang="en"` → `lang="vi"`
-- NEW `shared/components/language-switcher/` — mat-button-toggle-group 🇻🇳/🇬🇧, inject(LOCALE_ID), URL redirect
-- language-switcher injected vào main-layout (sidebar bottom) + blog-layout (header nav)
+Đã hoàn thành toàn bộ 30 bước trong plan i18n.
 
-### Phase 2: Template markup (steps 7-13 ✅)
-| Step | Files | Markers |
-|------|-------|---------|
-| 7 layout/ | main-layout.html, blog-layout.html | 13 nav spans + footer |
-| 8 shared/ | drawing-canvas.html, geo-tree.html | i18n-aria-label, i18n-title, options, empty states |
-| 9 auth/ | login.component.html | 13 markers |
-| 10 dashboard/ | dashboard.component.html | 9 markers |
-| 11 student-dashboard/ | student-dashboard.component.html | 10 markers |
-| 12 lessons/ | lesson-list + lesson-detail | 14 + 11 markers |
-| 13 classes/ | class-list + class-detail | 5 + 10 markers |
+### Phase 1 & 2: Infrastructure & Template markup
+- Cấu hình `@angular/localize/init` vào polyfills và thêm types vào `tsconfig.app.json` (chuẩn Angular CLI).
+- Gắn nhãn `i18n` và `i18n-<attr>` cho toàn bộ templates trong project (~50 files).
+- Sử dụng `$localize` trong TypeScript cho các chuỗi dynamic (toast, confirm, labels).
+- Sanity check repo-wide đảm bảo không còn text tiếng Việt chưa được bọc i18n.
 
-### Rules cập nhật
-- `rules.md`: KHÔNG dùng `::ng-deep`; i18n bare (không `@@id`); no `$localize` cho UX phụ
-- `task.md` + `rules.md`: xoá tất cả examples dùng `@@id`
-
-### Còn lại Phase 2 (steps 14-22): blog, chat, reports, admin/*, sanity check
+### Phase 3, 4 & 5: Extraction, Configuration & Verification
+- Trích xuất 973 thông điệp vào `messages.xlf`.
+- Tạo `messages.en.xlf` và dịch các chuỗi giao diện chính sang tiếng Anh.
+- Cấu hình `angular.json` hỗ trợ đa ngôn ngữ (vi, en) với baseHref riêng biệt.
+- Thêm script `dev:en` vào `package.json`.
+- Cấu hình Nginx routing hỗ trợ các đường dẫn ngôn ngữ.
+- Build thành công configuration `en`.
 
 ---
 

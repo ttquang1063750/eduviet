@@ -3,9 +3,9 @@
     <aside class="schools-layout__sidebar">
       <div class="geo-panel">
         <div class="geo-panel__header">
-          <h3 class="geo-panel__title">Địa lý</h3>
+          <h3 class="geo-panel__title" i18n>Địa lý</h3>
           @if (selectedGeo()) {
-            <button mat-button color="warn" (click)="clearGeoFilter()" type="button">
+            <button mat-button color="warn" (click)="clearGeoFilter()" type="button" i18n>
               Bỏ lọc
             </button>
           }
@@ -14,7 +14,7 @@
           <div class="geo-panel__active">
             <mat-chip-row (removed)="clearGeoFilter()">
               {{ selectedGeoLabel() }}
-              <button matChipRemove aria-label="Bỏ lọc">
+              <button matChipRemove i18n-aria-label aria-label="Bỏ lọc">
                 <mat-icon>cancel</mat-icon>
               </button>
             </mat-chip-row>
@@ -33,11 +33,11 @@
 
       <!-- Toolbar -->
       <div class="toolbar">
-        <h2 class="toolbar__title">Quản lý trường học</h2>
+        <h2 class="toolbar__title" i18n>Quản lý trường học</h2>
         <div class="toolbar__actions">
           <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field">
-            <mat-label>Tìm kiếm</mat-label>
-            <input matInput [formControl]="searchControl" placeholder="Tên trường, mã trường..." />
+            <mat-label i18n>Tìm kiếm</mat-label>
+            <input matInput [formControl]="searchControl" i18n-placeholder placeholder="Tên trường, mã trường..." />
             <mat-icon matPrefix>search</mat-icon>
           </mat-form-field>
           @if (selectedGeo()) {
@@ -49,7 +49,7 @@
             </mat-chip-set>
           }
           <a mat-flat-button routerLink="new">
-            <mat-icon>add</mat-icon> Tạo trường mới
+            <mat-icon>add</mat-icon> <span i18n>Tạo trường mới</span>
           </a>
         </div>
       </div>
@@ -60,7 +60,7 @@
 
           <!-- Cột: Mã trường -->
           <ng-container matColumnDef="code">
-            <mat-header-cell *matHeaderCellDef>Mã</mat-header-cell>
+            <mat-header-cell *matHeaderCellDef i18n>Mã</mat-header-cell>
             <mat-cell *matCellDef="let school">
               <code class="code-badge">{{ school.code }}</code>
             </mat-cell>
@@ -68,7 +68,7 @@
 
           <!-- Cột: Tên trường -->
           <ng-container matColumnDef="name">
-            <mat-header-cell *matHeaderCellDef>Tên trường</mat-header-cell>
+            <mat-header-cell *matHeaderCellDef i18n>Tên trường</mat-header-cell>
             <mat-cell *matCellDef="let school">
               <span class="school-name">{{ school.name }}</span>
             </mat-cell>
@@ -76,7 +76,7 @@
 
           <!-- Cột: Địa chỉ -->
           <ng-container matColumnDef="address">
-            <mat-header-cell *matHeaderCellDef>Địa chỉ</mat-header-cell>
+            <mat-header-cell *matHeaderCellDef i18n>Địa chỉ</mat-header-cell>
             <mat-cell *matCellDef="let school">
               <span class="address-text">{{ school.address || '—' }}</span>
             </mat-cell>
@@ -89,7 +89,7 @@
               <button
                 mat-icon-button
                 [routerLink]="[school.id, 'classes']"
-                matTooltip="Xem lớp học"
+                i18n-matTooltip matTooltip="Xem lớp học"
                 color="primary"
               >
                 <mat-icon>school</mat-icon>
@@ -97,14 +97,14 @@
               <button
                 mat-icon-button
                 [routerLink]="[school.id]"
-                matTooltip="Chỉnh sửa trường"
+                i18n-matTooltip matTooltip="Chỉnh sửa trường"
               >
                 <mat-icon>edit</mat-icon>
               </button>
               <button
                 mat-icon-button
                 color="warn"
-                matTooltip="Xóa trường"
+                i18n-matTooltip matTooltip="Xóa trường"
                 (click)="onDelete(school)"
               >
                 <mat-icon>delete</mat-icon>
@@ -119,7 +119,7 @@
           <tr class="mat-row no-data-row" *matNoDataRow>
             <td class="mat-cell no-data-cell" [attr.colspan]="displayedColumns.length">
               <mat-icon>search_off</mat-icon>
-              <span>Không tìm thấy trường nào.</span>
+              <span i18n>Không tìm thấy trường nào.</span>
             </td>
           </tr>
         </mat-table>
@@ -133,15 +133,15 @@
             [disabled]="page() === 1"
             (click)="onPageChange(page() - 1)"
           >
-            <mat-icon>chevron_left</mat-icon> Trước
+            <mat-icon>chevron_left</mat-icon> <span i18n>Trước</span>
           </button>
-          <span class="page-info">Trang {{ page() }} / {{ totalPages() }} ({{ total() }} trường)</span>
+          <span class="page-info" i18n>Trang {{ page() }} / {{ totalPages() }} ({{ total() }} trường)</span>
           <button
             mat-stroked-button
             [disabled]="page() >= totalPages()"
             (click)="onPageChange(page() + 1)"
           >
-            Sau <mat-icon>chevron_right</mat-icon>
+            <span i18n>Sau</span> <mat-icon>chevron_right</mat-icon>
           </button>
         </div>
       }

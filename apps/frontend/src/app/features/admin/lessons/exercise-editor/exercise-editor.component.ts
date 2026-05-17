@@ -56,22 +56,22 @@ export class ExerciseEditorComponent implements OnInit {
   readonly existingQuestionIds = computed(() => new Set(this.lessonQuestions().map((lq) => lq.questionId)));
 
   readonly questionTypes = [
-    { value: '', label: 'Tất cả loại' },
-    { value: 'SINGLE_CHOICE', label: 'Một đáp án' },
-    { value: 'MULTIPLE_CHOICE', label: 'Nhiều đáp án' },
-    { value: 'FILL_IN_BLANK', label: 'Điền vào chỗ trống' },
-    { value: 'SHORT_ANSWER', label: 'Trả lời ngắn' },
-    { value: 'ESSAY', label: 'Tự luận' },
-    { value: 'DRAWING', label: 'Vẽ / Sơ đồ' },
+    { value: '', label: $localize`Tất cả loại` },
+    { value: 'SINGLE_CHOICE', label: $localize`Một đáp án` },
+    { value: 'MULTIPLE_CHOICE', label: $localize`Nhiều đáp án` },
+    { value: 'FILL_IN_BLANK', label: $localize`Điền vào chỗ trống` },
+    { value: 'SHORT_ANSWER', label: $localize`Trả lời ngắn` },
+    { value: 'ESSAY', label: $localize`Tự luận` },
+    { value: 'DRAWING', label: $localize`Vẽ / Sơ đồ` },
   ];
 
   readonly questionTypeLabels: Record<string, string> = {
-    SINGLE_CHOICE: 'Một đáp án',
-    MULTIPLE_CHOICE: 'Nhiều đáp án',
-    FILL_IN_BLANK: 'Điền vào ô trống',
-    SHORT_ANSWER: 'Trả lời ngắn',
-    ESSAY: 'Tự luận',
-    DRAWING: 'Vẽ / Sơ đồ',
+    SINGLE_CHOICE: $localize`Một đáp án`,
+    MULTIPLE_CHOICE: $localize`Nhiều đáp án`,
+    FILL_IN_BLANK: $localize`Điền vào ô trống`,
+    SHORT_ANSWER: $localize`Trả lời ngắn`,
+    ESSAY: $localize`Tự luận`,
+    DRAWING: $localize`Vẽ / Sơ đồ`,
   };
 
   ngOnInit() {
@@ -92,14 +92,14 @@ export class ExerciseEditorComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err));
+        this.toastService.error(getApiErrorMessage(err, $localize`Không thể tải bài học`));
         this.loading.set(false);
       },
     });
 
     this.questionsService.getLessonQuestions(id).subscribe({
       next: (res) => this.lessonQuestions.set(res.data),
-      error: (err: unknown) => this.toastService.error(getApiErrorMessage(err)),
+      error: (err: unknown) => this.toastService.error(getApiErrorMessage(err, $localize`Không thể tải danh sách câu hỏi`)),
     });
   }
 
@@ -152,12 +152,12 @@ export class ExerciseEditorComponent implements OnInit {
       this.questionsService.addToLesson(lessonId, question.id).subscribe({
         next: (res) => {
           this.lessonQuestions.update((lqs) => [...lqs, res.data]);
-          this.toastService.success('Đã thêm câu hỏi vào bài học');
+          this.toastService.success($localize`Đã thêm câu hỏi vào bài học`);
           this.closePanel();
           this.isSaving.set(false);
         },
         error: (err: unknown) => {
-          this.toastService.error(getApiErrorMessage(err));
+          this.toastService.error(getApiErrorMessage(err, $localize`Thêm câu hỏi thất bại`));
           this.isSaving.set(false);
         },
       });
@@ -166,7 +166,7 @@ export class ExerciseEditorComponent implements OnInit {
       this.lessonQuestions.update((lqs) =>
         lqs.map((lq) => (lq.question.id === question.id ? { ...lq, question } : lq)),
       );
-      this.toastService.success('Đã cập nhật câu hỏi');
+      this.toastService.success($localize`Đã cập nhật câu hỏi`);
       this.closePanel();
       this.isSaving.set(false);
     }
@@ -189,13 +189,13 @@ export class ExerciseEditorComponent implements OnInit {
           this.lessonQuestions.update((lqs) => [...lqs, res.data]);
           done++;
           if (done === adds.length) {
-            this.toastService.success(`Đã thêm ${done} câu hỏi vào bài học`);
+            this.toastService.success($localize`Đã thêm ${done} câu hỏi vào bài học`);
             this.closePicker();
             this.isSaving.set(false);
           }
         },
         error: (err: unknown) => {
-          this.toastService.error(getApiErrorMessage(err));
+          this.toastService.error(getApiErrorMessage(err, $localize`Thêm câu hỏi thất bại`));
           this.isSaving.set(false);
         },
       });
@@ -223,12 +223,14 @@ export class ExerciseEditorComponent implements OnInit {
     this.questionsService.removeFromLesson(this.lessonId(), questionId).subscribe({
       next: () => {
         this.lessonQuestions.update((lqs) => lqs.filter((lq) => lq.questionId !== questionId));
-        this.toastService.success('Đã gỡ câu hỏi khỏi bài học');
+        this.toastService.success($localize`Đã gỡ câu hỏi khỏi bài học`);
         if (this.selectedQuestion()?.id === questionId) {
           this.closePanel();
         }
       },
-      error: (err: unknown) => this.toastService.error(getApiErrorMessage(err)),
+      error: (err: unknown) => {
+        this.toastService.error(getApiErrorMessage(err, $localize`Gỡ câu hỏi thất bại`));
+      },
     });
   }
 
@@ -239,9 +241,11 @@ export class ExerciseEditorComponent implements OnInit {
     this.questionsService.setRandomize(this.lessonId(), newValue).subscribe({
       next: () => {
         this.lesson.update((l) => l ? ({ ...l, randomizeQuestions: newValue } as unknown as Lesson) : l);
-        this.toastService.success(newValue ? 'Đã bật câu hỏi ngẫu nhiên' : 'Đã tắt câu hỏi ngẫu nhiên');
+        this.toastService.success(newValue ? $localize`Đã bật câu hỏi ngẫu nhiên` : $localize`Đã tắt câu hỏi ngẫu nhiên`);
       },
-      error: (err: unknown) => this.toastService.error(getApiErrorMessage(err)),
+      error: (err: unknown) => {
+        this.toastService.error(getApiErrorMessage(err, $localize`Cập nhật thất bại`));
+      },
     });
   }
 
@@ -250,7 +254,7 @@ export class ExerciseEditorComponent implements OnInit {
   runGenerate() {
     const keyword = this.generateKeyword().trim();
     if (!keyword) {
-      this.toastService.error('Nhập từ khóa để tạo câu hỏi');
+      this.toastService.error($localize`Nhập từ khóa để tạo câu hỏi`);
       return;
     }
 
@@ -302,7 +306,7 @@ export class ExerciseEditorComponent implements OnInit {
 
     const selected = drafts.filter((_, i) => this.isDraftSelected(i));
     if (!selected.length) {
-      this.toastService.error('Chưa chọn câu hỏi nào');
+      this.toastService.error($localize`Chưa chọn câu hỏi nào`);
       return;
     }
 
@@ -324,19 +328,19 @@ export class ExerciseEditorComponent implements OnInit {
               this.lessonQuestions.update((lqs) => [...lqs, linkRes.data]);
               savedCount++;
               if (savedCount === selected.length) {
-                this.toastService.success(`Đã thêm ${savedCount} câu hỏi vào bài học`);
+                this.toastService.success($localize`Đã thêm ${savedCount} câu hỏi vào bài học`);
                 this.closeGenerate();
                 this.isSaving.set(false);
               }
             },
             error: (err: unknown) => {
-              this.toastService.error(getApiErrorMessage(err));
+              this.toastService.error(getApiErrorMessage(err, $localize`Thêm câu hỏi thất bại`));
               this.isSaving.set(false);
             },
           });
         },
         error: (err: unknown) => {
-          this.toastService.error(getApiErrorMessage(err));
+          this.toastService.error(getApiErrorMessage(err, $localize`Tạo câu hỏi thất bại`));
           this.isSaving.set(false);
         },
       });

@@ -13,16 +13,16 @@ import { ToastService } from '../../../core/services/toast.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
 
 const SUBJECT_CODE_LABELS: Record<SubjectCode, string> = {
-  MATH: 'Toán học',
-  PHYSICS: 'Vật lý',
-  CHEMISTRY: 'Hóa học',
-  BIOLOGY: 'Sinh học',
-  LITERATURE: 'Ngữ văn',
-  ENGLISH: 'Tiếng Anh',
-  HISTORY: 'Lịch sử',
-  GEOGRAPHY: 'Địa lý',
-  CIVIC_EDUCATION: 'Giáo dục công dân',
-  INFORMATICS: 'Tin học',
+  MATH: $localize`Toán học`,
+  PHYSICS: $localize`Vật lý`,
+  CHEMISTRY: $localize`Hóa học`,
+  BIOLOGY: $localize`Sinh học`,
+  LITERATURE: $localize`Ngữ văn`,
+  ENGLISH: $localize`Tiếng Anh`,
+  HISTORY: $localize`Lịch sử`,
+  GEOGRAPHY: $localize`Địa lý`,
+  CIVIC_EDUCATION: $localize`Giáo dục công dân`,
+  INFORMATICS: $localize`Tin học`,
 };
 
 const ALL_CODES = Object.keys(SUBJECT_CODE_LABELS) as SubjectCode[];
@@ -116,7 +116,7 @@ export class SubjectsAdminComponent implements OnInit {
   onAutoSuggest(): void {
     const code = this.subjectForm.get('code')?.value as SubjectCode | '';
     if (!code) {
-      this.toastService.error('Chọn mã môn học trước khi dùng AI gợi ý.');
+      this.toastService.error($localize`Chọn mã môn học trước khi dùng AI gợi ý.`);
       return;
     }
     this.suggesting.set(true);
@@ -129,10 +129,10 @@ export class SubjectsAdminComponent implements OnInit {
           iconUrl: suggestion.iconUrl,
         });
         this.suggesting.set(false);
-        this.toastService.success('AI đã gợi ý thông tin môn học!');
+        this.toastService.success($localize`AI đã gợi ý thông tin môn học!`);
       },
       error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err, 'AI gợi ý thất bại'));
+        this.toastService.error(getApiErrorMessage(err, $localize`AI gợi ý thất bại`));
         this.suggesting.set(false);
       },
     });
@@ -157,12 +157,12 @@ export class SubjectsAdminComponent implements OnInit {
             this.subjects.update((list) =>
               list.map((s) => (s.id === updated.id ? updated : s)),
             );
-            this.toastService.success('Đã cập nhật môn học');
+            this.toastService.success($localize`Đã cập nhật môn học`);
             this.saving.set(false);
             this.closeModal();
           },
           error: (err: unknown) => {
-            this.toastService.error(getApiErrorMessage(err, 'Cập nhật thất bại'));
+            this.toastService.error(getApiErrorMessage(err, $localize`Cập nhật thất bại`));
             this.saving.set(false);
           },
         });
@@ -180,12 +180,12 @@ export class SubjectsAdminComponent implements OnInit {
             this.subjects.update((list) => [...list, created]);
             const usedCodes = new Set(this.subjects().map((s) => s.code));
             this.availableCodes.set(ALL_CODES.filter((c) => !usedCodes.has(c)));
-            this.toastService.success('Đã tạo môn học mới');
+            this.toastService.success($localize`Đã tạo môn học mới`);
             this.saving.set(false);
             this.closeModal();
           },
           error: (err: unknown) => {
-            this.toastService.error(getApiErrorMessage(err, 'Tạo môn học thất bại'));
+            this.toastService.error(getApiErrorMessage(err, $localize`Tạo môn học thất bại`));
             this.saving.set(false);
           },
         });
@@ -194,9 +194,9 @@ export class SubjectsAdminComponent implements OnInit {
 
   async onDelete(subject: Subject): Promise<void> {
     const confirmed = await this.confirmService.confirm({
-      title: 'Xóa môn học',
-      message: `Bạn có chắc muốn xóa môn học "${subject.name}"? Thao tác này không thể hoàn tác.`,
-      confirmText: 'Xóa',
+      title: $localize`Xóa môn học`,
+      message: $localize`Bạn có chắc muốn xóa môn học "${subject.name}"? Thao tác này không thể hoàn tác.`,
+      confirmText: $localize`Xóa`,
       type: 'danger',
     });
     if (!confirmed) return;
@@ -206,10 +206,10 @@ export class SubjectsAdminComponent implements OnInit {
         this.subjects.update((list) => list.filter((s) => s.id !== subject.id));
         const usedCodes = new Set(this.subjects().map((s) => s.code));
         this.availableCodes.set(ALL_CODES.filter((c) => !usedCodes.has(c)));
-        this.toastService.success('Đã xóa môn học');
+        this.toastService.success($localize`Đã xóa môn học`);
       },
       error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err, 'Xóa thất bại'));
+        this.toastService.error(getApiErrorMessage(err, $localize`Xóa thất bại`));
       },
     });
   }

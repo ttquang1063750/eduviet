@@ -203,13 +203,13 @@ export class SchoolClassDetailComponent implements OnInit {
     request$.subscribe({
       next: () => {
         this.toastService.success(
-          this.isEditMode() ? 'Đã cập nhật lớp học' : 'Đã tạo lớp học mới',
+          this.isEditMode() ? $localize`Đã cập nhật lớp học` : $localize`Đã tạo lớp học mới`,
         );
         this.saving.set(false);
         void this.router.navigate(this.backUrl);
       },
       error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err, 'Lưu lớp học thất bại'));
+        this.toastService.error(getApiErrorMessage(err, $localize`Lưu lớp học thất bại`));
         this.saving.set(false);
       },
     });
@@ -220,20 +220,20 @@ export class SchoolClassDetailComponent implements OnInit {
     if (!id) return;
 
     const confirmed = await this.confirmService.confirm({
-      title: 'Xóa lớp học',
-      message: 'Xóa lớp học này? Thao tác không thể hoàn tác.',
-      confirmText: 'Xóa',
+      title: $localize`Xóa lớp học`,
+      message: $localize`Xóa lớp học này? Thao tác không thể hoàn tác.`,
+      confirmText: $localize`Xóa`,
       type: 'danger',
     });
     if (!confirmed) return;
 
     this.classesService.delete(id).subscribe({
       next: () => {
-        this.toastService.success('Đã xóa lớp học');
+        this.toastService.success($localize`Đã xóa lớp học`);
         void this.router.navigate(this.backUrl);
       },
       error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err, 'Xóa thất bại'));
+        this.toastService.error(getApiErrorMessage(err, $localize`Xóa thất bại`));
       },
     });
   }

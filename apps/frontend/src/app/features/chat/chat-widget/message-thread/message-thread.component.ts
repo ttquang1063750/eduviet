@@ -76,7 +76,7 @@ export class MessageThreadComponent {
 
     // Validate phía client
     if (file.size > MAX_FILE_BYTES) {
-      this.toast.error('File quá lớn. Kích thước tối đa là 10MB');
+      this.toast.error($localize`File quá lớn. Kích thước tối đa là 10MB`);
       input.value = '';
       return;
     }
@@ -92,10 +92,10 @@ export class MessageThreadComponent {
         const label = this.isImage(result.mimeType) ? file.name : `[FILE] ${file.name}`;
         this.chatService.sendMessage(label, result.url);
         this.isUploading.set(false);
-        this.toast.success('Đã gửi file thành công');
+        this.toast.success($localize`Đã gửi file thành công`);
       },
       error: (err: unknown) => {
-        this.toast.error(getApiErrorMessage(err, 'Upload file thất bại'));
+        this.toast.error(getApiErrorMessage(err, $localize`Upload file thất bại`));
         this.isUploading.set(false);
       },
     });
@@ -125,8 +125,8 @@ export class MessageThreadComponent {
   getTypingText(): string {
     const typers = this.chatService.activeRoomTyping();
     if (typers.length === 0) return '';
-    if (typers.length === 1) return `${typers[0]} đang nhập...`;
-    if (typers.length === 2) return `${typers[0]} và ${typers[1]} đang nhập...`;
-    return 'Nhiều người đang nhập...';
+    if (typers.length === 1) return $localize`${typers[0]} đang nhập...`;
+    if (typers.length === 2) return $localize`${typers[0]} và ${typers[1]} đang nhập...`;
+    return $localize`Nhiều người đang nhập...`;
   }
 }

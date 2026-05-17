@@ -74,18 +74,18 @@ export class UsersAdminDetailComponent implements OnInit {
   readonly currentUserId = this.authService.user()?.id;
 
   readonly allRoles: { value: UserRole; label: string }[] = [
-    { value: 'SUPER_ADMIN', label: 'Super Admin' },
-    { value: 'PROVINCE_ADMIN', label: 'Admin Tỉnh' },
-    { value: 'DISTRICT_ADMIN', label: 'Admin Huyện' },
-    { value: 'SCHOOL_ADMIN', label: 'Admin Trường' },
-    { value: 'CONTENT_CREATOR', label: 'Soạn thảo' },
-    { value: 'CONTENT_REVIEWER', label: 'Reviewer' },
-    { value: 'CONTENT_APPROVER', label: 'Phê duyệt' },
-    { value: 'GRADER', label: 'Chấm điểm' },
-    { value: 'SUBJECT_TEACHER', label: 'Giáo viên bộ môn' },
-    { value: 'HOMEROOM_TEACHER', label: 'GV Chủ nhiệm' },
-    { value: 'STUDENT', label: 'Học sinh' },
-    { value: 'PARENT', label: 'Phụ huynh' },
+    { value: 'SUPER_ADMIN', label: $localize`Super Admin` },
+    { value: 'PROVINCE_ADMIN', label: $localize`Admin Tỉnh` },
+    { value: 'DISTRICT_ADMIN', label: $localize`Admin Huyện` },
+    { value: 'SCHOOL_ADMIN', label: $localize`Admin Trường` },
+    { value: 'CONTENT_CREATOR', label: $localize`Soạn thảo` },
+    { value: 'CONTENT_REVIEWER', label: $localize`Reviewer` },
+    { value: 'CONTENT_APPROVER', label: $localize`Phê duyệt` },
+    { value: 'GRADER', label: $localize`Chấm điểm` },
+    { value: 'SUBJECT_TEACHER', label: $localize`Giáo viên bộ môn` },
+    { value: 'HOMEROOM_TEACHER', label: $localize`GV Chủ nhiệm` },
+    { value: 'STUDENT', label: $localize`Học sinh` },
+    { value: 'PARENT', label: $localize`Phụ huynh` },
   ];
 
   ngOnInit() {
@@ -118,7 +118,7 @@ export class UsersAdminDetailComponent implements OnInit {
       }
     } catch (error) {
       console.error('Failed to load user', error);
-      this.toastService.error('Không thể tải thông tin người dùng');
+      this.toastService.error($localize`Không thể tải thông tin người dùng`);
       this.router.navigate(['/admin/users']);
     } finally {
       this.loading.set(false);
@@ -145,9 +145,9 @@ export class UsersAdminDetailComponent implements OnInit {
       await this.usersService
         .update(this.user()!.id, { fullName, phone, isActive, title: title || undefined })
         .toPromise();
-      this.toastService.success('Cập nhật thông tin thành công');
+      this.toastService.success($localize`Cập nhật thông tin thành công`);
     } catch (error: unknown) {
-      this.toastService.error(getApiErrorMessage(error, 'Lỗi cập nhật'));
+      this.toastService.error(getApiErrorMessage(error, $localize`Lỗi cập nhật`));
     } finally {
       this.isSaving.set(false);
     }
@@ -158,21 +158,21 @@ export class UsersAdminDetailComponent implements OnInit {
     const { roles } = this.form.getRawValue();
 
     if (this.user()!.id === this.currentUserId) {
-      this.toastService.warning('Bạn không thể tự thay đổi vai trò của chính mình');
+      this.toastService.warning($localize`Bạn không thể tự thay đổi vai trò của chính mình`);
       return;
     }
 
     if (roles.length === 0) {
-      this.toastService.warning('Phải chọn ít nhất 1 vai trò');
+      this.toastService.warning($localize`Phải chọn ít nhất 1 vai trò`);
       return;
     }
 
     this.isSaving.set(true);
     try {
       await this.usersService.changeRoles(this.user()!.id, roles).toPromise();
-      this.toastService.success('Thay đổi vai trò thành công');
+      this.toastService.success($localize`Thay đổi vai trò thành công`);
     } catch (error: unknown) {
-      this.toastService.error(getApiErrorMessage(error, 'Lỗi đổi vai trò'));
+      this.toastService.error(getApiErrorMessage(error, $localize`Lỗi đổi vai trò`));
     } finally {
       this.isSaving.set(false);
     }
@@ -185,9 +185,9 @@ export class UsersAdminDetailComponent implements OnInit {
     this.isSaving.set(true);
     try {
       await this.usersService.assignSchool(this.user()!.id, schoolId || null).toPromise();
-      this.toastService.success('Gán trường học thành công');
+      this.toastService.success($localize`Gán trường học thành công`);
     } catch (error: unknown) {
-      this.toastService.error(getApiErrorMessage(error, 'Lỗi gán trường'));
+      this.toastService.error(getApiErrorMessage(error, $localize`Lỗi gán trường`));
     } finally {
       this.isSaving.set(false);
     }
@@ -196,42 +196,42 @@ export class UsersAdminDetailComponent implements OnInit {
   async onDelete() {
     if (!this.user()) return;
     if (this.user()!.id === this.currentUserId) {
-      this.toastService.warning('Bạn không thể xóa tài khoản của chính mình');
+      this.toastService.warning($localize`Bạn không thể xóa tài khoản của chính mình`);
       return;
     }
 
     const confirmed = await this.confirmService.confirm({
-      title: 'Xác nhận xóa',
-      message: `Bạn có chắc muốn xóa người dùng ${this.user()!.fullName}? Hành động này không thể hoàn tác.`,
-      confirmText: 'Xóa người dùng',
+      title: $localize`Xác nhận xóa`,
+      message: $localize`Bạn có chắc muốn xóa người dùng ${this.user()!.fullName}? Hành động này không thể hoàn tác.`,
+      confirmText: $localize`Xóa người dùng`,
       type: 'danger',
     });
 
     if (confirmed) {
       try {
         await this.usersService.delete(this.user()!.id).toPromise();
-        this.toastService.success('Xóa người dùng thành công');
+        this.toastService.success($localize`Xóa người dùng thành công`);
         this.router.navigate(['/admin/users']);
       } catch (error: unknown) {
-        this.toastService.error(getApiErrorMessage(error, 'Lỗi xóa người dùng'));
+        this.toastService.error(getApiErrorMessage(error, $localize`Lỗi xóa người dùng`));
       }
     }
   }
 
   roleLabel(role: string): string {
     const labels: Record<string, string> = {
-      SUPER_ADMIN: 'Super Admin',
-      PROVINCE_ADMIN: 'Admin Tỉnh',
-      DISTRICT_ADMIN: 'Admin Huyện',
-      SCHOOL_ADMIN: 'Admin Trường',
-      CONTENT_CREATOR: 'Soạn thảo',
-      CONTENT_REVIEWER: 'Reviewer',
-      CONTENT_APPROVER: 'Phê duyệt',
-      GRADER: 'Chấm điểm',
-      SUBJECT_TEACHER: 'Giáo viên bộ môn',
-      HOMEROOM_TEACHER: 'GV Chủ nhiệm',
-      STUDENT: 'Học sinh',
-      PARENT: 'Phụ huynh',
+      SUPER_ADMIN: $localize`Super Admin`,
+      PROVINCE_ADMIN: $localize`Admin Tỉnh`,
+      DISTRICT_ADMIN: $localize`Admin Huyện`,
+      SCHOOL_ADMIN: $localize`Admin Trường`,
+      CONTENT_CREATOR: $localize`Soạn thảo`,
+      CONTENT_REVIEWER: $localize`Reviewer`,
+      CONTENT_APPROVER: $localize`Phê duyệt`,
+      GRADER: $localize`Chấm điểm`,
+      SUBJECT_TEACHER: $localize`Giáo viên bộ môn`,
+      HOMEROOM_TEACHER: $localize`GV Chủ nhiệm`,
+      STUDENT: $localize`Học sinh`,
+      PARENT: $localize`Phụ huynh`,
     };
     return labels[role] ?? role;
   }

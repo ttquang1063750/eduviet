@@ -247,10 +247,10 @@ export class ClassesAdminDetailComponent implements OnInit {
         ]);
         this.studentResults.update((prev) => prev.filter((u) => u.id !== student.id));
         this.enrollingId.set(null);
-        this.toastService.success(`Đã thêm ${student.fullName} vào lớp`);
+        this.toastService.success($localize`Đã thêm ${student.fullName} vào lớp`);
       },
       error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err, 'Thêm học sinh thất bại'));
+        this.toastService.error(getApiErrorMessage(err, $localize`Thêm học sinh thất bại`));
         this.enrollingId.set(null);
       },
     });
@@ -260,19 +260,19 @@ export class ClassesAdminDetailComponent implements OnInit {
     const classId = this.classId();
     if (!classId) return;
     const confirmed = await this.confirmService.confirm({
-      title: 'Xóa học sinh khỏi lớp',
-      message: `Xóa ${enrollment.user.fullName} khỏi lớp này?`,
-      confirmText: 'Xóa',
+      title: $localize`Xóa học sinh khỏi lớp`,
+      message: $localize`Xóa ${enrollment.user.fullName} khỏi lớp này?`,
+      confirmText: $localize`Xóa`,
       type: 'danger',
     });
     if (!confirmed) return;
     this.classesService.unenroll(classId, enrollment.user.id).subscribe({
       next: () => {
         this.enrollments.update((prev) => prev.filter((e) => e.user.id !== enrollment.user.id));
-        this.toastService.success(`Đã xóa ${enrollment.user.fullName} khỏi lớp`);
+        this.toastService.success($localize`Đã xóa ${enrollment.user.fullName} khỏi lớp`);
       },
       error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err, 'Xóa học sinh thất bại'));
+        this.toastService.error(getApiErrorMessage(err, $localize`Xóa học sinh thất bại`));
       },
     });
   }
@@ -425,13 +425,13 @@ export class ClassesAdminDetailComponent implements OnInit {
     request$.subscribe({
       next: () => {
         this.toastService.success(
-          this.isEditMode() ? 'Đã cập nhật lớp học' : 'Đã tạo lớp học mới',
+          this.isEditMode() ? $localize`Đã cập nhật lớp học` : $localize`Đã tạo lớp học mới`,
         );
         this.saving.set(false);
         void this.router.navigate(this.backUrl());
       },
       error: (err: unknown) => {
-        this.toastService.error(getApiErrorMessage(err, 'Lưu lớp học thất bại'));
+        this.toastService.error(getApiErrorMessage(err, $localize`Lưu lớp học thất bại`));
         this.saving.set(false);
       },
     });

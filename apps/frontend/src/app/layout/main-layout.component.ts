@@ -82,24 +82,32 @@ export class MainLayoutComponent {
     getInitials(this.user()?.fullName ?? '')
   );
 
+  readonly toggleTooltip = computed(() =>
+    this.collapsed() ? $localize`Mở rộng menu` : $localize`Thu gọn menu`
+  );
+
+  readonly blogAdminTooltip = computed(() =>
+    this.collapsed() ? $localize`Quản lý Blog` : ''
+  );
+
   readonly roleLabel = computed(() => {
     const u = this.user();
     // Ưu tiên hiển thị chức danh tự do nếu có
     if (u?.title) return u.title;
     // Fallback: nhãn của role đầu tiên
     const labels: Record<string, string> = {
-      SUPER_ADMIN: 'Super Admin',
-      PROVINCE_ADMIN: 'Quản trị tỉnh',
-      DISTRICT_ADMIN: 'Quản trị huyện',
-      SCHOOL_ADMIN: 'Quản trị trường',
-      CONTENT_CREATOR: 'Soạn thảo viên',
-      CONTENT_REVIEWER: 'Reviewer',
-      CONTENT_APPROVER: 'Phê duyệt viên',
-      GRADER: 'Chấm điểm',
-      HOMEROOM_TEACHER: 'Giáo viên chủ nhiệm',
-      SUBJECT_TEACHER: 'Giáo viên bộ môn',
-      STUDENT: 'Học sinh',
-      PARENT: 'Phụ huynh',
+      SUPER_ADMIN: $localize`Super Admin`,
+      PROVINCE_ADMIN: $localize`Quản trị tỉnh`,
+      DISTRICT_ADMIN: $localize`Quản trị huyện`,
+      SCHOOL_ADMIN: $localize`Quản trị trường`,
+      CONTENT_CREATOR: $localize`Soạn thảo viên`,
+      CONTENT_REVIEWER: $localize`Reviewer`,
+      CONTENT_APPROVER: $localize`Phê duyệt viên`,
+      GRADER: $localize`Chấm điểm`,
+      HOMEROOM_TEACHER: $localize`Giáo viên chủ nhiệm`,
+      SUBJECT_TEACHER: $localize`Giáo viên bộ môn`,
+      STUDENT: $localize`Học sinh`,
+      PARENT: $localize`Phụ huynh`,
     };
     const primaryRole = u?.roles?.[0] ?? '';
     return labels[primaryRole] ?? '';

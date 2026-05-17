@@ -7,7 +7,7 @@
     <div class="toolbar">
       <div class="toolbar__title-group">
         <h2 class="toolbar__title">
-          Học sinh
+          <span i18n>Học sinh</span>
           @if (enrollments().length > 0) {
             <span class="count-badge">{{ enrollments().length }}</span>
           }
@@ -18,11 +18,15 @@
       </div>
       <div class="toolbar__actions">
         <a mat-stroked-button [routerLink]="backUrl()">
-          <mat-icon>edit</mat-icon> Chỉnh sửa lớp
+          <mat-icon>edit</mat-icon> <span i18n>Chỉnh sửa lớp</span>
         </a>
         <button mat-flat-button (click)="toggleAddPanel()">
           <mat-icon>{{ showAddPanel() ? 'close' : 'person_add' }}</mat-icon>
-          {{ showAddPanel() ? 'Đóng' : 'Thêm học sinh' }}
+          @if (showAddPanel()) {
+            <span i18n>Đóng</span>
+          } @else {
+            <span i18n>Thêm học sinh</span>
+          }
         </button>
       </div>
     </div>
@@ -37,8 +41,8 @@
       <div class="add-panel">
         <div class="add-panel__header">
           <mat-form-field appearance="outline" subscriptSizing="dynamic" class="add-panel__search">
-            <mat-label>Tìm học sinh</mat-label>
-            <input matInput [formControl]="searchControl" placeholder="Nhập tên hoặc email..." />
+            <mat-label i18n>Tìm học sinh</mat-label>
+            <input matInput [formControl]="searchControl" i18n-placeholder placeholder="Nhập tên hoặc email..." />
             <mat-icon matPrefix>search</mat-icon>
           </mat-form-field>
         </div>
@@ -47,14 +51,15 @@
           @if (searching()) {
             <div class="panel-loading">
               <mat-spinner diameter="24" />
-              <span>Đang tìm kiếm...</span>
+              <span i18n>Đang tìm kiếm...</span>
             </div>
           } @else if (searchResults().length === 0) {
             <div class="panel-empty">
               <mat-icon>person_search</mat-icon>
-              <span>Không tìm thấy học sinh phù hợp</span>
+              <span i18n>Không tìm thấy học sinh phù hợp</span>
             </div>
-          } @else {
+          }
+ @else {
             @for (student of searchResults(); track student.id) {
               <div class="student-result">
                 <div class="student-result__avatar">
@@ -76,7 +81,7 @@
                 >
                   <mat-spinner diameter="16" [style.display]="enrollingId() === student.id ? 'inline-block' : 'none'" />
                   <mat-icon [style.display]="enrollingId() !== student.id ? '' : 'none'">add</mat-icon>
-                  <span [style.display]="enrollingId() !== student.id ? '' : 'none'">Thêm</span>
+                  <span [style.display]="enrollingId() !== student.id ? '' : 'none'" i18n>Thêm</span>
                 </button>
               </div>
             }
@@ -110,7 +115,7 @@
 
         <!-- Cột: Họ tên -->
         <ng-container matColumnDef="name">
-          <mat-header-cell *matHeaderCellDef>Họ và tên</mat-header-cell>
+          <mat-header-cell *matHeaderCellDef i18n>Họ và tên</mat-header-cell>
           <mat-cell *matCellDef="let enrollment">
             <span class="student-name">{{ enrollment.user.fullName }}</span>
           </mat-cell>
@@ -118,7 +123,7 @@
 
         <!-- Cột: Email -->
         <ng-container matColumnDef="email">
-          <mat-header-cell *matHeaderCellDef>Email</mat-header-cell>
+          <mat-header-cell *matHeaderCellDef i18n>Email</mat-header-cell>
           <mat-cell *matCellDef="let enrollment">
             <span class="student-email">{{ enrollment.user.email }}</span>
           </mat-cell>
@@ -131,7 +136,7 @@
             <button
               mat-icon-button
               color="warn"
-              matTooltip="Xóa khỏi lớp"
+              i18n-matTooltip matTooltip="Xóa khỏi lớp"
               (click)="onRemove(enrollment)"
               [disabled]="removingId() === enrollment.user.id"
             >
@@ -148,7 +153,7 @@
         <tr class="mat-row no-data-row" *matNoDataRow>
           <td class="mat-cell no-data-cell" [attr.colspan]="displayedColumns.length">
             <mat-icon>group_off</mat-icon>
-            <span>Lớp chưa có học sinh nào. Nhấn "Thêm học sinh" để bắt đầu.</span>
+            <span i18n>Lớp chưa có học sinh nào. Nhấn "Thêm học sinh" để bắt đầu.</span>
           </td>
         </tr>
       </mat-table>

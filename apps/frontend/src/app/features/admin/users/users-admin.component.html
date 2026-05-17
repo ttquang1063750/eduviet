@@ -1,17 +1,17 @@
 <div class="page">
   <div class="page-header">
-    <h1>Quản lý người dùng</h1>
+    <h1 i18n>Quản lý người dùng</h1>
     <button mat-flat-button (click)="openCreateModal()">
-      <mat-icon>add</mat-icon> Thêm người dùng
+      <mat-icon>add</mat-icon> <span i18n>Thêm người dùng</span>
     </button>
   </div>
 
   <div class="filter-bar">
     <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field">
-      <mat-label>Tìm kiếm người dùng</mat-label>
+      <mat-label i18n>Tìm kiếm người dùng</mat-label>
       <input
         matInput
-        placeholder="Tên hoặc email..."
+        i18n-placeholder placeholder="Tên hoặc email..."
         [ngModel]="search()"
         (ngModelChange)="onSearch($event)"
       />
@@ -19,32 +19,32 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" subscriptSizing="dynamic" class="role-field">
-      <mat-label>Vai trò</mat-label>
+      <mat-label i18n>Vai trò</mat-label>
       <mat-select [ngModel]="roleFilter()" (ngModelChange)="onRoleChange($event)">
-        <mat-option value="">Tất cả vai trò</mat-option>
-        <mat-option value="SUPER_ADMIN">Super Admin</mat-option>
-        <mat-option value="SCHOOL_ADMIN">Admin Trường</mat-option>
-        <mat-option value="SUBJECT_TEACHER">Giáo viên</mat-option>
-        <mat-option value="STUDENT">Học sinh</mat-option>
-        <mat-option value="PARENT">Phụ huynh</mat-option>
+        <mat-option value="" i18n>Tất cả vai trò</mat-option>
+        <mat-option value="SUPER_ADMIN" i18n>Super Admin</mat-option>
+        <mat-option value="SCHOOL_ADMIN" i18n>Admin Trường</mat-option>
+        <mat-option value="SUBJECT_TEACHER" i18n>Giáo viên</mat-option>
+        <mat-option value="STUDENT" i18n>Học sinh</mat-option>
+        <mat-option value="PARENT" i18n>Phụ huynh</mat-option>
       </mat-select>
     </mat-form-field>
   </div>
 
   <div class="table-card">
     @if (loading()) {
-      <div class="loading">Đang tải...</div>
+      <div class="loading" i18n>Đang tải...</div>
     } @else {
       <div class="table-container">
         <table class="data-table">
           <thead>
             <tr>
-              <th>Họ tên</th>
-              <th>Email</th>
-              <th>Vai trò</th>
-              <th>Trạng thái</th>
-              <th>Ngày tạo</th>
-              <th class="col-actions">Thao tác</th>
+              <th i18n>Họ tên</th>
+              <th i18n>Email</th>
+              <th i18n>Vai trò</th>
+              <th i18n>Trạng thái</th>
+              <th i18n>Ngày tạo</th>
+              <th class="col-actions" i18n>Thao tác</th>
             </tr>
           </thead>
           <tbody>
@@ -65,20 +65,22 @@
                   </div>
                 </td>
                 <td>
-                  <span class="status-badge" [class.active]="user.isActive">
-                    {{ user.isActive ? 'Hoạt động' : 'Bị khóa' }}
-                  </span>
+                  @if (user.isActive) {
+                    <span class="status-badge active" i18n>Hoạt động</span>
+                  } @else {
+                    <span class="status-badge" i18n>Bị khóa</span>
+                  }
                 </td>
                 <td class="text-muted">{{ user.createdAt | date: 'dd/MM/yyyy' }}</td>
                 <td class="col-actions">
-                  <button mat-icon-button (click)="editUser(user.id)" matTooltip="Sửa">
+                  <button mat-icon-button (click)="editUser(user.id)" i18n-matTooltip matTooltip="Sửa">
                     <mat-icon>edit</mat-icon>
                   </button>
                 </td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="6" class="text-center py-8 text-muted">Không tìm thấy người dùng nào</td>
+                <td colspan="6" class="text-center py-8 text-muted" i18n>Không tìm thấy người dùng nào</td>
               </tr>
             }
           </tbody>
@@ -86,14 +88,14 @@
       </div>
 
       <div class="table-footer">
-        <span class="total-count">Tổng: {{ total() }} người dùng</span>
+        <span class="total-count" i18n>Tổng: {{ total() }} người dùng</span>
         <div class="pagination">
           <button mat-stroked-button [disabled]="page() === 1" (click)="goToPage(page() - 1)">
-            <mat-icon>chevron_left</mat-icon> Trước
+            <mat-icon>chevron_left</mat-icon> <span i18n>Trước</span>
           </button>
-          <span class="page-info">Trang {{ page() }} / {{ totalPages() }}</span>
+          <span class="page-info" i18n>Trang {{ page() }} / {{ totalPages() }}</span>
           <button mat-stroked-button [disabled]="page() === totalPages()" (click)="goToPage(page() + 1)">
-            Sau <mat-icon>chevron_right</mat-icon>
+            <span i18n>Sau</span> <mat-icon>chevron_right</mat-icon>
           </button>
         </div>
       </div>
@@ -106,7 +108,7 @@
   <div class="modal-overlay" (click)="closeCreateModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>Tạo người dùng mới</h2>
+        <h2 i18n>Tạo người dùng mới</h2>
         <button mat-icon-button (click)="closeCreateModal()">
           <mat-icon>close</mat-icon>
         </button>
@@ -115,25 +117,25 @@
         <form class="material-form" (submit)="$event.preventDefault(); saveUser()">
           <div class="form-grid">
             <mat-form-field appearance="outline">
-              <mat-label>Email</mat-label>
-              <input matInput type="email" [(ngModel)]="newUser().email" name="email" required placeholder="example@eduviet.vn" />
+              <mat-label i18n>Email</mat-label>
+              <input matInput type="email" [(ngModel)]="newUser().email" name="email" required i18n-placeholder placeholder="example@eduviet.vn" />
               <mat-icon matSuffix>email</mat-icon>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Họ và tên</mat-label>
-              <input matInput type="text" [(ngModel)]="newUser().fullName" name="fullName" required placeholder="Nguyễn Văn A" />
+              <mat-label i18n>Họ và tên</mat-label>
+              <input matInput type="text" [(ngModel)]="newUser().fullName" name="fullName" required i18n-placeholder placeholder="Nguyễn Văn A" />
               <mat-icon matSuffix>person</mat-icon>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Mật khẩu</mat-label>
-              <input matInput type="password" [(ngModel)]="newUser().password" name="password" required placeholder="Tối thiểu 8 ký tự" />
+              <mat-label i18n>Mật khẩu</mat-label>
+              <input matInput type="password" [(ngModel)]="newUser().password" name="password" required i18n-placeholder placeholder="Tối thiểu 8 ký tự" />
               <mat-icon matSuffix>lock</mat-icon>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Vai trò</mat-label>
+              <mat-label i18n>Vai trò</mat-label>
               <mat-select
                 [ngModel]="newUser().roles"
                 (ngModelChange)="newUser.update(u => ({ ...u, roles: $event }))"
@@ -141,27 +143,27 @@
                 multiple
                 required
               >
-                <mat-option value="STUDENT">Học sinh</mat-option>
-                <mat-option value="PARENT">Phụ huynh</mat-option>
-                <mat-option value="SUBJECT_TEACHER">Giáo viên bộ môn</mat-option>
-                <mat-option value="HOMEROOM_TEACHER">GV Chủ nhiệm</mat-option>
-                <mat-option value="CONTENT_CREATOR">Soạn thảo</mat-option>
-                <mat-option value="CONTENT_REVIEWER">Reviewer</mat-option>
-                <mat-option value="CONTENT_APPROVER">Phê duyệt</mat-option>
-                <mat-option value="GRADER">Chấm điểm</mat-option>
-                <mat-option value="SCHOOL_ADMIN">Admin Trường</mat-option>
-                <mat-option value="DISTRICT_ADMIN">Admin Huyện</mat-option>
-                <mat-option value="PROVINCE_ADMIN">Admin Tỉnh</mat-option>
-                <mat-option value="SUPER_ADMIN">Super Admin</mat-option>
+                <mat-option value="STUDENT" i18n>Học sinh</mat-option>
+                <mat-option value="PARENT" i18n>Phụ huynh</mat-option>
+                <mat-option value="SUBJECT_TEACHER" i18n>Giáo viên bộ môn</mat-option>
+                <mat-option value="HOMEROOM_TEACHER" i18n>GV Chủ nhiệm</mat-option>
+                <mat-option value="CONTENT_CREATOR" i18n>Soạn thảo</mat-option>
+                <mat-option value="CONTENT_REVIEWER" i18n>Reviewer</mat-option>
+                <mat-option value="CONTENT_APPROVER" i18n>Phê duyệt</mat-option>
+                <mat-option value="GRADER" i18n>Chấm điểm</mat-option>
+                <mat-option value="SCHOOL_ADMIN" i18n>Admin Trường</mat-option>
+                <mat-option value="DISTRICT_ADMIN" i18n>Admin Huyện</mat-option>
+                <mat-option value="PROVINCE_ADMIN" i18n>Admin Tỉnh</mat-option>
+                <mat-option value="SUPER_ADMIN" i18n>Super Admin</mat-option>
               </mat-select>
-              <mat-hint>Có thể chọn nhiều vai trò</mat-hint>
+              <mat-hint i18n>Có thể chọn nhiều vai trò</mat-hint>
             </mat-form-field>
 
             @if (isSuperAdmin()) {
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Trường học</mat-label>
+                <mat-label i18n>Trường học</mat-label>
                 <mat-select [(ngModel)]="newUser().schoolId" name="schoolId">
-                  <mat-option [value]="undefined">Không thuộc trường nào</mat-option>
+                  <mat-option [value]="undefined" i18n>Không thuộc trường nào</mat-option>
                   @for (school of schools(); track school.id) {
                     <mat-option [value]="school.id">{{ school.name }}</mat-option>
                   }
@@ -171,9 +173,13 @@
           </div>
 
           <div class="form-actions">
-            <button mat-button type="button" (click)="closeCreateModal()">Hủy</button>
+            <button mat-button type="button" (click)="closeCreateModal()" i18n>Hủy</button>
             <button mat-flat-button color="primary" type="submit" [disabled]="isSaving()">
-              {{ isSaving() ? 'Đang tạo...' : 'Tạo người dùng' }}
+              @if (isSaving()) {
+                <span i18n>Đang tạo...</span>
+              } @else {
+                <span i18n>Tạo người dùng</span>
+              }
             </button>
           </div>
         </form>

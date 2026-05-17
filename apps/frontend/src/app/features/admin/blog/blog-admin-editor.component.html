@@ -3,11 +3,15 @@
   <!-- Toolbar -->
   <div class="editor-toolbar">
     <div class="editor-toolbar__left">
-      <a mat-icon-button routerLink="/admin/blog" matTooltip="Quay lại danh sách">
+      <a mat-icon-button routerLink="/admin/blog" i18n-matTooltip matTooltip="Quay lại danh sách">
         <mat-icon>arrow_back</mat-icon>
       </a>
       <h2 class="editor-toolbar__title">
-        {{ isEditMode() ? 'Chỉnh sửa bài viết' : 'Viết bài mới' }}
+        @if (isEditMode()) {
+          <span i18n>Chỉnh sửa bài viết</span>
+        } @else {
+          <span i18n>Viết bài mới</span>
+        }
       </h2>
       <span class="status-badge" [class]="'status-badge--' + postStatus().toLowerCase()">
         {{ postStatus() }}
@@ -21,7 +25,7 @@
         (click)="onSave()"
       >
         <mat-icon>save</mat-icon>
-        @if (saving()) { Đang lưu... } @else { Lưu nháp }
+        @if (saving()) { <span i18n>Đang lưu...</span> } @else { <span i18n>Lưu nháp</span> }
       </button>
       @if (postId() && canSubmitReview()) {
         <button
@@ -32,7 +36,7 @@
           (click)="onSubmitForReview()"
         >
           <mat-icon>send</mat-icon>
-          @if (submitting()) { Đang gửi... } @else { Gửi duyệt }
+          @if (submitting()) { <span i18n>Đang gửi...</span> } @else { <span i18n>Gửi duyệt</span> }
         </button>
       }
       @if (postId() && canPublish()) {
@@ -43,7 +47,7 @@
           (click)="onPublish()"
         >
           <mat-icon>publish</mat-icon>
-          🚀 Xuất bản
+          <span i18n>🚀 Xuất bản</span>
         </button>
       }
     </div>
@@ -56,18 +60,18 @@
         <!-- Title -->
         <div class="title-container">
           <mat-form-field appearance="fill" class="full-width title-field">
-            <mat-label>Tiêu đề bài viết</mat-label>
+            <mat-label i18n>Tiêu đề bài viết</mat-label>
             <input
               matInput
               type="text"
               formControlName="title"
-              placeholder="Nhập tiêu đề bài viết..."
+              i18n-placeholder placeholder="Nhập tiêu đề bài viết..."
             />
           </mat-form-field>
           @if (slugPreview()) {
             <div class="slug-preview">
               <mat-icon>link</mat-icon>
-              <span>URL: <code>/blog/{{ slugPreview() }}</code></span>
+              <span i18n>URL: <code>/blog/{{ slugPreview() }}</code></span>
             </div>
           }
         </div>
@@ -75,19 +79,19 @@
         <!-- Meta Row -->
         <div class="meta-row">
           <mat-form-field appearance="outline" class="meta-field">
-            <mat-label>Ảnh bìa (URL)</mat-label>
+            <mat-label i18n>Ảnh bìa (URL)</mat-label>
             <input
               matInput
               type="url"
               formControlName="coverImage"
-              placeholder="https://example.com/image.jpg"
+              i18n-placeholder placeholder="https://example.com/image.jpg"
             />
             <mat-icon matSuffix>image</mat-icon>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="meta-field">
-            <mat-label>Tags</mat-label>
-            <mat-chip-grid #chipGrid aria-label="Tag selection">
+            <mat-label i18n>Tags</mat-label>
+            <mat-chip-grid #chipGrid i18n-aria-label aria-label="Tag selection">
               @for (tag of selectedTags(); track tag) {
                 <mat-chip-row (removed)="removeTag(tag)">
                   {{ tag }}
@@ -97,7 +101,7 @@
                 </mat-chip-row>
               }
               <input
-                placeholder="Thêm tag..."
+                i18n-placeholder placeholder="Thêm tag..."
                 #tagInput
                 [formControl]="tagCtrl"
                 [matChipInputFor]="chipGrid"
@@ -120,7 +124,7 @@
             formControlName="content"
             [modules]="quillModules"
             (onEditorCreated)="onEditorCreated($event)"
-            placeholder="Bắt đầu viết nội dung bài học..."
+            i18n-placeholder placeholder="Bắt đầu viết nội dung bài học..."
             class="quill-editor"
           ></quill-editor>
         </div>

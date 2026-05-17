@@ -1,20 +1,20 @@
 <div class="page-header">
   <div>
-    <h1 class="page-title">Quản lý bài học</h1>
-    <p class="page-subtitle">Tạo, chỉnh sửa và quản lý nội dung bài học — {{ total() }} bài học</p>
+    <h1 class="page-title" i18n>Quản lý bài học</h1>
+    <p class="page-subtitle" i18n>Tạo, chỉnh sửa và quản lý nội dung bài học — {{ total() }} bài học</p>
   </div>
   <button mat-flat-button (click)="openCreate()">
-    <mat-icon>add</mat-icon> Tạo bài học mới
+    <mat-icon>add</mat-icon> <span i18n>Tạo bài học mới</span>
   </button>
 </div>
 
 <!-- Bộ lọc -->
 <div class="filter-bar">
   <mat-form-field appearance="outline" subscriptSizing="dynamic">
-    <mat-label>Tìm kiếm</mat-label>
+    <mat-label i18n>Tìm kiếm</mat-label>
     <input
       matInput
-      placeholder="Tiêu đề, chủ đề..."
+      i18n-placeholder placeholder="Tiêu đề, chủ đề..."
       [value]="filterSearch()"
       (input)="filterSearch.set(getInputValue($event))"
       (keydown.enter)="applyFilters()"
@@ -22,9 +22,9 @@
   </mat-form-field>
 
   <mat-form-field appearance="outline" subscriptSizing="dynamic">
-    <mat-label>Môn học</mat-label>
+    <mat-label i18n>Môn học</mat-label>
     <mat-select [value]="filterSubject()" (selectionChange)="filterSubject.set($event.value); applyFilters()">
-      <mat-option value="">Tất cả môn học</mat-option>
+      <mat-option value="" i18n>Tất cả môn học</mat-option>
       @for (s of subjects(); track s.id) {
         <mat-option [value]="s.code">{{ s.name }}</mat-option>
       }
@@ -32,37 +32,37 @@
   </mat-form-field>
 
   <mat-form-field appearance="outline" subscriptSizing="dynamic">
-    <mat-label>Khối lớp</mat-label>
+    <mat-label i18n>Khối lớp</mat-label>
     <mat-select [value]="filterGrade()" (selectionChange)="filterGrade.set($event.value === '' ? '' : +$event.value); applyFilters()">
-      <mat-option value="">Tất cả khối</mat-option>
+      <mat-option value="" i18n>Tất cả khối</mat-option>
       @for (g of [1,2,3,4,5,6,7,8,9,10,11,12]; track g) {
-        <mat-option [value]="g">Khối {{ g }}</mat-option>
+        <mat-option [value]="g" i18n>Khối {{ g }}</mat-option>
       }
     </mat-select>
   </mat-form-field>
 
   <mat-form-field appearance="outline" subscriptSizing="dynamic">
-    <mat-label>Trạng thái</mat-label>
+    <mat-label i18n>Trạng thái</mat-label>
     <mat-select [value]="filterStatus()" (selectionChange)="filterStatus.set($event.value); applyFilters()">
-      <mat-option value="">Tất cả trạng thái</mat-option>
+      <mat-option value="" i18n>Tất cả trạng thái</mat-option>
       @for (entry of statusLabels | keyvalue; track entry.key) {
         <mat-option [value]="entry.key">{{ entry.value }}</mat-option>
       }
     </mat-select>
   </mat-form-field>
 
-  <button mat-stroked-button (click)="applyFilters()">Tìm</button>
+  <button mat-stroked-button (click)="applyFilters()" i18n>Tìm</button>
 </div>
 
 <!-- Bảng bài học -->
 @if (loading()) {
-  <div class="loading-state">Đang tải...</div>
+  <div class="loading-state" i18n>Đang tải...</div>
 } @else if (lessons().length === 0) {
   <div class="empty-state">
     <mat-icon class="empty-icon">menu_book</mat-icon>
-    <p>Chưa có bài học nào phù hợp.</p>
+    <p i18n>Chưa có bài học nào phù hợp.</p>
     <button mat-flat-button (click)="openCreate()">
-      <mat-icon>add</mat-icon> Tạo bài học đầu tiên
+      <mat-icon>add</mat-icon> <span i18n>Tạo bài học đầu tiên</span>
     </button>
   </div>
 } @else {
@@ -70,11 +70,11 @@
     <table class="data-table">
       <thead>
         <tr>
-          <th class="col-title">Bài học</th>
-          <th class="col-subject">Môn / Khối</th>
-          <th class="col-status">Trạng thái</th>
-          <th class="col-date">Ngày tạo</th>
-          <th class="col-actions">Thao tác</th>
+          <th class="col-title" i18n>Bài học</th>
+          <th class="col-subject" i18n>Môn / Khối</th>
+          <th class="col-status" i18n>Trạng thái</th>
+          <th class="col-date" i18n>Ngày tạo</th>
+          <th class="col-actions" i18n>Thao tác</th>
         </tr>
       </thead>
       <tbody>
@@ -89,7 +89,7 @@
             <td class="col-subject">
               <div class="subject-info">
                 <span class="badge badge-subject" [style.background-color]="l.subject.color">{{ l.subject.name }}</span>
-                <span class="text-muted">Lớp {{ l.grade }}</span>
+                <span class="text-muted" i18n>Lớp {{ l.grade }}</span>
               </div>
             </td>
             <td class="col-status">
@@ -102,14 +102,14 @@
             </td>
             <td class="col-actions">
               <div class="action-buttons">
-                <button mat-icon-button matTooltip="Sửa nội dung" (click)="openEdit(l)">
+                <button mat-icon-button i18n-matTooltip matTooltip="Sửa nội dung" (click)="openEdit(l)">
                   <mat-icon>edit</mat-icon>
                 </button>
-                <button mat-icon-button matTooltip="Biên soạn câu hỏi" (click)="openExercises(l)">
+                <button mat-icon-button i18n-matTooltip matTooltip="Biên soạn câu hỏi" (click)="openExercises(l)">
                   <mat-icon>quiz</mat-icon>
                 </button>
                 @if (l.status === 'DRAFT' || l.status === 'REJECTED') {
-                  <button mat-icon-button matTooltip="Gửi duyệt" (click)="submitReview(l)">
+                  <button mat-icon-button i18n-matTooltip matTooltip="Gửi duyệt" (click)="submitReview(l)">
                     <mat-icon>send</mat-icon>
                   </button>
                 }
@@ -125,11 +125,11 @@
   @if (totalPages() > 1) {
     <div class="pagination">
       <button mat-stroked-button [disabled]="page() === 1" (click)="goToPage(page() - 1)">
-        <mat-icon>chevron_left</mat-icon> Trước
+        <mat-icon>chevron_left</mat-icon> <span i18n>Trước</span>
       </button>
-      <span class="page-info">{{ page() }} / {{ totalPages() }}</span>
+      <span class="page-info" i18n>{{ page() }} / {{ totalPages() }}</span>
       <button mat-stroked-button [disabled]="page() === totalPages()" (click)="goToPage(page() + 1)">
-        Sau <mat-icon>chevron_right</mat-icon>
+        <span i18n>Sau</span> <mat-icon>chevron_right</mat-icon>
       </button>
     </div>
   }

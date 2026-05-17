@@ -117,7 +117,7 @@ export class LessonAdminEditorComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        this.toastService.error(getApiErrorMessage(err));
+        this.toastService.error(getApiErrorMessage(err, $localize`Không thể tải bài học`));
         this.loading.set(false);
         this.router.navigate(['/admin/lessons']);
       },
@@ -142,12 +142,12 @@ export class LessonAdminEditorComponent implements OnInit {
           if (reviewerId) {
             this.lessonsService.assignReviewer(this.lessonId()!, reviewerId).subscribe();
           }
-          this.toastService.success('Đã cập nhật bài học');
+          this.toastService.success($localize`Đã cập nhật bài học`);
           this.saving.set(false);
           this.router.navigate(['/admin/lessons']);
         },
         error: (err) => {
-          this.toastService.error(getApiErrorMessage(err));
+          this.toastService.error(getApiErrorMessage(err, $localize`Cập nhật thất bại`));
           this.saving.set(false);
         },
       });
@@ -159,12 +159,12 @@ export class LessonAdminEditorComponent implements OnInit {
           if (reviewerId) {
             this.lessonsService.assignReviewer(newId, reviewerId).subscribe();
           }
-          this.toastService.success('Đã tạo bài học mới');
+          this.toastService.success($localize`Đã tạo bài học mới`);
           this.saving.set(false);
           this.router.navigate(['/admin/lessons']);
         },
         error: (err) => {
-          this.toastService.error(getApiErrorMessage(err));
+          this.toastService.error(getApiErrorMessage(err, $localize`Tạo bài học thất bại`));
           this.saving.set(false);
         },
       });

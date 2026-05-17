@@ -1,10 +1,10 @@
 <div class="admin-container">
   <div class="header-actions">
-    <h2>Kiểm duyệt nội dung (Blog)</h2>
+    <h2 i18n>Kiểm duyệt nội dung (Blog)</h2>
   </div>
 
   <div class="tabs">
-    <button mat-button class="tab-btn active">
+    <button mat-button class="tab-btn active" i18n>
       <mat-icon>hourglass_empty</mat-icon> Chờ duyệt
     </button>
   </div>
@@ -15,10 +15,10 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>Tiêu đề</th>
-              <th>Tác giả</th>
-              <th>Ngày tạo</th>
-              <th class="col-actions">Hành động</th>
+              <th i18n>Tiêu đề</th>
+              <th i18n>Tác giả</th>
+              <th i18n>Ngày tạo</th>
+              <th class="col-actions" i18n>Hành động</th>
             </tr>
           </thead>
           <tbody>
@@ -30,12 +30,12 @@
                 <td class="col-actions">
                   <div class="action-buttons">
                     <button mat-flat-button color="primary" (click)="approve(item.id)">
-                      <mat-icon>check</mat-icon> Duyệt
+                      <mat-icon>check</mat-icon> <span i18n>Duyệt</span>
                     </button>
                     <button mat-stroked-button color="warn" (click)="reject(item.id)">
-                      <mat-icon>close</mat-icon> Từ chối
+                      <mat-icon>close</mat-icon> <span i18n>Từ chối</span>
                     </button>
-                    <a mat-icon-button [routerLink]="['/blog', item.slug]" target="_blank" matTooltip="Xem trước">
+                    <a mat-icon-button [routerLink]="['/blog', item.slug]" target="_blank" i18n-matTooltip matTooltip="Xem trước">
                       <mat-icon>visibility</mat-icon>
                     </a>
                   </div>
@@ -43,7 +43,7 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="4" class="text-center py-8 text-muted">Không có nội dung nào chờ duyệt.</td>
+                <td colspan="4" class="text-center py-8 text-muted" i18n>Không có nội dung nào chờ duyệt.</td>
               </tr>
             }
           </tbody>
@@ -57,15 +57,15 @@
             [disabled]="page() === 1"
             (click)="onPageChange(page() - 1)"
           >
-            <mat-icon>chevron_left</mat-icon> Trước
+            <mat-icon>chevron_left</mat-icon> <span i18n>Trước</span>
           </button>
-          <span class="page-info">Trang {{ page() }} / {{ totalPages() }}</span>
+          <span class="page-info" i18n>Trang {{ page() }} / {{ totalPages() }}</span>
           <button
             mat-stroked-button
             [disabled]="page() >= totalPages()"
             (click)="onPageChange(page() + 1)"
           >
-            Sau <mat-icon>chevron_right</mat-icon>
+            <span i18n>Sau</span> <mat-icon>chevron_right</mat-icon>
           </button>
         </div>
       }
