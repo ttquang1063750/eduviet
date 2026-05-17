@@ -1,4 +1,5 @@
-import { PrismaClient, UserRole } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import type { UserRole } from '@eduviet/shared-types';
 import { AppError } from '../../shared/errors/app-error.js';
 import { writeAuditLog } from '../../shared/utils/audit.js';
 import { LessonAssignmentsRepository } from './lesson-assignments.repository.js';
