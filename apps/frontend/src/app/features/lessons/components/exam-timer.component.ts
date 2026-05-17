@@ -1,9 +1,10 @@
 import { Component, input, output, signal, computed, ChangeDetectionStrategy, effect, OnInit, OnDestroy } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-exam-timer',
   standalone: true,
-  imports: [],
+  imports: [MatIconModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './exam-timer.component.html',
   styleUrl: './exam-timer.component.scss',

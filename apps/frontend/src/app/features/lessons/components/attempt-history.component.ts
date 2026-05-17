@@ -1,12 +1,13 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, computed, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { DatePipe } from '@angular/common';
 import { AttemptsService } from '../../../core/services/attempts.service';
 import type { AttemptSummary } from '@eduviet/shared-types';
 
 @Component({
   selector: 'app-attempt-history',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, DatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './attempt-history.component.html',
   styleUrl: './attempt-history.component.scss',
@@ -34,11 +35,11 @@ export class AttemptHistoryComponent implements OnInit {
       next: (res) => {
         const mapped: AttemptSummary[] = (res.data as AttemptSummary[]).map(a => ({
           id: a.id,
-          lessonTitle: a.lesson.title,
-          lessonSlug: a.lesson.slug,
+          lessonTitle: a.lesson?.title ?? a.lessonTitle ?? '',
+          lessonSlug: a.lesson?.slug ?? a.lessonSlug ?? '',
           mode: a.mode,
           status: a.status,
-          score: a.totalScore,
+          totalScore: a.totalScore,
           maxScore: a.maxScore,
           submittedAt: a.submittedAt,
         }));

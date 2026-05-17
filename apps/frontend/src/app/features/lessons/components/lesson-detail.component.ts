@@ -6,6 +6,7 @@ import { LessonsService } from '../../../core/services/lessons.service';
 import { BreadcrumbService } from '../../../core/services/breadcrumb.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { AttemptsService } from '../../../core/services/attempts.service';
+import { ConfirmService } from '../../../core/services/confirm.service';
 import { DrawingCanvasComponent } from '../../../shared/components/drawing-canvas/drawing-canvas.component';
 import { ExamTimerComponent } from './exam-timer.component';
 import type { Lesson, AttemptMode, Attempt } from '@eduviet/shared-types';

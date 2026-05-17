@@ -231,7 +231,7 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ `chat.types.ts` — `role` → `roles` (multi-role fix)
 
 
-#### Session 28 — Assessment System + code quality fixes (2026-05-17)
+#### Session 28 — Assessment System + code quality + runtime fixes (2026-05-17)
 - ✅ Schema: `Attempt` + `AttemptAnswer` models, `AttemptMode`/`AttemptStatus` enums, `Lesson.timeLimitSec`/`maxAttempts`
 - ✅ Migration `20260517000001_add_attempt_system` + shared-types `attempt.types.ts`
 - ✅ BE `attempts/` module: repository + service (auto-grade 3 types + manual grade) + routes (6 endpoints) + 10 tests PASS
@@ -240,6 +240,8 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ student-dashboard: kết quả gần đây; main-layout: nav "Kết quả" + "Chấm điểm"; lesson-admin-editor: exam config
 - ✅ Code quality: split inline template/styles → 3 files; xoá CommonModule khỏi 5 components; fix `any` types → proper interfaces
 - ✅ Rule mới: TUYỆT ĐỐI KHÔNG inline template/styles trong .ts (với ❌/✅ examples + lý do)
+- ✅ Runtime fixes (`bash start-dev.sh`): BE Zod schema `z.any()→z.unknown()`, FE import paths 4→3 levels, shared-types `Lesson`+`AttemptSummary`, `DatePipe`/`MatProgressSpinnerModule` missing, `ConfirmService`/`getInputValue` imports, `score→totalScore`, `string|string[]` helper
+- ✅ `Application bundle generation complete` — dev server green
 
 #### Session 27 — i18n Phase 1 setup + Phase 2 markup steps 7-13 (2026-05-17)
 - ✅ Phase 1: install `@angular/localize`, `angular.json` i18n config, register CLDR, `lang="vi"` on html, `LanguageSwitcherComponent` (mat-button-toggle 🇻🇳/🇬🇧), inject vào 2 layouts

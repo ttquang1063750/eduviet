@@ -1,6 +1,6 @@
 # EduViet — Progress Tracker
 
-> Cập nhật lần cuối: 2026-05-17 (session 28 — Assessment System COMPLETED + code quality fixes)
+> Cập nhật lần cuối: 2026-05-17 (session 28 — Assessment System + runtime bug fixes + dev server green)
 > Workflow: `/plan-task` → `/execute-step` (lặp) → `/check-point` → `/resume` → tiếp tục
 
 ---
@@ -89,6 +89,30 @@
 | `features/admin/blog/` | Quill WYSIWYG + Draft→Review→Publish |
 | `features/admin/questions/` | Question Bank list + editor + question-form (signal inputs) |
 | `features/admin/lessons/` | list + editor + exercise-editor (CDK DragDrop) |
+
+---
+
+## Session 28 — Assessment System + Runtime Bug Fixes (2026-05-17)
+
+### Bug fixes từ `bash start-dev.sh`
+| File | Fix |
+|------|-----|
+| `attempts.routes.ts` | `z.any()` → `z.unknown()` trong Zod body schema (FastifyError schema invalid) |
+| `grading-detail/queue.component.ts` | Import path `../../../../` → `../../../` (sai 4 levels thay vì 3) |
+| `attempt-history/result.component.ts` | Thêm `ChangeDetectionStrategy` vào import |
+| 4 components | Thêm `DatePipe` (attempt-history, attempt-result, grading-queue, student-dashboard) |
+| `grading-queue/detail.component.ts` | Thêm `MatProgressSpinnerModule` |
+| `lesson-detail.component.ts` | Thêm `ConfirmService` import |
+| `lesson-admin-editor.component.ts` | Thêm `getInputValue()` method |
+| `shared-types/lesson.types.ts` | Thêm `timeLimitSec`, `maxAttempts` vào `Lesson` interface |
+| `shared-types/attempt.types.ts` | Fix `AttemptSummary`: xoá duplicate `maxScore`, thêm `totalScore` + `lesson?` |
+| `attempt-history.component.ts` | Fix mapper: `score` → `totalScore`, `a.lesson?.title ?? ''` |
+| `student-dashboard.component.ts` | Fix mapper: `score` → `totalScore` |
+| `attempt-result.component.html` | Fix `correctAnswer: string | string[]` → `toMarkdownString()` helper |
+| 5 components | Xoá `CommonModule` (exam-timer, attempt-result, attempt-history, grading-queue, grading-detail) |
+| `attempt-result.component.ts` | Thêm `toMarkdownString()` helper method |
+
+**Kết quả:** `Application bundle generation complete` ✅ — dev server chạy sạch
 
 ---
 

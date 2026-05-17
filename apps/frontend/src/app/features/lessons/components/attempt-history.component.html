@@ -40,8 +40,8 @@
                   </span>
                 </td>
                 <td>
-                  <span class="score-text" [style.color]="getScoreColor(att.score, att.maxScore)">
-                    {{ att.score ?? '—' }} / {{ att.maxScore ?? '—' }}
+                  <span class="score-text" [style.color]="getScoreColor(att.totalScore, att.maxScore)">
+                    {{ att.totalScore ?? '—' }} / {{ att.maxScore ?? '—' }}
                   </span>
                 </td>
                 <td class="text-muted">{{ att.submittedAt | date:'HH:mm dd/MM/yyyy' }}</td>

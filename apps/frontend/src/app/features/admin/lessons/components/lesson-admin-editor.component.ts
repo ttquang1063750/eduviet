@@ -173,4 +173,8 @@ export class LessonAdminEditorComponent implements OnInit {
       });
     }
   }
+
+  getInputValue(event: Event): string {
+    return (event.target as HTMLInputElement).value;
+  }
 }

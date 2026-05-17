@@ -34,7 +34,7 @@ export default async function attemptsRoutes(
       body: z.object({
         answers: z.array(z.object({
           questionId: z.string().uuid(),
-          answer: z.any(),
+          answer: z.unknown(),
         })),
       }),
     },

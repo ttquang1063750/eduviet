@@ -29,7 +29,7 @@
 
         <div class="result-actions">
           @if (res.mode === 'PRACTICE') {
-            <button class="btn btn-primary" [routerLink]="['/lessons', res.lesson?.slug]" i18n>Làm lại</button>
+            <button class="btn btn-primary" [routerLink]="['/lessons', res.lesson?.slug ?? '']" i18n>Làm lại</button>
           }
           <a routerLink="/lessons" class="btn btn-outline" i18n>Về danh sách bài học</a>
         </div>
@@ -77,7 +77,7 @@
               <div class="correct-answer">
                 <label i18n>Đáp án đúng:</label>
                 <div class="answer-box">
-                  <markdown [data]="ans.question!.correctAnswer" [inline]="true"></markdown>
+                  <markdown [data]="toMarkdownString(ans.question!.correctAnswer)" [inline]="true"></markdown>
                 </div>
               </div>
             }

@@ -60,11 +60,12 @@ export interface AttemptResult extends Attempt {
 }
 export interface AttemptSummary {
   id: string;
-  lessonTitle: string;
-  lessonSlug: string;
+  lessonTitle?: string;
+  lessonSlug?: string;
+  lesson?: { title: string; slug: string; subject?: { name: string; color: string | null } };
   mode: AttemptMode;
   status: AttemptStatus;
-  score: number | null;
+  totalScore: number | null;
   maxScore: number | null;
   submittedAt: string | null;
 }

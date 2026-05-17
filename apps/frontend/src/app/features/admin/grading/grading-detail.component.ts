@@ -1,21 +1,23 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MarkdownComponent } from 'ngx-markdown';
-import { AttemptsService } from '../../../../core/services/attempts.service';
-import { ToastService } from '../../../../core/services/toast.service';
-import { getApiErrorMessage } from '../../../../core/utils/http-error';
+import { AttemptsService } from '../../../core/services/attempts.service';
+import { ToastService } from '../../../core/services/toast.service';
+import { getApiErrorMessage } from '../../../core/utils/http-error';
 import type { AttemptResult, AttemptAnswer } from '@eduviet/shared-types';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-grading-detail',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule, MarkdownComponent, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule],
+  imports: [RouterLink, DatePipe, MatProgressSpinnerModule, ReactiveFormsModule, MarkdownComponent, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './grading-detail.component.html',
   styleUrl: './grading-detail.component.scss',

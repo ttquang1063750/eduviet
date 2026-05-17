@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -25,7 +26,7 @@ import type { StudentDashboard, AttemptSummary } from '@eduviet/shared-types';
 @Component({
   selector: 'app-student-dashboard',
   standalone: true,
-  imports: [
+  imports: [DatePipe, 
     RouterLink,
     MatCardModule,
     MatChipsModule,
@@ -96,7 +97,7 @@ export class StudentDashboardComponent implements OnInit {
           lessonSlug: a.lesson.slug,
           mode: a.mode,
           status: a.status,
-          score: a.totalScore,
+          totalScore: a.totalScore,
           maxScore: a.maxScore,
           submittedAt: a.submittedAt,
         }));
