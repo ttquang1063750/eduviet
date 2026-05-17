@@ -12,12 +12,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-grading-detail',
   standalone: true,
-  imports: [RouterLink, DatePipe, MatProgressSpinnerModule, ReactiveFormsModule, MarkdownComponent, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule],
+  imports: [RouterLink, MatProgressSpinnerModule, ReactiveFormsModule, MarkdownComponent, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './grading-detail.component.html',
   styleUrl: './grading-detail.component.scss',
