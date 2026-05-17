@@ -18,9 +18,19 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-17 — session 27: i18n Phase 1-5 Hoàn tất)
+## Trạng thái hiện tại (cập nhật 2026-05-17 — session 28: Assessment System Hoàn tất)
 
 ### ✅ Đã hoàn thành
+
+#### Assessment System ✅ COMPLETED (2026-05-17 session 28)
+- ✅ `libs/prisma/schema.prisma` — models `Attempt`, `AttemptAnswer` + relations
+- ✅ `attempts` module (BE) — repository + auto-grading service + routes (6 endpoints)
+- ✅ `attempts.service.spec.ts` — unit tests cho business logic & auto-grading
+- ✅ `lesson-detail` flow — mode selector (Practice/Test/Mock) + countdown timer + submit logic
+- ✅ `AttemptResult` component — xem kết quả chi tiết, badge đúng/sai, giải thích
+- ✅ `AttemptHistory` component — lịch sử bài làm cho học sinh
+- ✅ `GradingQueue` + `GradingDetail` — hàng đợi và giao diện chấm điểm tay cho giáo viên
+- ✅ Tích hợp i18n cho toàn bộ các màn hình mới
 
 #### Backend modules (`apps/backend/src/modules/`)
 | Module | Routes | Service | Repository | Tests |
@@ -220,6 +230,16 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 - ✅ `features/admin/questions/questions-admin.component` — Question Bank admin page (filter, paginate, CRUD modal)
 - ✅ `chat.types.ts` — `role` → `roles` (multi-role fix)
 
+
+#### Session 28 — Assessment System + code quality fixes (2026-05-17)
+- ✅ Schema: `Attempt` + `AttemptAnswer` models, `AttemptMode`/`AttemptStatus` enums, `Lesson.timeLimitSec`/`maxAttempts`
+- ✅ Migration `20260517000001_add_attempt_system` + shared-types `attempt.types.ts`
+- ✅ BE `attempts/` module: repository + service (auto-grade 3 types + manual grade) + routes (6 endpoints) + 10 tests PASS
+- ✅ FE: `attempts.service.ts`, `attempt-result`, `attempt-history`, `exam-timer` (3 files each), grading-queue/detail (3 files each)
+- ✅ lesson-detail wire submit → API + mode selector + ExamTimer integration
+- ✅ student-dashboard: kết quả gần đây; main-layout: nav "Kết quả" + "Chấm điểm"; lesson-admin-editor: exam config
+- ✅ Code quality: split inline template/styles → 3 files; xoá CommonModule khỏi 5 components; fix `any` types → proper interfaces
+- ✅ Rule mới: TUYỆT ĐỐI KHÔNG inline template/styles trong .ts (với ❌/✅ examples + lý do)
 
 #### Session 27 — i18n Phase 1 setup + Phase 2 markup steps 7-13 (2026-05-17)
 - ✅ Phase 1: install `@angular/localize`, `angular.json` i18n config, register CLDR, `lang="vi"` on html, `LanguageSwitcherComponent` (mat-button-toggle 🇻🇳/🇬🇧), inject vào 2 layouts

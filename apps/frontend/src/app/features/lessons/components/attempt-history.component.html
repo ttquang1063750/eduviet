@@ -1,0 +1,66 @@
+<div class="page">
+  <div class="page-header">
+    <h1 i18n>Kết quả của tôi</h1>
+    <p class="page-subtitle" i18n>Xem lại lịch sử làm bài và quá trình tiến bộ của bạn.</p>
+  </div>
+
+  <div class="history-card card">
+    @if (loading()) {
+      <div class="loading-state">
+        <div class="spinner-large"></div>
+        <p i18n>Đang tải lịch sử...</p>
+      </div>
+    } @else if (attempts().length === 0) {
+      <div class="empty-state">
+        <span class="icon">📜</span>
+        <p i18n>Bạn chưa thực hiện bài làm nào.</p>
+        <a routerLink="/lessons" class="btn btn-primary" i18n>Khám phá bài học</a>
+      </div>
+    } @else {
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th i18n>Bài học</th>
+              <th i18n>Chế độ</th>
+              <th i18n>Trạng thái</th>
+              <th i18n>Điểm số</th>
+              <th i18n>Ngày nộp</th>
+              <th i18n>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (att of attempts(); track att.id) {
+              <tr>
+                <td><strong>{{ att.lessonTitle }}</strong></td>
+                <td><span class="badge badge-mode">{{ att.mode }}</span></td>
+                <td>
+                  <span class="badge badge-status" [class.graded]="att.status === 'GRADED'">
+                    {{ att.status === 'GRADED' ? 'Đã chấm' : 'Chờ chấm' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="score-text" [style.color]="getScoreColor(att.score, att.maxScore)">
+                    {{ att.score ?? '—' }} / {{ att.maxScore ?? '—' }}
+                  </span>
+                </td>
+                <td class="text-muted">{{ att.submittedAt | date:'HH:mm dd/MM/yyyy' }}</td>
+                <td>
+                  <a [routerLink]="['/lessons', att.lessonSlug, 'result', att.id]" class="btn-link" i18n>Xem chi tiết</a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <button class="btn-p" [disabled]="page() === 1" (click)="onPageChange(page() - 1)">←</button>
+          <span i18n>Trang {{ page() }} / {{ totalPages() }}</span>
+          <button class="btn-p" [disabled]="page() === totalPages()" (click)="onPageChange(page() + 1)">→</button>
+        </div>
+      }
+    }
+  </div>
+</div>

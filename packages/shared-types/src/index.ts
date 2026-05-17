@@ -7,3 +7,4 @@ export * from './chat.types';
 export * from './blog.types';
 export * from './school.types';
 export * from './student.types';
+export * from './attempt.types';

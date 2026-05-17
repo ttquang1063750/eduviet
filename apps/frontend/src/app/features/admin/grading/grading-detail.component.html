@@ -1,0 +1,102 @@
+<div class="page">
+  <div class="page-header">
+    <div class="header-left">
+      <a mat-icon-button routerLink="/admin/grading" i18n-matTooltip matTooltip="Quay lại hàng đợi">
+        <mat-icon>arrow_back</mat-icon>
+      </a>
+      <h1 i18n>Chấm điểm bài làm</h1>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p i18n>Đang tải chi tiết bài làm...</p>
+    </div>
+  } @else if (attempt(); as res) {
+    <div class="grading-layout">
+      <!-- ── Student Info ──────────────────────────────────────────────── -->
+      <mat-card class="info-card">
+        <mat-card-content>
+          <div class="info-grid">
+            <div class="info-item">
+              <label i18n>Học sinh</label>
+              <strong>{{ res.student?.fullName }}</strong>
+            </div>
+            <div class="info-item">
+              <label i18n>Bài học</label>
+              <strong>{{ res.lesson?.title }}</strong>
+            </div>
+            <div class="info-item">
+              <label i18n>Chế độ / Trạng thái</label>
+              <div class="badges">
+                <span class="badge badge-mode">{{ res.mode }}</span>
+                <span class="badge badge-status" [class.graded]="res.status === 'GRADED'">{{ res.status }}</span>
+              </div>
+            </div>
+            <div class="info-item">
+              <label i18n>Điểm hiện tại</label>
+              <strong class="current-score">{{ res.totalScore ?? 0 }} / {{ res.maxScore }}</strong>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- ── Pending Answers List ──────────────────────────────────────── -->
+      <div class="answers-list">
+        <h2 class="section-title" i18n>Câu hỏi cần chấm ({{ getPendingAnswers().length }})</h2>
+
+        @for (ans of getPendingAnswers(); track ans.id; let i = $index) {
+          <mat-card class="grading-card">
+            <mat-card-content>
+              <div class="grading-card__header">
+                <span class="q-type" i18n>{{ ans.question?.type }}</span>
+                <span class="q-points" i18n>Tối đa {{ ans.question?.points }} điểm</span>
+              </div>
+
+              <div class="q-content">
+                <markdown [data]="ans.question?.content" [inline]="true"></markdown>
+              </div>
+
+              <div class="student-submission">
+                <label i18n>Nội dung học sinh nộp:</label>
+                @if (isDrawing(ans)) {
+                  <div class="image-wrapper">
+                    <img [src]="ans.answer" i18n-alt alt="Student drawing" class="drawing-img" />
+                  </div>
+                }
+ @else {
+                  <div class="text-submission">{{ ans.answer }}</div>
+                }
+              </div>
+
+              <form [formGroup]="gradingForms()[ans.id]" (ngSubmit)="submitGrade(ans.id)" class="grading-form">
+                <mat-form-field appearance="outline" class="score-field">
+                  <mat-label i18n>Nhập điểm</mat-label>
+                  <input matInput type="number" formControlName="score" />
+                  <span matSuffix>/ {{ ans.question?.points }}</span>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="feedback-field">
+                  <mat-label i18n>Nhận xét / Phản hồi</mat-label>
+                  <textarea matInput rows="2" formControlName="feedback" i18n-placeholder placeholder="Góp ý cho học sinh..."></textarea>
+                </mat-form-field>
+
+                <button mat-flat-button color="primary" type="submit" [disabled]="gradingForms()[ans.id].invalid || isSaving()">
+                  <mat-icon>done</mat-icon> <span i18n>Lưu điểm</span>
+                </button>
+              </form>
+            </mat-card-content>
+          </mat-card>
+        } @empty {
+          <div class="all-graded-notice card">
+            <mat-icon>check_circle</mat-icon>
+            <h3 i18n>Tất cả các câu hỏi đã được chấm xong!</h3>
+            <p i18n>Trạng thái bài làm đã được cập nhật thành GRADED.</p>
+            <a routerLink="/admin/grading" mat-stroked-button i18n>Quay lại hàng đợi</a>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

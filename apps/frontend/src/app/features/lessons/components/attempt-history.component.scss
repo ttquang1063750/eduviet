@@ -1,0 +1,113 @@
+.page {
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+  h1 { font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem; }
+  .page-subtitle { color: #6b7280; }
+}
+
+.card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 1.5rem;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  
+  th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #9ca3af;
+    font-weight: 700;
+  }
+
+  td {
+    font-size: 0.95rem;
+    color: #374151;
+  }
+}
+
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  
+  &-mode { background: #f3f4f6; color: #374151; }
+  &-status { 
+    background: #fff7ed; color: #9a3412; 
+    &.graded { background: #f0fdf4; color: #166534; }
+  }
+}
+
+.score-text {
+  font-weight: 700;
+}
+
+.btn-link {
+  color: var(--mat-sys-primary);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+  &:hover { text-decoration: underline; }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 1rem;
+  .icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
+  p { color: #6b7280; margin-bottom: 1.5rem; }
+}
+
+.btn-primary {
+  background: var(--mat-sys-primary);
+  color: white;
+  padding: 0.6rem 1.25rem;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.btn-p {
+  background: white;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &:hover:not(:disabled) { border-color: var(--mat-sys-primary); color: var(--mat-sys-primary); }
+}

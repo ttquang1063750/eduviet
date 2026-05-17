@@ -55,6 +55,38 @@ export class FooComponent {
 ### Quy tắc cứng
 - 3 file riêng: `.ts` + `.html` + `.scss` — KHÔNG inline.
 - `OnPush` trên MỌI component.
+
+### ❌ TUYỆT ĐỐI KHÔNG inline template hoặc styles trong `.ts`
+
+```typescript
+// ❌ SAI — inline template
+@Component({
+  template: `<div>{{ title }}</div>`,  // cấm
+})
+
+// ❌ SAI — inline styles
+@Component({
+  styles: [`h1 { color: red }`],       // cấm
+})
+
+// ❌ SAI — kết hợp cả hai
+@Component({
+  template: `<h1>...</h1>`,
+  styles: [`.card { padding: 1rem }`],
+})
+
+// ✅ ĐÚNG — 3 file riêng biệt
+@Component({
+  templateUrl: './foo.component.html',
+  styleUrl: './foo.component.scss',
+})
+```
+
+**Lý do:**
+- Code review khó — HTML/CSS chôn trong TS file
+- i18n extract không hoạt động với inline templates
+- ESLint rule `no-inline-declarations` sẽ báo lỗi nếu vi phạm
+- IDE support (syntax highlighting, formatting) kém hơn với file riêng
 - `inject()` thay constructor injection.
 - Signals cho state: `signal()`, `computed()`, `input()`, `output()`.
 - Control flow: `@if`, `@for` — KHÔNG `*ngIf`, `*ngFor`.

@@ -94,6 +94,23 @@
     </div>
 
     <aside class="sidebar-content">
+      <!-- Cài đặt thi thử -->
+      <section class="card section-exam">
+        <h2 class="section-title" i18n>🎯 Chế độ Thi thử (Mock Exam)</h2>
+        
+        <mat-form-field appearance="outline">
+          <mat-label i18n>Thời gian làm bài (Phút)</mat-label>
+          <input matInput type="number" [value]="lessonForm.get('timeLimitSec')?.value / 60" (input)="lessonForm.get('timeLimitSec')?.setValue(+getInputValue($event) * 60)" />
+          <mat-hint i18n>Để 0 nếu không muốn bật chế độ thi thử.</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label i18n>Lượt làm tối đa</mat-label>
+          <input matInput type="number" formControlName="maxAttempts" />
+          <mat-hint i18n>Để 0 nếu cho phép làm nhiều lần.</mat-hint>
+        </mat-form-field>
+      </section>
+
       <!-- Cài đặt xuất bản -->
       <section class="card section-publish">
         <h2 class="section-title" i18n>Cài đặt & Gán quyền</h2>

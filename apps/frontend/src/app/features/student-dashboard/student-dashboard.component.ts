@@ -15,11 +15,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { StudentDashboardService } from '../../core/services/student-dashboard.service';
+import { AttemptsService } from '../../core/services/attempts.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { BreadcrumbService } from '../../core/services/breadcrumb.service';
 import { getApiErrorMessage } from '../../core/utils/http-error';
-import type { StudentDashboard } from '@eduviet/shared-types';
+import type { StudentDashboard, AttemptSummary } from '@eduviet/shared-types';
 
 @Component({
   selector: 'app-student-dashboard',
@@ -40,12 +41,14 @@ import type { StudentDashboard } from '@eduviet/shared-types';
 })
 export class StudentDashboardComponent implements OnInit {
   private dashboardService = inject(StudentDashboardService);
+  private attemptsService = inject(AttemptsService);
   private authService = inject(AuthService);
   private toast = inject(ToastService);
   private breadcrumb = inject(BreadcrumbService);
 
   isLoading = signal(true);
   dashboard = signal<StudentDashboard | null>(null);
+  recentAttempts = signal<AttemptSummary[]>([]);
   error = signal<string | null>(null);
 
   currentUser = this.authService.user;
@@ -64,6 +67,7 @@ export class StudentDashboardComponent implements OnInit {
   ngOnInit(): void {
     this.breadcrumb.setLabel('student', 'Trang của tôi');
     this.loadDashboard();
+    this.loadRecentAttempts();
   }
 
   loadDashboard(): void {
@@ -79,6 +83,24 @@ export class StudentDashboardComponent implements OnInit {
         this.error.set(getApiErrorMessage(err, 'Không thể tải dashboard'));
         this.toast.error(this.error() ?? 'Lỗi tải dữ liệu');
         this.isLoading.set(false);
+      },
+    });
+  }
+
+  loadRecentAttempts(): void {
+    this.attemptsService.getMyHistory({ page: 1, perPage: 3 }).subscribe({
+      next: (res) => {
+        const mapped: AttemptSummary[] = (res.data as any[]).map(a => ({
+          id: a.id,
+          lessonTitle: a.lesson.title,
+          lessonSlug: a.lesson.slug,
+          mode: a.mode,
+          status: a.status,
+          score: a.totalScore,
+          maxScore: a.maxScore,
+          submittedAt: a.submittedAt,
+        }));
+        this.recentAttempts.set(mapped);
       },
     });
   }
