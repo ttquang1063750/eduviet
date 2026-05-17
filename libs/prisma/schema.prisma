@@ -134,6 +134,7 @@ model School {
   district   District @relation(fields: [districtId], references: [id])
   classes    Class[]
   users      User[]
+  lessonAssignments LessonAssignment[]
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
   deletedAt  DateTime? @map("deleted_at")
@@ -153,6 +154,8 @@ model Class {
   homeroomTeacher  User?             @relation("HomeroomTeacher", fields: [homeroomTeacherId], references: [id])
   enrollments      ClassEnrollment[]
   chatRooms        ChatRoom[]
+  lessonAssignments LessonAssignment[]
+  subjectTeachers   ClassSubjectTeacher[]
   createdAt        DateTime          @default(now()) @map("created_at")
   updatedAt        DateTime          @updatedAt @map("updated_at")
   deletedAt        DateTime?         @map("deleted_at")
@@ -211,10 +214,13 @@ model User {
   createdQuestions   Question[]
   studentAttempts    Attempt[]        @relation("StudentAttempts")
   gradedAnswers      AttemptAnswer[]  @relation("GradedAnswers")
+  assignedToMe       LessonAssignment[] @relation("AssignedToUser")
+  assignedByMe       LessonAssignment[] @relation("AssignedByUser")
   blogPosts          BlogPost[]
   comments           Comment[]
   studentParents     ParentStudent[]      @relation("ParentRelation")
   parentOf           ParentStudent[]      @relation("StudentRelation")
+  teachingClasses    ClassSubjectTeacher[]
 
   @@index([emailHash])
   @@index([schoolId])
@@ -261,6 +267,7 @@ model Subject {
   color     String?
   lessons   Lesson[]
   questions Question[]
+  classSubjectTeachers ClassSubjectTeacher[]
 
   @@map("subjects")
 }
@@ -289,6 +296,7 @@ model Lesson {
   scheduledAt        DateTime?      @map("scheduled_at")
   lessonQuestions    LessonQuestion[]
   attempts           Attempt[]
+  lessonAssignments  LessonAssignment[]
   createdAt          DateTime       @default(now()) @map("created_at")
   updatedAt        DateTime      @updatedAt @map("updated_at")
   deletedAt        DateTime?     @map("deleted_at")
@@ -338,6 +346,47 @@ model LessonQuestion {
   @@index([lessonId])
   @@index([questionId])
   @@map("lesson_questions")
+}
+
+model LessonAssignment {
+  id           String    @id @default(uuid())
+  lessonId     String    @map("lesson_id")
+  lesson       Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  // Exactly ONE target — school, class, or user
+  schoolId     String?   @map("school_id")
+  school       School?   @relation(fields: [schoolId], references: [id])
+  classId      String?   @map("class_id")
+  class        Class?    @relation(fields: [classId], references: [id])
+  userId       String?   @map("user_id")
+  user         User?     @relation("AssignedToUser", fields: [userId], references: [id])
+  assignedById String    @map("assigned_by_id")
+  assignedBy   User      @relation("AssignedByUser", fields: [assignedById], references: [id])
+  note         String?   @db.Text
+  dueDate      DateTime? @map("due_date")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@index([lessonId])
+  @@index([schoolId])
+  @@index([classId])
+  @@index([userId])
+  @@map("lesson_assignments")
+}
+
+model ClassSubjectTeacher {
+  id        String   @id @default(uuid())
+  classId   String   @map("class_id")
+  class     Class    @relation(fields: [classId], references: [id])
+  subjectId String   @map("subject_id")
+  subject   Subject  @relation(fields: [subjectId], references: [id])
+  teacherId String   @map("teacher_id")
+  teacher   User     @relation(fields: [teacherId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([classId, subjectId, teacherId])
+  @@index([classId])
+  @@index([teacherId])
+  @@map("class_subject_teachers")
 }
 
 // ===========================

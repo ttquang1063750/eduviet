@@ -1,0 +1,81 @@
+.assignment-panel {
+  padding: 1rem 0;
+}
+
+h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+  color: #111827;
+}
+
+.assignment-form {
+  .form-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    .scope-field { width: 180px; }
+    .target-field { flex: 1; min-width: 250px; }
+    .date-field { width: 220px; }
+  }
+
+  .form-actions {
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid #f3f4f6;
+  margin: 2rem 0;
+}
+
+.loading-state, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+  gap: 1rem;
+}
+
+.table-container {
+  border: 1px solid #f3f4f6;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.assignment-table {
+  width: 100%;
+}
+
+.target-cell, .assigned-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.5rem 0;
+}
+
+.target-name, .assigned-by {
+  font-weight: 600;
+  color: #111827;
+}
+
+.target-note, .assigned-at {
+  font-size: 0.75rem;
+}
+
+mat-header-cell {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #9ca3af;
+  letter-spacing: 0.05em;
+}
+
+mat-cell {
+  font-size: 0.9rem;
+}

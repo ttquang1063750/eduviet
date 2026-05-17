@@ -52,14 +52,16 @@ export const lessonsRoutes: FastifyPluginAsync = async (app) => {
 
     // Xác định quyền (không bắt buộc đăng nhập)
     let userRoles: string[] | undefined;
+    let userId: string | undefined;
     try {
       await request.jwtVerify();
       userRoles = (request.user as { roles?: string[] }).roles;
+      userId = (request.user as { id?: string }).id;
     } catch {
       // unauthenticated — chỉ thấy PUBLISHED
     }
 
-    const result = await service.list(query.data, userRoles as never);
+    const result = await service.list(query.data, userRoles as never, userId);
     return reply.send(result);
   });
 

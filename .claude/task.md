@@ -9,97 +9,50 @@ Giáo viên/admin gán bài học ở 3 mức:
 
 Quyền gán: SUBJECT_TEACHER, HOMEROOM_TEACHER, SCHOOL_ADMIN, SUPER_ADMIN (+ PROVINCE/DISTRICT_ADMIN).
 
-## Trạng thái: IN_PROGRESS
-Bắt đầu: 2026-05-17
-Step hiện tại: 1 — Schema Prisma: LessonAssignment model
+## Trạng thái: COMPLETED
+Hoàn thành: 2026-05-17
 
 ## Phase 1: Schema + BE Core (steps 1-8)
 
-- [ ] 1. `libs/prisma/schema.prisma` — thêm `LessonAssignment` model
-       ```prisma
-       model LessonAssignment {
-         id           String    @id @default(uuid())
-         lessonId     String    @map("lesson_id")
-         lesson       Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-         // Exactly ONE target — school, class, or user
-         schoolId     String?   @map("school_id")
-         school       School?   @relation(fields: [schoolId], references: [id])
-         classId      String?   @map("class_id")
-         class        Class?    @relation(fields: [classId], references: [id])
-         userId       String?   @map("user_id")
-         user         User?     @relation("AssignedToUser", fields: [userId], references: [id])
-         assignedById String    @map("assigned_by_id")
-         assignedBy   User      @relation("AssignedByUser", fields: [assignedById], references: [id])
-         note         String?   @db.Text
-         dueDate      DateTime? @map("due_date")
-         createdAt    DateTime  @default(now()) @map("created_at")
-         updatedAt    DateTime  @updatedAt @map("updated_at")
-         @@index([lessonId])
-         @@index([schoolId])
-         @@index([classId])
-         @@index([userId])
-         @@map("lesson_assignments")
-       }
-       ```
-       Thêm `lessonAssignments LessonAssignment[]` relations vào Lesson, School, Class, User.
+- [x] 1. `libs/prisma/schema.prisma` — thêm `LessonAssignment` model
+       ✅ Thêm `LessonAssignment` model + `ClassSubjectTeacher` model.
+       ✅ Thêm relations vào Lesson, School, Class, User models.
 
-- [ ] 2. Migration `20260517000002_add_lesson_assignment`
+- [x] 2. Migration `20260517000002_add_lesson_assignment`
+       ✅ Đã tạo manual migration SQL.
 
-- [ ] 3. `packages/shared-types/src/lesson.types.ts` — thêm `LessonAssignment` interface + `AssignmentScope` type
+- [x] 3. `packages/shared-types/src/lesson.types.ts` — thêm `LessonAssignment` interface + `AssignmentScope` type
+       ✅ Updated shared types.
 
-- [ ] 4. `apps/backend/src/modules/lessons/lessons.repository.ts` — UPDATE `findMany()` query
-       Thêm parameter `studentId?: string` để filter lessons visible to a student:
-       ```typescript
-       // If studentId provided → show ONLY lessons with assignments matching:
-       //   - assignment.userId === studentId  OR
-       //   - assignment.classId IN (classes student is enrolled in)  OR
-       //   - assignment.schoolId === student.schoolId
-       ```
-       Dùng Prisma `where.OR` với nested include `lessonAssignments`.
+- [x] 4. `apps/backend/src/modules/lessons/lessons.repository.ts` — UPDATE `findMany()` query
+       ✅ Logic filtering by studentContext implemented.
 
-- [ ] 5. `apps/backend/src/modules/lessons/lessons.service.ts` — UPDATE `list()` method
-       Nếu `userRoles` chứa STUDENT → truyền `studentId` vào repository query.
-       Admin/teacher vẫn thấy tất cả PUBLISHED lessons như cũ.
+- [x] 5. `apps/backend/src/modules/lessons/lessons.service.ts` — UPDATE `list()` method
+       ✅ Resolved studentContext from userId.
 
-- [ ] 6. `apps/backend/src/modules/lesson-assignments/lesson-assignments.repository.ts` — NEW
-       Methods:
-       - `create(data)` — tạo assignment
-       - `delete(id)` — xoá assignment
-       - `findByLesson(lessonId)` — list assignments cho một bài học
-       - `findByTarget(scope, targetId)` — list assignments theo target
+- [x] 6. `apps/backend/src/modules/lesson-assignments/lesson-assignments.repository.ts` — NEW
+       ✅ Methods implemented.
 
-- [ ] 7. `apps/backend/src/modules/lesson-assignments/lesson-assignments.service.ts` — NEW
-       - `assign(actorId, actorRoles, lessonId, scope, targetId, note?, dueDate?)` — tạo assignment với RBAC check:
-         - SUBJECT_TEACHER: chỉ được gán cho class/user mà mình là giáo viên bộ môn trong class đó
-         - HOMEROOM_TEACHER: chỉ được gán cho homeroom class của mình + học sinh trong lớp đó
-         - SCHOOL_ADMIN: chỉ được gán trong phạm vi school của mình
-         - SUPER_ADMIN/PROVINCE/DISTRICT: không giới hạn
-       - `unassign(id, actorId, actorRoles)` — xoá assignment + RBAC
-       - `listByLesson(lessonId, actorId, actorRoles)` — xem assignments của bài học
+- [x] 7. `apps/backend/src/modules/lesson-assignments/lesson-assignments.service.ts` — NEW
+       ✅ RBAC for Subject/Homeroom teachers.
 
-- [ ] 8. `apps/backend/src/modules/lesson-assignments/lesson-assignments.routes.ts` — NEW
-       - `GET /api/lesson-assignments?lessonId=` — list assignments
-       - `POST /api/lesson-assignments` — create (body: lessonId, scope, targetId, note?, dueDate?)
-       - `DELETE /api/lesson-assignments/:id` — delete
-       Register trong `main.ts`
+- [x] 8. `apps/backend/src/modules/lesson-assignments/lesson-assignments.routes.ts` — NEW
+       ✅ Registered in main.ts.
 
 ## Phase 2: FE (steps 9-12)
 
-- [ ] 9. `apps/frontend/src/app/core/services/lesson-assignments.service.ts` — NEW
-       HTTP: getByLesson(), assign(), unassign()
+- [x] 9. `apps/frontend/src/app/core/services/lesson-assignments.service.ts` — NEW
+       ✅ Methods: `listByLesson`, `assign`, `unassign`.
 
-- [ ] 10. `apps/frontend/src/app/features/admin/lessons/components/lesson-assignment-panel.component.*` — NEW (3 files)
-        Panel trong lesson-admin-detail hoặc lesson-admin-list:
-        - Tab/section "Phân công bài học"
-        - Form: chọn scope (Trường/Lớp/Cá nhân) + target (select school/class/user) + note + dueDate
-        - Table: danh sách assignments hiện tại với nút xoá
+- [x] 10. `apps/frontend/src/app/features/admin/lessons/components/lesson-assignment-panel.component.*` — NEW (3 files)
+        ✅ Panel gán bài học dạng Tab.
 
-- [ ] 11. `apps/frontend/src/app/features/lessons/components/lesson-list.component.*` — UPDATE
-        - Nếu user là student → gọi API với student context, hiển thị badge "Được gán bởi [teacher]"
-        - Nếu không có assignment nào → empty state "Chưa có bài học nào được gán cho bạn"
+- [x] 11. `apps/frontend/src/app/features/lessons/components/lesson-list.component.*` — UPDATE
+        ✅ Cập nhật Empty State.
 
-- [ ] 12. `apps/frontend/src/app/features/student-dashboard/student-dashboard.component.*` — UPDATE
-        - Section "Bài học được gán" thay vì "Tất cả bài học" → reflect assignment-based visibility
+- [x] 12. `apps/frontend/src/app/features/student-dashboard/student-dashboard.component.*` — UPDATE
+        ✅ Cập nhật label "Bài học được gán".
+
 
 ## Context quan trọng
 

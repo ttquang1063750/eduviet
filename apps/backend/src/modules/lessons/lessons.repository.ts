@@ -8,6 +8,11 @@ export interface LessonFilters {
   difficulty?: string;
   statuses: string[];
   search?: string;
+  studentContext?: {
+    userId: string;
+    classIds: string[];
+    schoolId: string | null;
+  };
 }
 
 // Prisma client hasn't been regenerated yet (migration pending).
@@ -40,7 +45,7 @@ export class LessonsRepository {
   }
 
   async findMany(filters: LessonFilters) {
-    const { page, perPage, subject, grade, difficulty, statuses, search } = filters;
+    const { page, perPage, subject, grade, difficulty, statuses, search, studentContext } = filters;
     const skip = (page - 1) * perPage;
 
     const where: Prisma.LessonWhereInput = {
@@ -58,6 +63,18 @@ export class LessonsRepository {
           }
         : {}),
     };
+
+    if (studentContext) {
+      where.lessonAssignments = {
+        some: {
+          OR: [
+            { userId: studentContext.userId },
+            ...(studentContext.classIds.length > 0 ? [{ classId: { in: studentContext.classIds } }] : []),
+            ...(studentContext.schoolId ? [{ schoolId: studentContext.schoolId }] : []),
+          ],
+        },
+      } as never;
+    }
 
     const [lessons, total] = await Promise.all([
       this.prisma.lesson.findMany({

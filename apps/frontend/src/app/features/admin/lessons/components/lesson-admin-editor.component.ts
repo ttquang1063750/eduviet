@@ -25,11 +25,27 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { LessonAssignmentPanelComponent } from './lesson-assignment-panel.component';
 
 @Component({
   selector: 'app-lesson-admin-editor',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, QuillModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    QuillModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatTabsModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    LessonAssignmentPanelComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './lesson-admin-editor.component.html',
   styleUrl: './lesson-admin-editor.component.scss',
