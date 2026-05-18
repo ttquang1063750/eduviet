@@ -14,6 +14,7 @@ import {
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { QuillModule } from 'ngx-quill';
+import { AuthService } from '../../../../core/services/auth.service';
 import { LessonsService } from '../../../../core/services/lessons.service';
 import { SubjectsService } from '../../../../core/services/subjects.service';
 import { UsersService } from '../../../../core/services/users.service';
@@ -51,6 +52,7 @@ import { LessonAssignmentPanelComponent } from './lesson-assignment-panel.compon
   styleUrl: './lesson-admin-editor.component.scss',
 })
 export class LessonAdminEditorComponent implements OnInit {
+  private authService = inject(AuthService);
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -98,7 +100,10 @@ export class LessonAdminEditorComponent implements OnInit {
 
   ngOnInit() {
     this.loadSubjects();
-    this.loadReviewers();
+    // Chỉ admin/approver mới được list CONTENT_REVIEWER users
+    if (this.authService.hasRole('SUPER_ADMIN', 'SCHOOL_ADMIN', 'CONTENT_APPROVER', 'PROVINCE_ADMIN', 'DISTRICT_ADMIN')) {
+      this.loadReviewers();
+    }
 
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
