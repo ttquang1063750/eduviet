@@ -1,5 +1,6 @@
-import { Component, inject, signal, input, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, input, OnInit, ChangeDetectionStrategy, computed } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { AuthService } from '../../../../core/services/auth.service';
 import { DatePipe } from '@angular/common';
 import { LessonAssignmentsService } from '../../../../core/services/lesson-assignments.service';
 import { SchoolsService } from '../../../../core/services/schools.service';
@@ -55,6 +56,15 @@ export class LessonAssignmentPanelComponent implements OnInit {
   private toast = inject(ToastService);
   private confirm = inject(ConfirmService);
   private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
+
+  /** Chỉ SUPER_ADMIN / SCHOOL_ADMIN / TEACHER mới được phép gán bài học */
+  readonly canAssign = computed(() =>
+    this.authService.hasRole(
+      'SUPER_ADMIN', 'PROVINCE_ADMIN', 'DISTRICT_ADMIN',
+      'SCHOOL_ADMIN', 'SUBJECT_TEACHER', 'HOMEROOM_TEACHER',
+    )
+  );
 
   lessonId = input.required<string>();
 
@@ -78,7 +88,10 @@ export class LessonAssignmentPanelComponent implements OnInit {
 
   ngOnInit() {
     this.loadAssignments();
-    this.loadTargets();
+    // Chỉ load targets (schools/classes/users) nếu có quyền gán
+    if (this.canAssign()) {
+      this.loadTargets();
+    }
 
     // Reset targetId when scope changes
     this.assignmentForm.get('scope')?.valueChanges.subscribe(() => {
