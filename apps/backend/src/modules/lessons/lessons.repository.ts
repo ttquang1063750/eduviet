@@ -12,6 +12,7 @@ export interface LessonFilters {
     userId: string;
     classIds: string[];
     schoolId: string | null;
+    classGrades: number[]; // grades of enrolled classes — used to restrict school-wide assignments
   };
 }
 
@@ -65,6 +66,13 @@ export class LessonsRepository {
     };
 
     if (studentContext) {
+      // Filter lesson grade to match student's enrolled class grades.
+      // Exception: explicit user-level assignments bypass grade check (teacher's intentional override).
+      // For school/class assignments: restrict to student's own grades.
+      if (studentContext.classGrades.length > 0) {
+        where.grade = { in: studentContext.classGrades };
+      }
+
       where.lessonAssignments = {
         some: {
           OR: [

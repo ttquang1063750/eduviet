@@ -58,7 +58,10 @@ export class LessonsService {
           select: {
             schoolId: true,
             enrollments: {
-              select: { classId: true },
+              select: {
+                classId: true,
+                class: { select: { grade: true } },
+              },
             },
           },
         });
@@ -68,6 +71,7 @@ export class LessonsService {
             userId,
             schoolId: user.schoolId,
             classIds: user.enrollments.map((e) => e.classId),
+            classGrades: [...new Set(user.enrollments.map((e) => e.class.grade))],
           };
         }
       }
