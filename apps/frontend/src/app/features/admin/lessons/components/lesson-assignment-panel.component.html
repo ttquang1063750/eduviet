@@ -1,0 +1,124 @@
+<div class="assignment-panel">
+  <!-- Form only for roles with assign permission -->
+  @if (canAssign()) {
+  <section class="assignment-form-section">
+    <h3 i18n>Gán bài học mới</h3>
+    <form [formGroup]="assignmentForm" (ngSubmit)="onAssign()" class="assignment-form">
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="scope-field">
+          <mat-label i18n>Phạm vi</mat-label>
+          <mat-select formControlName="scope">
+            <mat-option value="SCHOOL" i18n>Toàn trường</mat-option>
+            <mat-option value="CLASS" i18n>Theo lớp</mat-option>
+            <mat-option value="USER" i18n>Cá nhân học sinh</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="target-field">
+          <mat-label i18n>Đối tượng</mat-label>
+          <mat-select formControlName="targetId" required>
+            @if (assignmentForm.get('scope')?.value === 'SCHOOL') {
+              @for (s of schools(); track s.id) {
+                <mat-option [value]="s.id">{{ s.name }}</mat-option>
+              }
+            } @else if (assignmentForm.get('scope')?.value === 'CLASS') {
+              @for (c of classes(); track c.id) {
+                <mat-option [value]="c.id">{{ c.name }} ({{ c.school.name }})</mat-option>
+              }
+            } @else if (assignmentForm.get('scope')?.value === 'USER') {
+              @for (u of students(); track u.id) {
+                <mat-option [value]="u.id">{{ u.fullName }} ({{ u.email }})</mat-option>
+              }
+            }
+          </mat-select>
+          @if (assignmentForm.get('targetId')?.invalid && assignmentForm.get('targetId')?.touched) {
+            <mat-error i18n>Vui lòng chọn đối tượng</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="date-field">
+          <mat-label i18n>Hạn nộp (tùy chọn)</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="dueDate">
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label i18n>Ghi chú cho học sinh</mat-label>
+        <textarea matInput formControlName="note" rows="2" i18n-placeholder placeholder="Ví dụ: Hoàn thành trước khi vào lớp..."></textarea>
+      </mat-form-field>
+
+      <div class="form-actions">
+        <button mat-flat-button color="primary" type="submit" [disabled]="submitting()">
+          @if (submitting()) {
+            <mat-spinner diameter="18" />
+          } @else {
+            <ng-container><mat-icon>add</mat-icon> <span i18n>Gán bài</span></ng-container>
+          }
+        </button>
+      </div>
+    </form>
+  </section>
+  } <!-- end @if canAssign -->
+
+  <hr class="divider" />
+
+  <!-- List of assignments -->
+  <section class="assignment-list-section">
+    <h3 i18n>Danh sách đã gán</h3>
+    @if (loading()) {
+      <div class="loading-state">
+        <mat-spinner diameter="30" />
+        <p i18n>Đang tải danh sách...</p>
+      </div>
+    } @else if (assignments().length === 0) {
+      <div class="empty-state" i18n>Bài học này chưa được gán cho ai.</div>
+    } @else {
+      <div class="table-container">
+        <mat-table [dataSource]="assignments()" class="assignment-table">
+          <ng-container matColumnDef="target">
+            <mat-header-cell *matHeaderCellDef i18n>Đối tượng</mat-header-cell>
+            <mat-cell *matCellDef="let a">
+              <div class="target-cell">
+                <span class="target-name">{{ getTargetName(a) }}</span>
+                @if (a.note) {
+                  <span class="target-note text-muted">{{ a.note }}</span>
+                }
+              </div>
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="assignedBy">
+            <mat-header-cell *matHeaderCellDef i18n>Người gán</mat-header-cell>
+            <mat-cell *matCellDef="let a">
+              <div class="assigned-cell">
+                <span class="assigned-by">{{ a.assignedBy.fullName }}</span>
+                <span class="assigned-at text-muted">{{ a.createdAt | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="dueDate">
+            <mat-header-cell *matHeaderCellDef i18n>Hạn nộp</mat-header-cell>
+            <mat-cell *matCellDef="let a">
+              {{ a.dueDate ? (a.dueDate | date:'dd/MM/yyyy HH:mm') : '—' }}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <mat-header-cell *matHeaderCellDef></mat-header-cell>
+            <mat-cell *matCellDef="let a">
+              <button mat-icon-button color="warn" (click)="onUnassign(a)" i18n-matTooltip matTooltip="Xóa phân công">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+        </mat-table>
+      </div>
+    }
+  </section>
+</div>

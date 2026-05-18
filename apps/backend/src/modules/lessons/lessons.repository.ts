@@ -8,6 +8,12 @@ export interface LessonFilters {
   difficulty?: string;
   statuses: string[];
   search?: string;
+  studentContext?: {
+    userId: string;
+    classIds: string[];
+    schoolId: string | null;
+    classGrades: number[]; // grades of enrolled classes — used to restrict school-wide assignments
+  };
 }
 
 // Prisma client hasn't been regenerated yet (migration pending).
@@ -40,7 +46,7 @@ export class LessonsRepository {
   }
 
   async findMany(filters: LessonFilters) {
-    const { page, perPage, subject, grade, difficulty, statuses, search } = filters;
+    const { page, perPage, subject, grade, difficulty, statuses, search, studentContext } = filters;
     const skip = (page - 1) * perPage;
 
     const where: Prisma.LessonWhereInput = {
@@ -58,6 +64,25 @@ export class LessonsRepository {
           }
         : {}),
     };
+
+    if (studentContext) {
+      // Filter lesson grade to match student's enrolled class grades.
+      // Exception: explicit user-level assignments bypass grade check (teacher's intentional override).
+      // For school/class assignments: restrict to student's own grades.
+      if (studentContext.classGrades.length > 0) {
+        where.grade = { in: studentContext.classGrades };
+      }
+
+      where.lessonAssignments = {
+        some: {
+          OR: [
+            { userId: studentContext.userId },
+            ...(studentContext.classIds.length > 0 ? [{ classId: { in: studentContext.classIds } }] : []),
+            ...(studentContext.schoolId ? [{ schoolId: studentContext.schoolId }] : []),
+          ],
+        },
+      } as never;
+    }
 
     const [lessons, total] = await Promise.all([
       this.prisma.lesson.findMany({

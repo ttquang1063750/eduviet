@@ -45,6 +45,9 @@ export type AuditAction =
   // User roles / school
   | 'USER_ROLES_CHANGED'
   | 'USER_SCHOOL_ASSIGNED'
+  // Lesson assignment
+  | 'LESSON_ASSIGNED'
+  | 'LESSON_UNASSIGNED'
   // Blog
   | 'BLOG_SUBMITTED_FOR_REVIEW'
   // File

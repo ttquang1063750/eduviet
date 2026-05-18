@@ -35,10 +35,11 @@
   } @else if (lessons().length === 0) {
     <div class="empty-state">
       <div class="empty-illustration">📭</div>
-      <h3 i18n>Không tìm thấy bài học nào</h3>
-      <p i18n>Thử thay đổi bộ lọc tìm kiếm của bạn</p>
+      <h3 i18n>Chưa có bài học nào</h3>
+      <p i18n>Bạn sẽ thấy bài học tại đây khi giáo viên phân công hoặc sau khi thay đổi bộ lọc.</p>
     </div>
-  } @else {
+  }
+ @else {
     <div class="grid">
       @for (lesson of lessons(); track lesson.id) {
         <a [routerLink]="['/lessons', lesson.slug]" class="card">

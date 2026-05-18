@@ -18,9 +18,18 @@ Nền tảng học tập trực tuyến dành cho học sinh Việt Nam. Flat Il
 
 ---
 
-## Trạng thái hiện tại (cập nhật 2026-05-17 — session 28: Assessment System Hoàn tất)
+## Trạng thái hiện tại (cập nhật 2026-05-17 — session 29: Lesson Assignment System Hoàn tất)
 
 ### ✅ Đã hoàn thành
+
+#### Lesson Assignment System ✅ COMPLETED (2026-05-17 session 29)
+- ✅ `libs/prisma/schema.prisma` — models `LessonAssignment`, `ClassSubjectTeacher` + relations
+- ✅ Filtering visibility: Học sinh chỉ thấy bài học đã được gán (School, Class, hoặc User scope)
+- ✅ `LessonsRepository` + `LessonsService` — logic filtering dựa trên `studentContext`
+- ✅ `lesson-assignments` module (BE) — repository + RBAC-aware service + routes
+- ✅ Lesson Editor (Admin) — bổ sung Tab "Phân công" để gán bài học cho Trường/Lớp/Cá nhân
+- ✅ Student Dashboard + Lesson List — hiển thị chính xác các bài được gán
+- ✅ Tích hợp i18n cho toàn bộ các màn hình mới
 
 #### Assessment System ✅ COMPLETED (2026-05-17 session 28)
 - ✅ `libs/prisma/schema.prisma` — models `Attempt`, `AttemptAnswer` + relations

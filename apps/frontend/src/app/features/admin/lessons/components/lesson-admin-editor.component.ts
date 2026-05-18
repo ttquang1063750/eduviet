@@ -14,6 +14,7 @@ import {
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { QuillModule } from 'ngx-quill';
+import { AuthService } from '../../../../core/services/auth.service';
 import { LessonsService } from '../../../../core/services/lessons.service';
 import { SubjectsService } from '../../../../core/services/subjects.service';
 import { UsersService } from '../../../../core/services/users.service';
@@ -25,16 +26,33 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { LessonAssignmentPanelComponent } from './lesson-assignment-panel.component';
 
 @Component({
   selector: 'app-lesson-admin-editor',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, QuillModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    QuillModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatTabsModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    LessonAssignmentPanelComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './lesson-admin-editor.component.html',
   styleUrl: './lesson-admin-editor.component.scss',
 })
 export class LessonAdminEditorComponent implements OnInit {
+  private authService = inject(AuthService);
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -82,7 +100,10 @@ export class LessonAdminEditorComponent implements OnInit {
 
   ngOnInit() {
     this.loadSubjects();
-    this.loadReviewers();
+    // Chỉ admin/approver mới được list CONTENT_REVIEWER users
+    if (this.authService.hasRole('SUPER_ADMIN', 'SCHOOL_ADMIN', 'CONTENT_APPROVER', 'PROVINCE_ADMIN', 'DISTRICT_ADMIN')) {
+      this.loadReviewers();
+    }
 
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {

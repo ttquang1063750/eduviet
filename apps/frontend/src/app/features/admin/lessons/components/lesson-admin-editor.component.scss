@@ -25,6 +25,14 @@
   }
 }
 
+.editor-tabs {
+  margin-top: 1rem;
+
+  ::ng-deep .mat-mdc-tab-body-wrapper {
+    padding-top: 1.5rem;
+  }
+}
+
 .editor-layout {
   display: grid;
   grid-template-columns: 1fr 320px;

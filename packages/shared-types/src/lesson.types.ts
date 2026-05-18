@@ -10,6 +10,26 @@ export interface Subject {
   iconUrl: string | null;
 }
 
+export type AssignmentScope = 'SCHOOL' | 'CLASS' | 'USER';
+
+export interface LessonAssignment {
+  id: string;
+  lessonId: string;
+  schoolId?: string | null;
+  classId?: string | null;
+  userId?: string | null;
+  assignedById: string;
+  note?: string | null;
+  dueDate?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  // Populated relations (present when included by BE)
+  school?: { id: string; name: string } | null;
+  class?: { id: string; name: string; grade: number } | null;
+  user?: { id: string; fullName: string } | null;
+  assignedBy?: { id: string; fullName: string } | null;
+}
+
 export interface Lesson {
   id: string;
   title: string;
@@ -25,6 +45,7 @@ export interface Lesson {
   timeLimitSec: number | null;
   maxAttempts: number;
   lessonQuestions: LessonQuestion[];
+  lessonAssignments?: LessonAssignment[];
   reviewerId: string | null;
   publishedAt: string | null;
   createdAt: string;

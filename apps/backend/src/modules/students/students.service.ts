@@ -26,27 +26,36 @@ export class StudentsService {
       };
     }
 
-    // 2. Lấy các grade từ lớp học để query bài học phù hợp
-    const grades = [...new Set(enrollments.map((e) => e.class.grade))];
+    // 2. Lấy danh sách các classId và schoolId
+    const classIds = enrollments.map((e) => e.classId);
+    const schoolIds = [...new Set(enrollments.map((e) => e.class.schoolId))];
 
-    // 3. Lấy bài học PUBLISHED theo grade (tối đa 5 bài mỗi grade)
-    const lessonsByGrade = await this.prisma.lesson.findMany({
+    // 3. Lấy bài học PUBLISHED đã được gán (User, Class, hoặc School)
+    const assignedLessons = await this.prisma.lesson.findMany({
       where: {
-        grade: { in: grades },
         status: 'PUBLISHED',
         deletedAt: null,
+        lessonAssignments: {
+          some: {
+            OR: [
+              { userId },
+              { classId: { in: classIds } },
+              { schoolId: { in: schoolIds } },
+            ],
+          },
+        },
       },
       include: {
         subject: { select: { id: true, code: true, name: true, color: true } },
         _count: { select: { lessonQuestions: true } },
       },
       orderBy: { publishedAt: 'desc' },
-      take: 50, // giới hạn tổng, sẽ phân bổ theo grade bên dưới
     });
 
-    // 4. Map lesson theo grade
+    // 4. Map lesson theo grade/class
+    // Để đơn giản, bài học nào có grade khớp với lớp thì hiện ở lớp đó
     const lessonMapByGrade = new Map<number, StudentLesson[]>();
-    for (const lesson of lessonsByGrade) {
+    for (const lesson of assignedLessons) {
       const mapped: StudentLesson = {
         id: lesson.id,
         title: lesson.title,
@@ -66,7 +75,6 @@ export class StudentsService {
 
       const existing = lessonMapByGrade.get(lesson.grade) ?? [];
       if (existing.length < 5) {
-        // tối đa 5 bài mỗi grade
         existing.push(mapped);
         lessonMapByGrade.set(lesson.grade, existing);
       }
@@ -91,14 +99,8 @@ export class StudentsService {
       };
     });
 
-    // 6. Tính progress — tổng bài PUBLISHED theo các grade đang học
-    const totalLessons = await this.prisma.lesson.count({
-      where: {
-        grade: { in: grades },
-        status: 'PUBLISHED',
-        deletedAt: null,
-      },
-    });
+    // 6. Tính progress — tổng bài đã được gán
+    const totalLessons = assignedLessons.length;
 
     return {
       classes,

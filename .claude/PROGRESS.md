@@ -196,24 +196,24 @@
 
 ---
 
-## Session 28 — Assessment System Full implementation (2026-05-17) ✅
+## Session 29 — Lesson Assignment System Full implementation (2026-05-17) ✅
 
-Đã xây dựng hoàn chỉnh hệ thống bài làm, chấm điểm và đánh giá.
+Đã triển khai hệ thống phân công bài học theo scope (Trường/Lớp/Cá nhân).
 
-### Core Backend & infrastructure
-- Triển khai Migration thêm bảng `attempts` và `attempt_answers`.
-- Xây dựng Repository, Service và Routes xử lý logic làm bài.
-- Logic auto-grade cho câu hỏi trắc nghiệm và điền ô trống.
-- Cơ chế quản lý thi thử (MOCK_EXAM) với giới hạn thời gian và số lượt.
+### Core Infrastructure & Backend
+- Thêm model `LessonAssignment` và `ClassSubjectTeacher` (để kiểm soát quyền GV bộ môn).
+- Cập nhật logic filtering trong `LessonsRepository` và `LessonsService` để lọc bài học dựa trên context của học sinh.
+- Implement REST API cho gán/hủy gán bài học với cơ chế RBAC nghiêm ngặt.
 
-### Frontend UI & Flow
-- Màn hình chọn chế độ làm bài (Ôn tập, Kiểm tra, Thi thử).
-- Tích hợp Countdown Timer cho chế độ thi thử.
-- Màn hình xem kết quả chi tiết với biểu đồ điểm số và giải thích.
-- Lịch sử làm bài cá nhân của học sinh.
-- Hàng đợi chấm điểm và giao diện chấm điểm tay cho giáo viên.
+### Frontend UI & Features
+- Bổ sung Tab "Phân công" trong giao diện chỉnh sửa bài học (Admin).
+- Form gán bài linh hoạt hỗ trợ 3 mức độ (School, Class, User).
+- Cập nhật Student Dashboard và Lesson List để phản ánh đúng các bài học được gán.
+- Đảm bảo i18n cho toàn bộ giao diện mới.
 
 ---
+
+## Session 28 — Assessment System Full implementation (2026-05-17) ✅
 
 ## Session 27 — i18n Full implementation (2026-05-17) ✅
 ...

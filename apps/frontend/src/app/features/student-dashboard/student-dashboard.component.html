@@ -48,7 +48,7 @@
           </div>
           <div class="stat-card__body">
             <span class="stat-card__value">{{ dashboard()!.progress.totalLessons }}</span>
-            <span class="stat-card__label" i18n>Bài học có sẵn</span>
+            <span class="stat-card__label" i18n>Bài học được gán</span>
           </div>
         </mat-card-content>
       </mat-card>
@@ -137,7 +137,7 @@
           <mat-divider />
 
           @if (cls.lessons.length === 0) {
-            <p class="no-lessons" i18n>Chưa có bài học nào cho lớp này.</p>
+            <p class="no-lessons" i18n>Chưa có bài học nào được gán cho lớp này.</p>
           }
 
           <!-- Lesson List -->

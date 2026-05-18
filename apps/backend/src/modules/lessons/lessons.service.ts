@@ -36,17 +36,45 @@ export class LessonsService {
   /** Danh sách bài học, lọc status dựa theo quyền người dùng */
   async list(
     query: Omit<LessonFilters, 'statuses'> & { status?: string },
-    userRoles?: UserRole[]
+    userRoles?: UserRole[],
+    userId?: string
   ) {
     let statuses: string[];
+    let studentContext: LessonFilters['studentContext'] | undefined;
 
     const isPrivileged = userRoles?.some((r) => ADMIN_ROLES.includes(r));
+    const isStudent = userRoles?.includes('STUDENT');
+
     if (isPrivileged) {
       statuses = query.status
         ? [query.status]
         : ['DRAFT', 'IN_REVIEW', 'APPROVED', 'PUBLISHED', 'REJECTED', 'ARCHIVED'];
     } else {
       statuses = ['PUBLISHED'];
+
+      if (isStudent && userId) {
+        const user = await this.prisma.user.findUnique({
+          where: { id: userId, deletedAt: null },
+          select: {
+            schoolId: true,
+            enrollments: {
+              select: {
+                classId: true,
+                class: { select: { grade: true } },
+              },
+            },
+          },
+        });
+
+        if (user) {
+          studentContext = {
+            userId,
+            schoolId: user.schoolId,
+            classIds: user.enrollments.map((e) => e.classId),
+            classGrades: [...new Set(user.enrollments.map((e) => e.class.grade))],
+          };
+        }
+      }
     }
 
     const { page, perPage, subject, grade, difficulty, search } = query;
@@ -58,6 +86,7 @@ export class LessonsService {
       difficulty,
       statuses,
       search,
+      studentContext,
     });
 
     return {

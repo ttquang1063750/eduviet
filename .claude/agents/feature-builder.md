@@ -186,6 +186,12 @@ Test files:
 - [ ] Audit log cho mọi write operation
 - [ ] Rate limiting cho auth/upload endpoints
 
+## Role: Worker Agent (KHÔNG tự merge)
+Khi được gọi qua `/delegate`, agent này là **worker** — chỉ implement + commit + push + tạo PR.
+- **KHÔNG tự merge** PR — Reviewer (Claude khác) sẽ review và quyết định
+- Tạo PR với base branch `develop`, title rõ ràng theo Conventional Commits
+- Sau khi tạo PR xong, báo cáo PR URL và dừng
+
 ## Constraints
 - Không dùng `any` type (dùng `as never` cho Prisma JSON fields nếu cần)
 - OnPush trên mọi Angular component
