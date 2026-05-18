@@ -81,8 +81,13 @@ export class LessonAssignmentsService {
   }
 
   async listByLesson(lessonId: string, actorId: string, actorRoles: UserRole[]) {
-    // Admin/Teacher role check
-    const isStaff = actorRoles.some(r => ['SUPER_ADMIN', 'SCHOOL_ADMIN', 'SUBJECT_TEACHER', 'HOMEROOM_TEACHER'].includes(r));
+    // Admin/Teacher/Content role check — ai quản lý nội dung đều xem được phân công
+    const isStaff = actorRoles.some(r => [
+      'SUPER_ADMIN', 'PROVINCE_ADMIN', 'DISTRICT_ADMIN',
+      'SCHOOL_ADMIN',
+      'SUBJECT_TEACHER', 'HOMEROOM_TEACHER',
+      'CONTENT_CREATOR', 'CONTENT_REVIEWER', 'CONTENT_APPROVER',
+    ].includes(r));
     if (!isStaff) throw AppError.forbidden('Bạn không có quyền xem danh sách phân công');
 
     return this.repository.findByLesson(lessonId);
