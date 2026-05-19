@@ -23,7 +23,7 @@
     "@angular/localize": "^21.2.13",
     "@angular/material": "^21.2.10",
     "@angular/platform-browser": "^21.2.0",
-    "@angular/router": "^21.2.0",
+    "@angular/router": "^21.2.13",
     "@eduviet/shared-types": "workspace:*",
     "chart.js": "^4.4.3",
     "dompurify": "^3.2.4",
